@@ -8,7 +8,6 @@
 #include <functional>
 #include <cmath>
 #include <vector>
-#include <iostream>
 
 enum class kernel{
     Gaussian,
@@ -40,7 +39,6 @@ std::function<T(vector<T>,vector<T>)> kernel_function(kernel kernel){
                 T sum = 0;
                 for(int i = 0; i < x.size(); i++)
                     sum += pow(abs(x[i]-y[i]),2);
-                std::cout << sum << "\n";
                 return sqrt(sum);
             };
         case kernel::Exponential:
@@ -48,6 +46,9 @@ std::function<T(vector<T>,vector<T>)> kernel_function(kernel kernel){
         case kernel::Laplacian:
             break;
     }
+
+    //default (unreachable only there to avoid compiler warning)
+    //return [](T x, T y) -> T { return T{}; };
 }
 
 #endif //KDE_SUB_QUADRATIC_KERNEL_H
