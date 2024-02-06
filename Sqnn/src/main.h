@@ -6,9 +6,4 @@
 #define KDE_SUB_QUADRATIC_MAIN_H
 
 
-class main {
-
-};
-
-
 #endif //KDE_SUB_QUADRATIC_MAIN_H
