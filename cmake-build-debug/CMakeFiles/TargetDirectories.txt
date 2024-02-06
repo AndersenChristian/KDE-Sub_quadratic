@@ -1,3 +1,0 @@
-/home/cj/Documents/DTU/USA/KDE-Sub_quadratic/cmake-build-debug/CMakeFiles/KDE_Sub_quadratic.dir
-/home/cj/Documents/DTU/USA/KDE-Sub_quadratic/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/cj/Documents/DTU/USA/KDE-Sub_quadratic/cmake-build-debug/CMakeFiles/rebuild_cache.dir
