@@ -22,9 +22,10 @@ using std::vector;
 //Done since i expect that the library used will change later based on efficiency and data types
 namespace mat{
     using std::sqrt;
+    using std::pow;
+    using std::abs;
+    using std::exp;
 }
-
-using namespace mat;
 
 // Concept to limit T to arithmetic types
 template<typename T>
@@ -38,8 +39,10 @@ std::function<T(vector<T>,vector<T>)> kernel_function(kernel kernel){
             return [](vector<T> x, vector<T> y) -> T {
                 T sum = 0;
                 for(int i = 0; i < x.size(); i++)
-                    sum += pow(abs(x[i]-y[i]),2);
-                return sqrt(sum);
+                    sum += mat::pow(mat::abs(x[i]-y[i]),2);
+                sum = mat::sqrt(sum);
+                return mat::exp(-sum);
+
             };
         case kernel::Exponential:
             break;
