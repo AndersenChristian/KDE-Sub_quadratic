@@ -21,8 +21,6 @@ class KDE {
 
 public:
     virtual T QueryNewPoint(vector<T>) = 0;
-
-private:
 };
 
 
