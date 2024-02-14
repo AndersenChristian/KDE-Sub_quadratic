@@ -33,7 +33,7 @@ concept Arithmetic = std::is_arithmetic_v<T>;
 
 
 template<Arithmetic T>
-std::function<T(vector<T>,vector<T>)> kernel_function(kernel kernel){
+inline std::function<T(vector<T>,vector<T>)> kernel_function(kernel kernel){
     switch (kernel) {
         case kernel::Gaussian:
             return [](vector<T> x, vector<T> y) -> T {

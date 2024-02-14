@@ -8,13 +8,14 @@
 #include <iostream>
 #include <vector>
 
+using std::function;
+using std::vector;
+
 int main(int argc, char *argv[]){
-    std::function
-        <double(std::vector<double>, std::vector<double>)>
-        kernel_function =
+    function<double(vector<double>, vector<double>)> kernel_function =
             ::kernel_function<double>(kernel::Gaussian);
 
-    std::array<std::vector<double>, 20> vectors = {{
+    std::array<vector<double>, 20> vectors = {{
        {36.0, 18.0, 0.0},
        {18.0, 13.0, 47.0},
        {19.0, 37.0, 13.0},
@@ -30,7 +31,7 @@ int main(int argc, char *argv[]){
        {41.0, 44.0, 29.0},
        {6.0, 21.0, 12.0},
        {38.0, 1.0, 9.0},
-       {24.0, 31.0, 43.0},
+       {24.0, 202431.0, 43.0},
        {25.0, 46.0, 6.0},
        {9.0, 31.0, 9.0},
        {40.0, 17.0, 11.0},
