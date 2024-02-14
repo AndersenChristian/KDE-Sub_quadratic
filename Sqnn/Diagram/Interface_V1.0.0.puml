@@ -1,0 +1,35 @@
+@startuml
+
+enum kernel
+class kde
+class random_sample
+
+
+enum kernel{
+    Gaussian
+    Laplace
+    Exponential
+    +getFunction<T>(vector<T>,vector<T>) : T
+}
+
+class kde{
+
+}
+
+class random_sample{
+
+    +random_sample(X, numberOfSample, sampleLogic)
+}
+
+note left of random_sample
+    X refers to some data structure of vectors
+    each vector having the same dimensions
+    and datatype belonging to T
+end note
+
+note right of kernel
+    type T must support arithmetic
+    eks.: double, float, ...
+end note
+
+@enduml
