@@ -9,12 +9,6 @@
 #include <cmath>
 #include <vector>
 
-enum class kernel{
-    Gaussian,
-    Exponential,
-    Laplacian
-};
-
 using std::vector;
 
 //dealing with what equations to use
@@ -27,35 +21,42 @@ namespace mat{
     using std::exp;
 }
 
+enum class kernels {
+    Gaussian,
+    Exponential,
+    Laplacian
+};
 
-// Concept to limit T to arithmetic types
-template<typename T>
-concept Arithmetic = std::is_arithmetic_v<T>;
+namespace kernel {
 
-template<typename T>
-using kernelFunction = std::function<T(vector<T>,vector<T>)>;
+    // Concept to limit T to arithmetic types
+    template<typename T>
+    concept Arithmetic = std::is_arithmetic_v<T>;
 
+    template<typename T>
+    using kernelFunction = std::function<T(vector<T>,vector<T>)>;
 
-template<Arithmetic T>
-inline kernelFunction<T> kernel_function(kernel kernel){
-    switch (kernel) {
-        case kernel::Gaussian:
-            return kernelFunction<T>([](vector<T> x, vector<T> y) -> T {
-                T sum = 0;
-                for(int i = 0; i < x.size(); i++)
-                    sum += mat::pow(mat::abs(x[i]-y[i]),2);
-                sum = mat::sqrt(sum);
-                return mat::exp(-sum);
+    template<Arithmetic T>
+    inline kernelFunction<T> kernel_function(kernels kernel) {
+        switch (kernel) {
+            case kernels::Gaussian:
+                return kernelFunction<T>([](vector<T> x, vector<T> y) -> T {
+                    T sum = 0;
+                    for (int i = 0; i < x.size(); i++)
+                        sum += mat::pow(mat::abs(x[i] - y[i]), 2);
+                    sum = mat::sqrt(sum);
+                    return mat::exp(-sum);
 
-            });
-        case kernel::Exponential:
-            break;
-        case kernel::Laplacian:
-            break;
+                });
+            case kernels::Exponential:
+                break;
+            case kernels::Laplacian:
+                break;
+        }
+
+        //default (unreachable only there to avoid compiler warning)
+        return [](vector<T> x, vector<T> y) -> T { return T{}; };
     }
-
-    //default (unreachable only there to avoid compiler warning)
-    return [](vector<T> x, vector<T> y) -> T { return T{}; };
 }
 
 #endif //KDE_SUB_QUADRATIC_KERNEL_H

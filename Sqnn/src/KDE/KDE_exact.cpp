@@ -5,10 +5,11 @@
 #include "KDE_exact.h"
 
 using std::vector;
+using kernel::Arithmetic;
 
 template<Arithmetic T>
-KDE_exact<T>::KDE_exact(kernelFunction<T> kernelFuntion, list<vector<T>> data) {
-    this->kernelFuntion = kernelFuntion;
+KDE_exact<T>::KDE_exact(kernel::kernelFunction<T> kernelFunction, list<vector<T>> data) {
+    this->kernelFunction = kernelFunction;
     this->data = data;
 }
 
@@ -17,7 +18,7 @@ T KDE_exact<T>::QueryNewPoint(vector<T> point) {
     T sum = 0;
 
     for(const vector<T>& d : this->data){
-        sum += this->kernelFuntion(point, d);
+        sum += this->kernelFunction(point, d);
     }
     sum /= this->data.size();
     return sum;

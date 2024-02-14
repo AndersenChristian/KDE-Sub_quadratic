@@ -16,7 +16,7 @@ using std::list;
 using std::vector;
 
 
-template<Arithmetic T>
+template<kernel::Arithmetic T>
 class KDE {
 
 public:

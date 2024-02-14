@@ -9,17 +9,17 @@
 
 #include <iostream>
 
-template<Arithmetic T>
+template<kernel::Arithmetic T>
 class KDE_exact : public KDE<T>{
 //variables
 private:
     list<vector<T>> data;
-    kernelFunction<T> kernelFuntion;
+    kernel::kernelFunction<T> kernelFunction;
     double bandwidth;
 
 //function
 public:
-    KDE_exact(kernelFunction<T> kernelFuntion, list<vector<T>> data);
+    KDE_exact(kernel::kernelFunction<T> kernelFuntion, list<vector<T>> data);
     T QueryNewPoint(vector<T>) override;
 private:
     inline T computeBandwidth();

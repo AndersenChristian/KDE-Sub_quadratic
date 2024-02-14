@@ -14,7 +14,7 @@ using std::vector;
 int main(int argc, char *argv[]){
 
     auto kernel_function =
-            ::kernel_function<double>(kernel::Gaussian);
+            kernel::kernel_function<double>(kernels::Gaussian);
 
     std::list<vector<double>> vectors = {{
        {3.0, 3.0, 3.0},
@@ -40,7 +40,7 @@ int main(int argc, char *argv[]){
     }};
 
     KDE<double>* kde = new KDE_exact<double>(kernel_function, vectors);
-    double s = kde->QueryNewPoint({2.0,3.0,3.0});
+    double s = kde->QueryNewPoint({3.0,3.0,3.0});
 
     std::cout << s;
 
