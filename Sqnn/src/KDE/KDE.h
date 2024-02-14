@@ -5,6 +5,8 @@
 #ifndef KDE_SUB_QUADRATIC_KDE_H
 #define KDE_SUB_QUADRATIC_KDE_H
 
+#include "kernel.h"
+
 //libraries
 #include <vector>
 #include <list>
@@ -14,16 +16,11 @@ using std::list;
 using std::vector;
 
 
-// Concept to limit T to arithmetic types
-template<typename T>
-concept Arithmetic = std::is_arithmetic_v<T>;
-
-
 template<Arithmetic T>
 class KDE {
 
 public:
-    T QueryNewPoint(vector<T>);
+    virtual T QueryNewPoint(vector<T>) = 0;
 
 private:
 };

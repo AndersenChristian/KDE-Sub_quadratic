@@ -40,14 +40,14 @@ template<Arithmetic T>
 inline kernelFunction<T> kernel_function(kernel kernel){
     switch (kernel) {
         case kernel::Gaussian:
-            return [](vector<T> x, vector<T> y) -> T {
+            return kernelFunction<T>([](vector<T> x, vector<T> y) -> T {
                 T sum = 0;
                 for(int i = 0; i < x.size(); i++)
                     sum += mat::pow(mat::abs(x[i]-y[i]),2);
                 sum = mat::sqrt(sum);
                 return mat::exp(-sum);
 
-            };
+            });
         case kernel::Exponential:
             break;
         case kernel::Laplacian:
@@ -55,7 +55,7 @@ inline kernelFunction<T> kernel_function(kernel kernel){
     }
 
     //default (unreachable only there to avoid compiler warning)
-    //return [](T x, T y) -> T { return T{}; };
+    return [](vector<T> x, vector<T> y) -> T { return T{}; };
 }
 
 #endif //KDE_SUB_QUADRATIC_KERNEL_H
