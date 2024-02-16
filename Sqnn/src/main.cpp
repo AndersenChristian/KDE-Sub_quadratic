@@ -17,32 +17,22 @@ int main(int argc, char *argv[]){
             kernel::kernel_function<double>(kernels::Gaussian);
 
     std::list<vector<double>> vectors = {{
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
-       {3.0, 3.0, 3.0},
+        4.0
     }};
 
-    KDE<double>* kde = new KDE_exact<double>(kernel_function, vectors);
-    double s = kde->QueryNewPoint({3.0,3.0,3.0});
+    KDE<double>* kde = new KDE_exact<double>(kernel_function, vectors, 4.0);
+    double s = kde->QueryNewPoint({4.0});
+    std::cout << s << "\n";
 
-    std::cout << s;
+
+    //computes sum
+    double sum = 0.0;
+    for(int i = -20; i < 40; i ++){
+        sum += kde->QueryNewPoint({(double) i});
+    }
+
+    std::cout << sum;
+
 
     return 0;
 }

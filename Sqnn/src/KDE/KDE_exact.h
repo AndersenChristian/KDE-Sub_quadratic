@@ -19,11 +19,13 @@ private:
 
 //function
 public:
-    KDE_exact(kernel::kernelFunction<T> kernelFuntion, list<vector<T>> data);
+    KDE_exact(
+        kernel::kernelFunction<T>,
+        list<vector<T>>,
+        double
+    );
     T QueryNewPoint(vector<T>) override;
 private:
-    inline T computeBandwidth();
-
 };
 
 #endif //KDE_SUB_QUADRATIC_KDE_EXACT_H

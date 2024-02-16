@@ -34,19 +34,21 @@ namespace kernel {
     concept Arithmetic = std::is_arithmetic_v<T>;
 
     template<typename T>
-    using kernelFunction = std::function<T(vector<T>,vector<T>)>;
+    using kernelFunction = std::function<T(vector<T>,vector<T>, double)>;
 
     template<Arithmetic T>
     inline kernelFunction<T> kernel_function(kernels kernel) {
         switch (kernel) {
             case kernels::Gaussian:
-                return kernelFunction<T>([](vector<T> x, vector<T> y) -> T {
+                return kernelFunction<T>([](vector<T> x, vector<T> y, double sigma) -> T {
+                    //prefix constant for kernel smoothing
+                    double c = 1/(sigma * sqrt(2*M_PI));
+
                     T sum = 0;
                     for (int i = 0; i < x.size(); i++)
                         sum += mat::pow(mat::abs(x[i] - y[i]), 2);
-                    sum = mat::sqrt(sum);
-                    return mat::exp(-sum);
-
+                    sum = mat::sqrt(sum/(2* pow(sigma,2)));
+                    return c * mat::exp(-sum);
                 });
             case kernels::Exponential:
                 break;
@@ -55,7 +57,7 @@ namespace kernel {
         }
 
         //default (unreachable only there to avoid compiler warning)
-        return [](vector<T> x, vector<T> y) -> T { return T{}; };
+        return [](vector<T> x, vector<T> y, double) -> T { return T{}; };
     }
 }
 
