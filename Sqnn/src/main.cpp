@@ -3,7 +3,8 @@
 //
 
 #include "KDE/KDE_exact.h"
-#include "kernel.h"
+#include "src/API/kernelFunction.h"
+#include "ENUM/kernelType.h"
 
 #include <iostream>
 #include <vector>
@@ -14,20 +15,20 @@ using std::vector;
 int main(int argc, char *argv[]){
 
     auto kernel_function =
-            kernel::kernel_function<double>(kernels::Gaussian);
+            kernelFunction::kernel_function<double>(kernelType::Gaussian);
 
     std::list<vector<double>> vectors = {{
         4.0
     }};
 
-    KDE<double>* kde = new KDE_exact<double>(kernel_function, vectors, 4.0);
+    KDE<double>* kde = new KDE_exact<double>(kernel_function, vectors, 2.0);
     double s = kde->QueryNewPoint({4.0});
     std::cout << s << "\n";
 
 
     //computes sum
     double sum = 0.0;
-    for(int i = -20; i < 40; i ++){
+    for(int i = -1000; i < 1000; i ++){
         sum += kde->QueryNewPoint({(double) i});
     }
 

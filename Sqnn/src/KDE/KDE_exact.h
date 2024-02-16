@@ -5,26 +5,41 @@
 #ifndef KDE_SUB_QUADRATIC_KDE_EXACT_H
 #define KDE_SUB_QUADRATIC_KDE_EXACT_H
 
-#include "KDE.h"
+#include "src/API/KDE.h"
 
 #include <iostream>
 
-template<kernel::Arithmetic T>
+using kernelFunction::Arithmetic;
+using kernelFunction::kernelLambda;
+
+template<Arithmetic T>
 class KDE_exact : public KDE<T>{
 //variables
 private:
     list<vector<T>> data;
-    kernel::kernelFunction<T> kernelFunction;
+    kernelLambda<T> kernelFunction;
     double bandwidth;
 
 //function
 public:
     KDE_exact(
-        kernel::kernelFunction<T>,
-        list<vector<T>>,
-        double
-    );
-    T QueryNewPoint(vector<T>) override;
+        kernelLambda<T> kernelFunction,
+        list<vector<T>> data,
+        double bandwidth
+    ){
+        this->kernelFunction = kernelFunction;
+        this->data = data;
+        this->bandwidth = bandwidth;
+    };
+    T QueryNewPoint(vector<T> point) override {
+        T sum = 0;
+
+        for(const vector<T>& d : this->data){
+            sum += this->kernelFunction(point, d, bandwidth);
+        }
+        sum /= this->data.size();
+        return sum;
+    };
 private:
 };
 

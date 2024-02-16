@@ -1,32 +1,22 @@
 @startuml
 'https://plantuml.com/class-diagram
 
-abstract class AbstractList
-abstract AbstractCollection
-interface List
-interface Collection
+package "Kernel Density Estimation (KDE)" {
 
-enum kernel{
-    Gaussian
-    Exponential
-}
+    class KDE {
+        + estimateDensity(data: vector, kernelType: kernels, bandwidth: double): vector
+    }
 
-List <|-- AbstractList
-Collection <|-- AbstractCollection
+    class KernelFunction {
+        - function: function
+        + evaluate(x: vector, y: vector, bandwidth: double): double
+    }
 
-Collection <|- List
-AbstractCollection <|- AbstractList
-AbstractList <|-- ArrayList
-
-class ArrayList {
-Object[] elementData
-size()
-}
-
-enum TimeUnit {
-DAYS
-HOURS
-MINUTES
+    class KernelType {
+        + Gaussian
+        + Exponential
+        + Laplacian
+    }
 }
 
 @enduml

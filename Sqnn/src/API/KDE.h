@@ -5,7 +5,7 @@
 #ifndef KDE_SUB_QUADRATIC_KDE_H
 #define KDE_SUB_QUADRATIC_KDE_H
 
-#include "kernel.h"
+#include "src/API/kernelFunction.h"
 
 //libraries
 #include <vector>
@@ -14,9 +14,10 @@
 //specific needs from libraries
 using std::list;
 using std::vector;
+using kernelFunction::Arithmetic;
 
 
-template<kernel::Arithmetic T>
+template<Arithmetic T>
 class KDE {
 
 public:

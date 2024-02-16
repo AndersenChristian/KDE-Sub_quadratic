@@ -2,18 +2,19 @@
 // Created by cj on 6-2-24.
 //
 
-#ifndef KDE_SUB_QUADRATIC_KERNEL_H
-#define KDE_SUB_QUADRATIC_KERNEL_H
+#ifndef KDE_SUB_QUADRATIC_KERNELFUNCTION_H
+#define KDE_SUB_QUADRATIC_KERNELFUNCTION_H
 
 #include <functional>
 #include <cmath>
 #include <vector>
+#include "ENUM/kernelType.h"
 
 using std::vector;
 
 //dealing with what equations to use
 //
-//Done since i expect that the library used will change later based on efficiency and data types
+//Done since I expect that the library used will change later based on efficiency and data types
 namespace mat{
     using std::sqrt;
     using std::pow;
@@ -21,38 +22,34 @@ namespace mat{
     using std::exp;
 }
 
-enum class kernels {
-    Gaussian,
-    Exponential,
-    Laplacian
-};
+using kernelType::Gaussian;
+using kernelType::Exponential;
+using kernelType::Laplacian;
 
-namespace kernel {
+namespace kernelFunction {
 
     // Concept to limit T to arithmetic types
     template<typename T>
     concept Arithmetic = std::is_arithmetic_v<T>;
 
     template<typename T>
-    using kernelFunction = std::function<T(vector<T>,vector<T>, double)>;
+    using kernelLambda = std::function<T(vector<T>, vector<T>, double)>;
 
     template<Arithmetic T>
-    inline kernelFunction<T> kernel_function(kernels kernel) {
+    inline kernelLambda<T> kernel_function(kernelType kernel) {
         switch (kernel) {
-            case kernels::Gaussian:
-                return kernelFunction<T>([](vector<T> x, vector<T> y, double sigma) -> T {
-                    //prefix constant for kernel smoothing
-                    double c = 1/(sigma * sqrt(2*M_PI));
+            case Gaussian:
+                return kernelLambda<T>([](vector<T> x, vector<T> y, double sigma) -> T {
 
                     T sum = 0;
                     for (int i = 0; i < x.size(); i++)
                         sum += mat::pow(mat::abs(x[i] - y[i]), 2);
                     sum = mat::sqrt(sum/(2* pow(sigma,2)));
-                    return c * mat::exp(-sum);
+                    return mat::exp(-sum);
                 });
-            case kernels::Exponential:
+            case Exponential:
                 break;
-            case kernels::Laplacian:
+            case Laplacian:
                 break;
         }
 
@@ -61,4 +58,4 @@ namespace kernel {
     }
 }
 
-#endif //KDE_SUB_QUADRATIC_KERNEL_H
+#endif //KDE_SUB_QUADRATIC_KERNELFUNCTION_H
