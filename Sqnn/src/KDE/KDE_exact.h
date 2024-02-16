@@ -26,11 +26,8 @@ public:
         kernelLambda<T> kernelFunction,
         list<vector<T>> data,
         double bandwidth
-    ){
-        this->kernelFunction = kernelFunction;
-        this->data = data;
-        this->bandwidth = bandwidth;
-    };
+    ): kernelFunction(kernelFunction), data(data), bandwidth(bandwidth) {};
+
     T QueryNewPoint(vector<T> point) override {
         T sum = 0;
 
@@ -42,5 +39,7 @@ public:
     };
 private:
 };
+
+template class KDE_exact<double>;
 
 #endif //KDE_SUB_QUADRATIC_KDE_EXACT_H

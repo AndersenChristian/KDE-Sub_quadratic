@@ -14,7 +14,7 @@ using std::vector;
 
 int main(int argc, char *argv[]){
 
-    auto kernel_function =
+    const auto kernel_function =
             kernelFunction::kernel_function<double>(kernelType::Gaussian);
 
     std::list<vector<double>> vectors = {{
