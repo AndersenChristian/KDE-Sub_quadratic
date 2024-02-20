@@ -16,7 +16,7 @@ template<Arithmetic T>
 class KDE_exact : public KDE<T>{
 //variables
 private:
-    list<vector<T>> data;
+    vector<vector<T>> data;
     kernelLambda<T> kernelFunction;
     double bandwidth;
 
@@ -24,7 +24,7 @@ private:
 public:
     KDE_exact(
         kernelLambda<T> kernelFunction,
-        list<vector<T>> data,
+        vector<vector<T>> data,
         double bandwidth
     ): kernelFunction(kernelFunction), data(data), bandwidth(bandwidth) {};
 

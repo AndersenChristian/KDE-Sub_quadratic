@@ -31,13 +31,15 @@ public:
     ){
         this->epsilon = epsilon;
         kde = new KDE<T>[pow(2, log(data->size())+1)];
-        rec_construct(data, kernelLambda, sigma, 1);
+        auto* dataArray = new vector<T>[data->size()];
+        rec_construct(dataArray, dataArray->size(), kernelLambda, sigma, 1);
     }
 
 private:
     void rec_construct
     (
-        list<vector<T>>* data,
+        vector<T>* data,
+        int dataSize,
         int startPoint,
         int endPoint,
         const kernelLambda<T> kernelLambda,
@@ -45,7 +47,7 @@ private:
         int arrayIndex
     ){
         //check if done.
-        if (data->size() < 2) return;
+        if (dataSize < 2) return;
 
         //creates this layers KDE
         kde[arrayIndex] = new KDE_exact<T>(kernelLambda,data,sigma);

@@ -8,16 +8,50 @@
 
 #include <iostream>
 #include <vector>
+#include <string>
 
 using std::function;
 using std::vector;
+using std::string;
 
+//predecleration
+kernelType getKernelType(const string&);
+
+
+/**
+ *
+ *
+ * @param argc number of data or number of argv
+ * @param argv contains the dataType and the data
+ *             argv[0] path to directory, argv[1] data type, argv[2] kernel type, argv[3] dimension and argv[4..n] data
+ * @return
+ */
 int main(int argc, char *argv[]){
+
+    //ensures that there is at least 1 value.
+    if (argc < 4) return 1;
+
+    const char *dataType = argv[1];
+    const kernelType kernelType = getKernelType(string(argv[2]));
+    const unsigned int dataSize = argc - 3;
+
+    if(string(dataType) == "double"){
+        auto data =
+    }
+
+
+    std::cout << argc << "\n";
+
+    for (int i = 1; i < argc; ++i) {
+        std::cout << argv[i] << " ";
+    }
+
+
 
     const auto kernel_function =
             kernelFunction::kernel_function<double>(kernelType::Gaussian);
 
-    std::list<vector<double>> vectors = {{
+    vector<vector<double>> vectors = {{
         4.0
     }};
 
@@ -38,4 +72,8 @@ int main(int argc, char *argv[]){
     delete kde;
 
     return 0;
+}
+
+inline kernelType getKernelType(const string& kernelType){
+    if (kernelType == )
 }

@@ -12,7 +12,6 @@
 #include <list>
 
 //specific needs from libraries
-using std::list;
 using std::vector;
 using kernelFunction::Arithmetic;
 
