@@ -26,11 +26,11 @@ private:
 public:
     KDE_exact(
         kernelLambda<T> kernelFunction,
-        vector<vector<T>>& data,
+        vector<vector<T>>* data,
         unsigned int start,
         unsigned int end,
         double bandwidth
-    ): kernelFunction(kernelFunction), data(&data), start(start), end(end), bandwidth(bandwidth) {};
+    ): kernelFunction(kernelFunction), data(data), start(start), end(end), bandwidth(bandwidth) {};
 
     T QueryNewPoint(vector<T> point) override {
         T sum = 0;

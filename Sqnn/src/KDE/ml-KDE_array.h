@@ -20,19 +20,19 @@ class ml_KDE_array : multi_levelKDE<T>{
 private:
     const long double epsilon; //maybe not const??
     const kernelLambda<T> kernel_function;
-    const vector<KDE<T>*> kde;
+    vector<KDE<T>*> kde;
 
 public:
     ml_KDE_array
     (
-        const vector<vector<T>>* data,
+        vector<vector<T>>* data,
         const long double epsilon,
         double sigma, //might need to store sigma
         const kernelType kernelType
     ):
     epsilon(epsilon),
     kernel_function(kernelFunction::kernel_function<T>(kernelType::Gaussian)),
-    kde(vector<KDE<T>>((int) pow(2, log(data->size())+1)))
+    kde(vector<KDE<T>*>((int) pow(2, log(data->size())+1)))
     {
         //int size = pow(2, log(data->size())+1);
         //kde.resize(size);
@@ -46,7 +46,7 @@ public:
 private:
     void rec_construct
     (
-        const vector<vector<T>>* data,
+        vector<vector<T>>* data,
         const unsigned int startPoint,
         const unsigned int endPoint,
         const double sigma,
@@ -56,7 +56,7 @@ private:
         if (endPoint - startPoint < 2) return;
 
         //creates this layers KDE
-        kde[arrayIndex] = KDE_exact<T>(kernel_function, *data, startPoint, endPoint, 2);
+        kde[arrayIndex] = new KDE_exact<T>(kernel_function, data, startPoint, endPoint, 2);
 
         //computes the middle
         const unsigned int m = (startPoint + endPoint) / 2;
