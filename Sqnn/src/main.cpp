@@ -9,13 +9,15 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <cstring>
 
 using std::function;
 using std::vector;
 using std::string;
+using std::stoi;
 
 //predecleration
-kernelType getKernelType(const string&);
+kernelType getKernelType(const char&);
 
 
 /**
@@ -31,12 +33,26 @@ int main(int argc, char *argv[]){
     //ensures that there is at least 1 value.
     if (argc < 4) return 1;
 
+    //checks the kernel type
+    if(std::strlen(argv[2]) != 1)
+        return 3;
+    try {
+        const kernelType kernelType = getKernelType(argv[2][0]);
+    } catch (std::exception &e){
+        std::cerr << e.what();
+        return 3;
+    }
+
+    //build data structure
+    const unsigned int dimension = stoi(argv[3]);
+    const unsigned int dataSize = (argc - 3) / dimension;
     const char *dataType = argv[1];
-    const kernelType kernelType = getKernelType(string(argv[2]));
-    const unsigned int dataSize = argc - 3;
+    //const kernelType kernelType = getKernelType(argv[2][0]);
 
     if(string(dataType) == "double"){
-        auto data =
+        auto data = vector<vector<double>>(dataSize, vector<double>(dimension));
+    } else {
+        return 2;
     }
 
 
@@ -74,6 +90,15 @@ int main(int argc, char *argv[]){
     return 0;
 }
 
-inline kernelType getKernelType(const string& kernelType){
-    if (kernelType == )
+inline kernelType getKernelType(const char& kernelType) {
+    switch (kernelType) {
+        case 'G':
+            return kernelType::Gaussian;
+        case 'E':
+            return kernelType::Exponential;
+        case 'L':
+            return kernelType::Laplacian;
+        default:
+            throw std::invalid_argument("kernel type only accept the letter G, E and L");
+    }
 }
