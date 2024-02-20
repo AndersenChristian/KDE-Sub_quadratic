@@ -34,8 +34,6 @@ public:
     kernel_function(kernelFunction::kernel_function<T>(kernelType::Gaussian)),
     kde(vector<KDE<T>*>((int) pow(2, log(data->size())+1)))
     {
-        //int size = pow(2, log(data->size())+1);
-        //kde.resize(size);
         rec_construct(data, 0, data->size() - 1, sigma, 1);
     }
 
@@ -52,7 +50,7 @@ private:
         const double sigma,
         const unsigned int arrayIndex
     ){
-        //check if done.
+        //if there is less then 2 datas left, we can't create both a left and right child, so we terminate.
         if (endPoint - startPoint < 2) return;
 
         //creates this layers KDE
