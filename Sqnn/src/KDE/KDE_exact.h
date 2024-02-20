@@ -16,25 +16,29 @@ template<Arithmetic T>
 class KDE_exact : public KDE<T>{
 //variables
 private:
-    vector<vector<T>> data;
     kernelLambda<T> kernelFunction;
+    vector<vector<T>>* data;
+    unsigned int start;
+    unsigned int end;
     double bandwidth;
 
 //function
 public:
     KDE_exact(
         kernelLambda<T> kernelFunction,
-        vector<vector<T>> data,
+        vector<vector<T>>& data,
+        unsigned int start,
+        unsigned int end,
         double bandwidth
-    ): kernelFunction(kernelFunction), data(data), bandwidth(bandwidth) {};
+    ): kernelFunction(kernelFunction), data(&data), start(start), end(end), bandwidth(bandwidth) {};
 
     T QueryNewPoint(vector<T> point) override {
         T sum = 0;
 
-        for(const vector<T>& d : this->data){
-            sum += this->kernelFunction(point, d, bandwidth);
+        for(unsigned int i = start; i < end; i++){
+            sum += this->kernelFunction(point, (*data)[i], bandwidth);
         }
-        sum /= this->data.size();
+        sum /= end-start;
         return sum;
     };
 

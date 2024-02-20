@@ -8,45 +8,13 @@
 
 #include <iostream>
 #include <vector>
-#include <string>
+#include <algorithm>
 
 using std::function;
 using std::vector;
 using std::string;
 
-//predecleration
-kernelType getKernelType(const string&);
-
-
-/**
- *
- *
- * @param argc number of data or number of argv
- * @param argv contains the dataType and the data
- *             argv[0] path to directory, argv[1] data type, argv[2] kernel type, argv[3] dimension and argv[4..n] data
- * @return
- */
 int main(int argc, char *argv[]){
-
-    //ensures that there is at least 1 value.
-    if (argc < 4) return 1;
-
-    const char *dataType = argv[1];
-    const kernelType kernelType = getKernelType(string(argv[2]));
-    const unsigned int dataSize = argc - 3;
-
-    if(string(dataType) == "double"){
-        auto data =
-    }
-
-
-    std::cout << argc << "\n";
-
-    for (int i = 1; i < argc; ++i) {
-        std::cout << argv[i] << " ";
-    }
-
-
 
     const auto kernel_function =
             kernelFunction::kernel_function<double>(kernelType::Gaussian);
@@ -55,7 +23,8 @@ int main(int argc, char *argv[]){
         4.0
     }};
 
-    KDE<double>* kde = new KDE_exact<double>(kernel_function, vectors, 2.0);
+    unsigned int start = 0, end = 1;
+    KDE<double>* kde = new KDE_exact<double>(kernel_function, vectors, start, end, 2.0);
     double s = kde->QueryNewPoint({4.0});
     std::cout << s << "\n";
 
@@ -68,12 +37,18 @@ int main(int argc, char *argv[]){
 
     std::cout << sum;
 
+
+
     //tear down
     delete kde;
 
-    return 0;
-}
+    // Clear all vectors and deallocate memory
+    std::for_each(vectors.begin(), vectors.end(), [](std::vector<double>& inner_vec) {
+        inner_vec.clear();
+    });
 
-inline kernelType getKernelType(const string& kernelType){
-    if (kernelType == )
+    // Clear the outer vector
+    vectors.clear();
+
+    return 0;
 }
