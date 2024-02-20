@@ -19,19 +19,23 @@ template<Arithmetic T>
 class ml_KDE_array : multi_levelKDE<T>{
 private:
     const long double epsilon; //maybe not const??
-    const kernelLambda<double> kernel_function;
-    const KDE<T> kde[];
+    const kernelLambda<T> kernel_function;
+    const vector<KDE<T>*> kde;
 
 public:
     ml_KDE_array
     (
         const vector<vector<T>>* data,
-        const long double* epsilon,
+        const long double epsilon,
         double sigma, //might need to store sigma
-        const kernelType* kernelType
-    ): epsilon(*epsilon)
+        const kernelType kernelType
+    ):
+    epsilon(epsilon),
+    kernel_function(kernelFunction::kernel_function<T>(kernelType::Gaussian)),
+    kde(vector<KDE<T>>((int) pow(2, log(data->size())+1)))
     {
-        kde = new KDE<T>[pow(2, log(data->size())+1)];
+        //int size = pow(2, log(data->size())+1);
+        //kde.resize(size);
         rec_construct(data, 0, data->size() - 1, sigma, 1);
     }
 
@@ -52,7 +56,7 @@ private:
         if (endPoint - startPoint < 2) return;
 
         //creates this layers KDE
-        kde[arrayIndex] = new KDE_exact<T>(kernel_function,data,startPoint, endPoint,2);
+        kde[arrayIndex] = KDE_exact<T>(kernel_function, *data, startPoint, endPoint, 2);
 
         //computes the middle
         const unsigned int m = (startPoint + endPoint) / 2;
@@ -62,4 +66,5 @@ private:
         rec_construct(data,m+1,endPoint,sigma,arrayIndex*2+1);
     }
 };
+
 #endif //KDE_SUB_QUADRATIC_ML_KDE_ARRAY_H
