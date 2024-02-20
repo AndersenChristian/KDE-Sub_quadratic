@@ -37,9 +37,14 @@ public:
         sum /= this->data.size();
         return sum;
     };
+
+    void deallocate() override{
+
+    }
+    ~KDE_exact() override = default;
 private:
 };
 
-template class KDE_exact<double>;
+//template class KDE_exact<double>;
 
 #endif //KDE_SUB_QUADRATIC_KDE_EXACT_H

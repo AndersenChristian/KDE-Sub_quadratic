@@ -28,16 +28,39 @@ using kernelType::Laplacian;
 
 namespace kernelFunction {
 
-    // Concept to limit T to arithmetic types
+    /**
+     * Concept to limit T to arithmetic types
+     * Might be set explicit to some datatypes later
+     *
+     * @tparam T Any type that support arithmatic operations
+     */
     template<typename T>
     concept Arithmetic = std::is_arithmetic_v<T>;
 
-    template<typename T>
-    using kernelLambda = std::function<T(vector<T>, vector<T>, double)>;
+    /**
+     * Declaring of the lambda function that is used as the kernel function for the KDE. \n
+     * lambda follows the format of: Lambda((vector<T>, vector<T>, double) -> T) \n
+     * takes 2 vectors of equal dimensions, and a bandwidth sigma and returns the distance. \n
+     * \n
+     * @tparam T support Arithmatic
+     * @param x, y both need to be same size, else it may lead to unwanted behavior.
+     * @param sigma bandwidth, must be greater then 0
+     */
+    template<Arithmetic T>
+    using kernelLambda = std::function<T(vector<T> x, vector<T> y, double signma)>;
 
+    /**
+     * Given an ENUM of kernelType returns the corresponding lambda functions
+     *
+     * @tparam T of Arithmatic
+     * @param kernel kernelType
+     * @return kernelLambda of type T
+     */
     template<Arithmetic T>
     inline kernelLambda<T> kernel_function(kernelType kernel) {
         switch (kernel) {
+            //Gaussian kernel = e^(-||x-y||^2) where ||x-y||^2 is second norm
+            //Second norm = sqrt(|x0-y0|^2 + ... + |xd-yd|^2)
             case Gaussian:
                 return kernelLambda<T>([](vector<T> x, vector<T> y, double sigma) -> T {
 

@@ -22,6 +22,8 @@ class KDE {
 
 public:
     virtual T QueryNewPoint(vector<T>) = 0;
+    virtual void deallocate() = 0;
+    virtual ~KDE() = default;
 };
 
 

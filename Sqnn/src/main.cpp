@@ -34,6 +34,8 @@ int main(int argc, char *argv[]){
 
     std::cout << sum;
 
+    //tear down
+    delete kde;
 
     return 0;
 }
