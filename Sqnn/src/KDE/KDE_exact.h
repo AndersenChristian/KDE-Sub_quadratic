@@ -38,9 +38,6 @@ public:
         return sum;
     };
 
-    void deallocate() override{
-
-    }
     ~KDE_exact() override = default;
 private:
 };
