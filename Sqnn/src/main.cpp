@@ -32,13 +32,10 @@ int main(int argc, char *argv[]){
     double sigma = 2;
     auto mlKDE = new ml_KDE_array<double>(&vectors, epsilon, sigma, Gaussian);
 
-    auto kdeRoot = mlKDE->getKDE();
-    auto kdeElement = &kdeRoot[1];
+    auto kdeElement = mlKDE->getTreeRoot();
     std::cout << (*kdeElement)->QueryNewPoint({2.0}) << "\n";
 
-    unsigned int currentPosition = kdeElement - kdeRoot;
-    unsigned int nextPosition = currentPosition * 2;
-    kdeElement = kdeElement + nextPosition - 1;
+    kdeElement = mlKDE->getChild(kdeElement,0);
 
     std::cout << (*kdeElement)->QueryNewPoint({2.0}) << "\n";
     std::cout << (*(kdeElement + 1))->QueryNewPoint({2.0}) << "\n";

@@ -37,9 +37,22 @@ public:
         rec_construct(data, 0, data->size() - 1, sigma, 1);
     }
 
-    virtual KDE<T>** getKDE(){
-        return &kde[0];
+    KDE<T>** getTreeRoot() override{
+        return &kde[1];
     }
+
+    /**
+     *
+     * @param current
+     * @param child 0 = left, 1 = right
+     * @return
+     */
+    virtual inline KDE<T>** getChild(KDE<T>** current, unsigned int child){
+        unsigned int p = current - &kde[0];
+        p = p * 2 + 1 * child;
+        return current + p - 1;
+    };
+
 
     ~ml_KDE_array() {
         delete[] kde;

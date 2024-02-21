@@ -16,6 +16,14 @@ using std::pair;
 template <Arithmetic T>
 class multi_levelKDE{
 public:
-    virtual KDE<T>** getKDE() = 0;
+    virtual KDE<T>** getTreeRoot() = 0;
+    /**
+     *
+     *
+     * @param current Current position in tree
+     * @param child what child to visit
+     * @return
+     */
+    virtual inline KDE<T>** getChild(KDE<T>** current, unsigned int child) = 0;
 };
 #endif //KDE_SUB_QUADRATIC_MULTI_LEVELKDE_H
