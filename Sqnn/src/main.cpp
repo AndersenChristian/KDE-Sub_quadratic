@@ -22,15 +22,28 @@ int main(int argc, char *argv[]){
             {4.0},
             {4.0},
             {4.0},
-            {4.0},
-            {4.0},
-            {4.0},
-            {4.0}
+            {2.0},
+            {2.0},
+            {2.0},
+            {2.0}
     };
 
     long double epsilon = 1;
     double sigma = 2;
-    auto kde = new ml_KDE_array<double>(&vectors, epsilon, sigma, Gaussian);
+    auto mlKDE = new ml_KDE_array<double>(&vectors, epsilon, sigma, Gaussian);
+
+    auto kdeRoot = mlKDE->getKDE();
+    auto kdeElement = &kdeRoot[1];
+    std::cout << (*kdeElement)->QueryNewPoint({2.0}) << "\n";
+
+    unsigned int currentPosition = kdeElement - kdeRoot;
+    unsigned int nextPosition = currentPosition * 2;
+    kdeElement = kdeElement + nextPosition - 1;
+
+    std::cout << (*kdeElement)->QueryNewPoint({2.0}) << "\n";
+    std::cout << (*(kdeElement + 1))->QueryNewPoint({2.0}) << "\n";
+
+    //std::cout << kde.second->QueryNewPoint({3.0});
 
     //std::cout << "KDE:" << sizeof(KDE<double>) << "\tKDE_EXACT:" << sizeof(KDE_exact<double>);
 

@@ -37,6 +37,10 @@ public:
         rec_construct(data, 0, data->size() - 1, sigma, 1);
     }
 
+    virtual KDE<T>** getKDE(){
+        return &kde[0];
+    }
+
     ~ml_KDE_array() {
         delete[] kde;
     }
@@ -50,7 +54,7 @@ private:
         const double sigma,
         const unsigned int arrayIndex
     ){
-        //if there is less then 2 datas left, we can't create both a left and right child, so we terminate.
+        //if there is less then 2 datas left, we can't create both a left and right child, so we stop.
         if (endPoint - startPoint < 2) return;
 
         //creates this layers KDE
