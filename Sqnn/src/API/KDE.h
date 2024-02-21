@@ -29,7 +29,7 @@ public:
     /**
      * query the approximated value of the new point, based on how the KDE was initially constructed.
      *
-     * @return an apoximated distance
+     * @return an approximated distance
      */
     virtual T QueryNewPoint(vector<T>) = 0;
     virtual ~KDE() = default;

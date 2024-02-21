@@ -22,7 +22,7 @@ public:
      *
      * @param current Current position in tree
      * @param child what child to visit
-     * @return
+     * @return a pointeer to where the pointer to the data can be found.
      */
     virtual inline KDE<T>** getChild(KDE<T>** current, unsigned int child) = 0;
 };

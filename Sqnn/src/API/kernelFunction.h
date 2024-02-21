@@ -63,7 +63,6 @@ namespace kernelFunction {
             //Second norm = sqrt(|x0-y0|^2 + ... + |xd-yd|^2)
             case Gaussian:
                 return kernelLambda<T>([](vector<T> x, vector<T> y, double sigma) -> T {
-
                     T sum = 0;
                     for (int i = 0; i < x.size(); i++)
                         sum += mat::pow(mat::abs(x[i] - y[i]), 2);
