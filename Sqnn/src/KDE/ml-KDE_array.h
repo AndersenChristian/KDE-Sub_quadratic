@@ -32,7 +32,7 @@ public:
     ):
     epsilon(epsilon),
     kernel_function(kernelFunction::kernel_function<T>(kernelType::Gaussian)),
-    kde(vector<KDE<T>*>((int) pow(2, log(data->size())+1)))
+    kde(vector<KDE<T>*>(data->size()))
     {
         rec_construct(data, 0, data->size() - 1, sigma, 1);
     }
@@ -45,11 +45,21 @@ public:
      *
      * @param current
      * @param child 0 = left, 1 = right
-     * @return
+     * @return the child, or itself if no child exist in that direction.
      */
     virtual inline KDE<T>** getChild(KDE<T>** current, unsigned int child){
+        // current pointers location in array equal to: kde[p]
         unsigned int p = current - &kde[0];
+
+        // finds the child, left: kde[p*2] and right: kde[p*2+1].
+        // hence we can do p * 2 always, and utilize a multiplication with child to avoid branching.
         p = p * 2 + 1 * child;
+
+        //child doesn't exist, return itself.
+        if (p - 1 >= kde.size())
+            return current;
+
+        //subtract 1 due to array 0 indexing.
         return current + p - 1;
     };
 
@@ -67,8 +77,8 @@ private:
         const double sigma,
         const unsigned int arrayIndex
     ){
-        //if there is less then 2 datas left, we can't create both a left and right child, so we stop.
-        if (endPoint - startPoint < 2) return;
+        //if there is less than 2 datas left, we can't create both a left and right child, so we stop.
+        if (endPoint - startPoint + 1 < 2) return;
 
         //creates this layers KDE
         kde[arrayIndex] = new KDE_exact<T>(kernel_function, data, startPoint, endPoint, 2);

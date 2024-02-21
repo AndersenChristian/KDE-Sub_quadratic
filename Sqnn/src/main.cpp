@@ -35,10 +35,16 @@ int main(int argc, char *argv[]){
     auto kdeElement = mlKDE->getTreeRoot();
     std::cout << (*kdeElement)->QueryNewPoint({2.0}) << "\n";
 
+    std::cout << ((kdeElement == (mlKDE->getChild(kdeElement,0))) ? 1 : 0 ) << "\n";
+
     kdeElement = mlKDE->getChild(kdeElement,0);
 
     std::cout << (*kdeElement)->QueryNewPoint({2.0}) << "\n";
     std::cout << (*(kdeElement + 1))->QueryNewPoint({2.0}) << "\n";
+
+    kdeElement = mlKDE->getChild(kdeElement,0);
+
+    std::cout << ((kdeElement == (mlKDE->getChild(kdeElement,0))) ? 1 : 0 ) << "\n";
 
     //std::cout << kde.second->QueryNewPoint({3.0});
 
