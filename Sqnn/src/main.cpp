@@ -5,35 +5,63 @@
 #include "KDE/KDE_exact.h"
 #include "src/API/kernelFunction.h"
 #include "ENUM/kernelType.h"
+#include "KDE/ml-KDE_array.h"
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 using std::function;
 using std::vector;
+using std::string;
 
 int main(int argc, char *argv[]){
 
-    const auto kernel_function =
-            kernelFunction::kernel_function<double>(kernelType::Gaussian);
+    vector<vector<double>> vectors = {
+            {4.0},
+            {4.0},
+            {4.0},
+            {4.0},
+            {2.0},
+            {2.0},
+            {2.0},
+            {2.0}
+    };
 
-    std::list<vector<double>> vectors = {{
-        4.0
-    }};
+    long double epsilon = 1;
+    double sigma = 2;
+    auto mlKDE = new ml_KDE_array<double>(&vectors, epsilon, sigma, Gaussian);
 
-    KDE<double>* kde = new KDE_exact<double>(kernel_function, vectors, 2.0);
-    double s = kde->QueryNewPoint({4.0});
-    std::cout << s << "\n";
+    auto kdeElement = mlKDE->getTreeRoot();
+    std::cout << (*kdeElement)->QueryNewPoint({2.0}) << "\n";
+
+    std::cout << ((kdeElement == (mlKDE->getChild(kdeElement,0))) ? 1 : 0 ) << "\n";
+
+    kdeElement = mlKDE->getChild(kdeElement,0);
+
+    std::cout << (*kdeElement)->QueryNewPoint({2.0}) << "\n";
+    std::cout << (*(kdeElement + 1))->QueryNewPoint({2.0}) << "\n";
+
+    kdeElement = mlKDE->getChild(kdeElement,0);
+
+    std::cout << ((kdeElement == (mlKDE->getChild(kdeElement,0))) ? 1 : 0 ) << "\n";
+
+    //std::cout << kde.second->QueryNewPoint({3.0});
+
+    //std::cout << "KDE:" << sizeof(KDE<double>) << "\tKDE_EXACT:" << sizeof(KDE_exact<double>);
 
 
-    //computes sum
-    double sum = 0.0;
-    for(int i = -1000; i < 1000; i ++){
-        sum += kde->QueryNewPoint({(double) i});
-    }
 
-    std::cout << sum;
+    //tear down \
+    delete kde;
 
+    // Clear all vectors and deallocate memory
+    std::for_each(vectors.begin(), vectors.end(), [](std::vector<double>& inner_vec) {
+        inner_vec.clear();
+    });
+
+    // Clear the outer vector
+    vectors.clear();
 
     return 0;
 }
