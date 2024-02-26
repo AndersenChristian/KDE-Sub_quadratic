@@ -4,6 +4,7 @@
 
 #include "KDE/KDE_exact.h"
 #include "src/API/kernelFunction.h"
+#include "ANN/ANN.h"
 #include "ENUM/kernelType.h"
 #include "KDE/ml-KDE_array.h"
 
@@ -17,6 +18,7 @@ using std::string;
 
 int main(int argc, char *argv[]){
 
+    /*
     vector<vector<double>> vectors = {
             {4.0},
             {4.0},
@@ -62,6 +64,25 @@ int main(int argc, char *argv[]){
 
     // Clear the outer vector
     vectors.clear();
+
+     */
+
+    vector<vector<float>> vectors = {
+            {4.0},
+            {4.0},
+            {4.0},
+            {4.0},
+            {2.0},
+            {2.0},
+            {2.0},
+            {2.0}
+    };
+
+    auto *ann = new Ann<float>(vectors, 1);
+    ann->NNS({2.f});
+
+
+    delete ann;
 
     return 0;
 }
