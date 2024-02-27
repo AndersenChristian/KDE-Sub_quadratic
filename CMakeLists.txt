@@ -7,6 +7,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 include_directories(Sqnn)
 include_directories(Sqnn/src)
 
+# Find FLANN using pkg-config
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(FLANN REQUIRED flann)
+
+# Include directories for FLANN
+include_directories(${FLANN_INCLUDE_DIRS})
+
 # Define variables for source files
 set(MAIN_SOURCES
         Sqnn/src/main.cpp
@@ -24,12 +31,14 @@ add_executable(KDE_Sub_quadratic
         ${KDE_SOURCES}
 )
 
+target_link_libraries(KDE_Sub_quadratic ${FLANN_LIBRARIES})
+
 # Add SIMD flags based on your requirements and compiler
 # For example, for GCC or Clang, to enable AVX2:
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(KDE_Sub_quadratic PRIVATE "-mavx2")
     # You can add more specific flags here based on your needs
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     # For Visual Studio, use appropriate /arch flag
     target_compile_options(KDE_Sub_quadratic PRIVATE "/arch:AVX2")
-endif()
+endif ()

@@ -5,37 +5,29 @@
 #ifndef KDE_SUB_QUADRATIC_ANN_H
 #define KDE_SUB_QUADRATIC_ANN_H
 
-#include <NGT/Index.h>
+#include <flann/flann.hpp>
+#include <flann/io/hdf5.h>
 
 template<class T>
 class Ann {
 private:
-	NGT::Index mIndex;
-	NGT::Property mProperty;
 public:
 	Ann(std::vector<std::vector<T>> data, const int dimension) {
-		mProperty.dimension = dimension;
-		//Todo, switch case i guess on types?
-		mProperty.objectType = NGT::ObjectSpace::ObjectType::Float;
-		//Todo, do we always use L2? and does that mean second norm
-		mProperty.distanceType = NGT::Index::Property::DistanceType::DistanceTypeL2;
-
-		//build index:
-		std::string path("anng");
-		NGT::Index::create(path, mProperty);
-		NGT::Index index(path);
-		for (const auto x: data) {
-			index.append(x);
-		}
-		index.createIndex(16);
-		index.save();
+		//int nn = 3;
+		//flann::Matrix<float> dataset;
+		//flann::Matrix<float> query;
+		//flann::load_from_file(dataset, "dataset.hdf5","dataset");
+		//flann::load_from_file(query, "dataset.hdf5","query");
+		//flann::Matrix<int> indices(new int[query.rows*nn], query.rows, nn);
+		//flann::Matrix<float> dists(new float[query.rows*nn], query.rows, nn);
+// construct an randomized kd-tree index using 4 kd-trees
+		//flann::Index<flann::L2<float> > index(dataset, flann::KDTreeIndexParams(4));
+		//index.buildIndex();
+// do a knn search, using 128 checks
+		//index.knnSearch(query, indices, dists, nn, flann::SearchParams(128));
+		//flann::save_to_file(indices,"result.hdf5","result");
 	}
 
-	void NNS(std::vector<T> point) {
-		if (point.size() != mProperty.dimension)
-			throw std::invalid_argument("size of vector must be equal to the init vector");
-		std::cout << "test";
-	}
 };
 
 #endif //KDE_SUB_QUADRATIC_ANN_H

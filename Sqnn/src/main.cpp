@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <flann/flann.hpp>
 
 using std::function;
 using std::vector;
@@ -67,6 +68,8 @@ int main(int argc, char *argv[]){
 
      */
 
+		/*
+
     vector<vector<float>> vectors = {
             {4.0},
             {4.0},
@@ -79,10 +82,13 @@ int main(int argc, char *argv[]){
     };
 
     auto *ann = new Ann<float>(vectors, 1);
-    ann->NNS({2.f});
 
 
     delete ann;
+
+    */
+
+
 
     return 0;
 }
