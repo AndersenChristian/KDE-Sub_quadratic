@@ -16,7 +16,7 @@
 #include <sys/mman.h>
 #endif
 
-#include "Mrpt.h"
+#include "src/ANN/Mrpt.h"
 #include "numpy/arrayobject.h"
 
 #include <Eigen/Dense>
