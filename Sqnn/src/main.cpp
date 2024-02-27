@@ -14,10 +14,13 @@
 //#include <flann/flann.hpp>
 #include "../lib/Eigen/Dense"
 #include "ANN/Mrpt.h"
+#include <chrono>
 
 using std::function;
 using std::vector;
 using std::string;
+
+std::tuple<int,int,int> test();
 
 int main(int argc, char *argv[]) {
 
@@ -90,21 +93,79 @@ int main(int argc, char *argv[]) {
 
 	*/
 
-	int n = 10000, d = 200, k = 10;
-	double target_recall = 0.9;
+	int result[20](0);
+	int timeAverage = 0;
+
+	for(int i = 0; i < 100000; i++){
+		auto data = test();
+		result[std::get<0>(data)] ++ ;
+		//if(i == 0) timeAverage =
+	}
+
+	return 0;
+}
+
+std::tuple<int,int,int> test(){
+	// Create a random number engine
+	std::random_device rd;
+	std::mt19937 gen(rd()); // Mersenne Twister engine
+
+	// Create a uniform real distribution in the range [-1, 1]
+	std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
+
+
+	int n = 100000, d = 200, k = 20;
+
 	Eigen::MatrixXf X = Eigen::MatrixXf::Random(d, n);
 	Eigen::MatrixXf q = Eigen::VectorXf::Random(d);
 
+	for(int i = 0; i < d; i++){
+		for(int j = 0; j < n; j++){
+			X(i,j) = dist(gen);
+		}
+	}
+
+	for(int i = 0; i < d; i++){
+		q(i) = dist(gen);
+	}
+
+	//std::cout << test << "\n";
+
+	double target_recall = 0.9;
+	//Eigen::MatrixXf X = Eigen::MatrixXf::Random(d, n);
+	//Eigen::MatrixXf q = Eigen::VectorXf::Random(d);
+
+	//std::cout << X << "\n" ;
+
 	Eigen::VectorXi indices(k), indices_exact(k);
 
+	auto start = std::chrono::high_resolution_clock::now();
 	Mrpt::exact_knn(q, X, k, indices_exact.data());
-	std::cout << indices_exact.transpose() << std::endl;
+	auto end = std::chrono::high_resolution_clock::now();
+	std::cout << indices_exact.transpose() << "\t time:" << end-start << std::endl;
 
 	Mrpt mrpt(X);
 	mrpt.grow_autotune(target_recall, k);
 
+	start = std::chrono::high_resolution_clock::now();
 	mrpt.query(q, indices.data());
-	std::cout << indices.transpose() << std::endl;
+	end = std::chrono::high_resolution_clock::now();
+	//std::cout << indices.transpose() << "\t time:" << end-start << std::endl;
 
-	return 0;
+	//Result:
+
+	int count = 0;
+
+
+	// Compare each element of vec1 with elements of vec2
+	for (int i = 0; i < indices_exact.size(); ++i) {
+		for (int j = 0; j < indices.size(); ++j) {
+			if (indices_exact(i) == indices(j)) {
+				count++;
+				break; // Move to the next element of vec1
+			}
+		}
+	}
+
+	std::cout << count << "/" << k;
 }
