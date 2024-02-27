@@ -20,7 +20,7 @@ using std::function;
 using std::vector;
 using std::string;
 
-std::tuple<int,int,int> test();
+std::tuple<int,int,int> test(int n, int d, int k);
 
 int main(int argc, char *argv[]) {
 
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
 	int timeAverage = 0;
 
 	for(int i = 0; i < 100000; i++){
-		auto data = test();
+		auto data = test(100000, 200, 20);
 		result[std::get<0>(data)] ++ ;
 		//if(i == 0) timeAverage =
 	}
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 
-std::tuple<int,int,int> test(){
+std::tuple<int,int,int> test(int n, int d, int k){
 	// Create a random number engine
 	std::random_device rd;
 	std::mt19937 gen(rd()); // Mersenne Twister engine
@@ -114,7 +114,7 @@ std::tuple<int,int,int> test(){
 	std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
 
 
-	int n = 100000, d = 200, k = 20;
+	//int n = 100000, d = 200, k = 20;
 
 	Eigen::MatrixXf X = Eigen::MatrixXf::Random(d, n);
 	Eigen::MatrixXf q = Eigen::VectorXf::Random(d);
@@ -142,7 +142,7 @@ std::tuple<int,int,int> test(){
 	auto start = std::chrono::high_resolution_clock::now();
 	Mrpt::exact_knn(q, X, k, indices_exact.data());
 	auto end = std::chrono::high_resolution_clock::now();
-	std::cout << indices_exact.transpose() << "\t time:" << end-start << std::endl;
+	//std::cout << indices_exact.transpose() << "\t time:" << end-start << std::endl;
 
 	Mrpt mrpt(X);
 	mrpt.grow_autotune(target_recall, k);
