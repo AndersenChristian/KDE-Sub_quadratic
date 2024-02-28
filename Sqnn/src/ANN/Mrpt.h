@@ -14,11 +14,8 @@
 #include <vector>
 #include <omp.h>
 
-//#include <Eigen/Dense>
-//#include <Eigen/SparseCore>
-
-#include "../../lib/Eigen/Dense"
-#include "../../lib/Eigen/SparseCore"
+#include <Eigen/Dense>
+#include <Eigen/SparseCore>
 
 struct Mrpt_Parameters {
   int n_trees = 0; /**< Number of trees in the index. */
