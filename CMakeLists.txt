@@ -11,20 +11,24 @@ include_directories(Sqnn)
 include_directories(Sqnn/src)
 
 # Find FLANN using pkg-config
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(FLANN REQUIRED flann)
+#find_package(PkgConfig REQUIRED)
+#pkg_check_modules(FLANN REQUIRED flann)
+
+# Find Eigen
+find_package(Eigen3 REQUIRED)
 
 # Include directories
-include_directories(cpp lib)
+#include_directories(cpp lib)
 
 # Include directories for FLANN
-include_directories(${FLANN_INCLUDE_DIRS})
+# include_directories(${FLANN_INCLUDE_DIRS})
 
 # Define variables for source files
 set(MAIN_SOURCES
         Sqnn/src/main.cpp
         Sqnn/src/main.h
         Sqnn/src/ANN/ANN.h
+        Sqnn/test/TFucntionality.h
 )
 
 file(GLOB API_SOURCES Sqnn/src/API/*.h)
@@ -37,8 +41,9 @@ add_executable(KDE_Sub_quadratic
         ${KDE_SOURCES}
 )
 
-target_link_libraries(KDE_Sub_quadratic ${FLANN_LIBRARIES})
-target_link_libraries(KDE_Sub_quadratic gomp)
+#target_link_libraries(KDE_Sub_quadratic ${FLANN_LIBRARIES})
+#target_link_libraries(KDE_Sub_quadratic gomp)
+target_link_libraries(KDE_Sub_quadratic Eigen3::Eigen)
 
 # Add SIMD flags based on your requirements and compiler
 # For example, for GCC or Clang, to enable AVX2:
