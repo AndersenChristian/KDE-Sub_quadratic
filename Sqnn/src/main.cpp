@@ -7,20 +7,20 @@
 #include "ANN/ANN.h"
 #include "ENUM/kernelType.h"
 #include "KDE/ml-KDE_array.h"
+#include "../test/TFucntionality.h"
 
 #include <iostream>
 #include <vector>
 #include <algorithm>
-//#include <flann/flann.hpp>
-#include "../lib/Eigen/Dense"
-#include "ANN/Mrpt.h"
+#include <Eigen/Dense>
+//#include "ANN/Mrpt.h"
 #include <chrono>
 
 using std::function;
 using std::vector;
 using std::string;
 
-std::tuple<int,int,int> test(int n, int d, int k);
+std::tuple<int, int, int> test(int n, int d, int k);
 
 int main(int argc, char *argv[]) {
 
@@ -93,6 +93,7 @@ int main(int argc, char *argv[]) {
 
 	*/
 
+	/*
 	int result[20](0);
 	int timeAverage = 0;
 
@@ -102,10 +103,25 @@ int main(int argc, char *argv[]) {
 		//if(i == 0) timeAverage =
 	}
 
+ */
+
+	//correctness();
+	//test3();
+
+	vector<float> data = {
+			{0.1f,0.2f,0.3f,0.6f,0.7f,0.8f}
+	};
+
+	Ann<float> nn(data.data(), 3, 2, 0, 0.5);
+
+	std::cout << "final done";
+
+
 	return 0;
 }
 
-std::tuple<int,int,int> test(int n, int d, int k){
+/*
+std::tuple<int, int, int> test(int n, int d, int k) {
 	// Create a random number engine
 	std::random_device rd;
 	std::mt19937 gen(rd()); // Mersenne Twister engine
@@ -119,13 +135,13 @@ std::tuple<int,int,int> test(int n, int d, int k){
 	Eigen::MatrixXf X = Eigen::MatrixXf::Random(d, n);
 	Eigen::MatrixXf q = Eigen::VectorXf::Random(d);
 
-	for(int i = 0; i < d; i++){
-		for(int j = 0; j < n; j++){
-			X(i,j) = dist(gen);
+	for (int i = 0; i < d; i++) {
+		for (int j = 0; j < n; j++) {
+			X(i, j) = dist(gen);
 		}
 	}
 
-	for(int i = 0; i < d; i++){
+	for (int i = 0; i < d; i++) {
 		q(i) = dist(gen);
 	}
 
@@ -168,4 +184,6 @@ std::tuple<int,int,int> test(int n, int d, int k){
 	}
 
 	std::cout << count << "/" << k;
-}
+
+	return new std::tuple<float,float,float>(0.1,0.1,0.1);
+}*/
