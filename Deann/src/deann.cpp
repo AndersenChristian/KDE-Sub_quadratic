@@ -711,7 +711,8 @@ namespace {
         }
         else {
           throw invalid_argument("Only int32 and int64 types are supported for sample counts");
-        }
+        } class of algorithms that perform approximate nearest
+neighbor searches, which
       }
       else {
         *S = -1;
