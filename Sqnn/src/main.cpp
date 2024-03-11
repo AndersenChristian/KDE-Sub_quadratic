@@ -66,6 +66,72 @@ std::string intArrayToString(const int arr[], size_t size) {
 	return ss.str();
 }
 
+void manyTest() {
+	const int k_start = 10, k_max = 51;
+	int hits;
+	const int tests = 500;
+	int result[k_max - k_start];
+
+	for (int k = k_start; k < k_max; k++) {
+		hits = 0;
+		int indexExact[k];
+		int indexAprox[k];
+		for (int i = 0; i < tests; i++) {
+			//std::cout << "run: " << i << "\n";
+
+			// Initialize random number generator
+			std::random_device rd;
+			std::mt19937 gen(rd());
+
+			// Generate random values for d and n
+			std::uniform_int_distribution<int> d_distribution(10, 30);
+			std::uniform_int_distribution<int> n_distribution(500, 1000);
+			int d = d_distribution(gen);
+			int n = n_distribution(gen);
+
+			//std::cout << "d: " << d << "\tn:" << n << "\n";
+
+			vector<float> *data = generateRandomData(d, n, gen);
+			//std::cout << "data gen success." << "\n";
+
+			auto *ann = new Ann(data->data(), d, n, k, 0.5, 0.9);
+			//std::cout << "Ann gen success." << "\n";
+
+			auto *point = new vector<float>(d, 0.0f);
+			//std::cout << "point gen success." << "\n";
+
+			ann->exact(point->data(), indexExact);
+			//std::cout << "exact data gen success." << "\n";
+
+			ann->aprox(point->data(), indexAprox);
+			//std::cout << "aprox data gen success." << "\n";
+
+			std::sort(indexExact, indexExact + k);
+			std::sort(indexAprox, indexAprox + k);
+
+			int count = countSameValues(indexExact, indexAprox, k);
+
+			//std::cout << "exact: " << intArrayToString(indexExact, k) << "\n";
+			//std::cout << "aprox: " << intArrayToString(indexAprox, k) << "\n";
+			//std::cout << count << "/" << k << "\n";
+
+			hits += count;
+
+			delete ann;
+			delete data;
+			delete point;
+		}
+		std::cout << "\nresult: " << hits << "\tmax: " << tests * k << "\n\n";
+		result[k - k_start] = hits;
+	}
+
+	for (int i = 0; i < k_max - k_start; i++) {
+		std::cout << "k: " << i + k_start << " = ";
+		std::cout << ((float) result[i] / (float) (i + k_start)) / (float) tests << "\t";
+
+	}
+}
+
 int main(int argc, char *argv[]) {
 
 	/*
@@ -151,70 +217,6 @@ int main(int argc, char *argv[]) {
 
 	//correctness();
 	//test3();
-
-	const int k_start = 10, k_max = 51;
-	int hits;
-	const int tests = 500;
-	int result[k_max - k_start];
-
-	for(int k = k_start; k < k_max; k++) {
-		hits = 0;
-		int indexExact[k];
-		int indexAprox[k];
-		for (int i = 0; i < tests; i++) {
-			//std::cout << "run: " << i << "\n";
-
-			// Initialize random number generator
-			std::random_device rd;
-			std::mt19937 gen(rd());
-
-			// Generate random values for d and n
-			std::uniform_int_distribution<int> d_distribution(10, 30);
-			std::uniform_int_distribution<int> n_distribution(500, 1000);
-			int d = d_distribution(gen);
-			int n = n_distribution(gen);
-
-			//std::cout << "d: " << d << "\tn:" << n << "\n";
-
-			vector<float> *data = generateRandomData(d, n, gen);
-			//std::cout << "data gen success." << "\n";
-
-			auto *ann = new Ann(data->data(), d, n, k, 0.5, 0.9);
-			//std::cout << "Ann gen success." << "\n";
-
-			auto *point = new vector<float>(d, 0.0f);
-			//std::cout << "point gen success." << "\n";
-
-			ann->exact(point->data(), indexExact);
-			//std::cout << "exact data gen success." << "\n";
-
-			ann->aprox(point->data(), indexAprox);
-			//std::cout << "aprox data gen success." << "\n";
-
-			std::sort(indexExact, indexExact + k);
-			std::sort(indexAprox, indexAprox + k);
-
-			int count = countSameValues(indexExact, indexAprox, k);
-
-			//std::cout << "exact: " << intArrayToString(indexExact, k) << "\n";
-			//std::cout << "aprox: " << intArrayToString(indexAprox, k) << "\n";
-			//std::cout << count << "/" << k << "\n";
-
-			hits += count;
-
-			delete ann;
-			delete data;
-			delete point;
-		}
-		std::cout << "\nresult: " << hits << "\tmax: " << tests*k << "\n\n";
-		result[k-k_start] = hits;
-	}
-
-	for(int i = 0; i < k_max-k_start; i++){
-		std::cout << "k: " << i+k_start << " = ";
-		std::cout << ((float) result[i] / (float) (i+k_start)) / (float) tests << "\t";
-	}
-
 
 	return 0;
 }
