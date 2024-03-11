@@ -11,19 +11,32 @@ template<class T>
 class Ann {
 private:
 	Mrpt *mrpt;
+	int k;
 public:
-	Ann(T *data, const int d, const int n, const int k, const float epsilon) {
+	Ann(T *data, const int d, const int n, const int k, const float epsilon, double target_recall) : k(k) {
 		Eigen::MatrixXf dataM(d, n);
-		for(int i = 0; i < n; i++){
-			for(int j = 0; j < d; j++){
-				dataM(j,i) = data[i*d + j];
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < d; j++) {
+				dataM(j, i) = data[i * d + j];
 			}
 		}
-		std::cout << dataM.transpose();
-
 		mrpt = new Mrpt(dataM);
-		std::cout <<"\n done \n";
+		mrpt->grow_autotune(target_recall, k);
 	}
+
+	void exact(const float *q, int *out, float *out_distance = nullptr) {
+		mrpt->exact_knn(q, this->k, out, out_distance);
+	}
+
+	void aprox(const float *q, int *out, float *out_distance = nullptr) {
+		mrpt->query(q, out, out_distance);
+		//mrpt->query(q, out);
+	}
+
+
+	~Ann(){
+		delete mrpt;
+	};
 
 };
 
