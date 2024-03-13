@@ -3,16 +3,11 @@
 //
 
 #include "KDE/KDE_exact.h"
-#include "src/API/kernelFunction.h"
 #include "ANN/ANN.h"
-#include "ENUM/kernelType.h"
-#include "KDE/ml-KDE_array.h"
-#include "../test/TFucntionality.h"
 
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <Eigen/Dense>
 //#include "ANN/Mrpt.h"
 #include <chrono>
 
@@ -46,11 +41,11 @@ int countSameValues(int arr1[], int arr2[], int size) {
 	return count;
 }
 
-std::vector<float>* generateRandomData(int d, int n, std::mt19937 gen) {
+std::vector<float> *generateRandomData(int d, int n, std::mt19937 gen) {
 	std::uniform_real_distribution<float> dis(-1.0f, 1.0f);
 
 	// Create a vector of size d*n and fill it with random floats
-	auto* data = new std::vector<float>(d * n);
+	auto *data = new std::vector<float>(d * n);
 	for (int i = 0; i < d * n; ++i) {
 		(*data)[i] = dis(gen);
 	}
