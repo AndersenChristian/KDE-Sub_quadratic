@@ -9,15 +9,17 @@
 #include "../API/kernelFunction.h"
 
 template<typename T>
-using node = vector<std::pair<vector<T>, vector<T>> *>;
+struct Node{
+	vector<T> *point1, *point2;
+	Node *left, *right;
+};
 
 template<typename T>
 class Ann {
 public:
 
-	Ann(T *X, kernelType kernel, double bandWidth, int numberOfTrees) :
-			trees(new node<T>(numberOfTrees)) {
-		for(auto *t: trees) t = new node<T>;
+	Ann(vector<vector<T>> *X, kernelType kernel, double bandWidth, int numberOfTrees):
+	trees(numberOfTrees){
 		bool successfullyCreatedTree = false;
 		for (int i = 0; i < numberOfTrees; i = successfullyCreatedTree ? i++ : i) {
 			successfullyCreatedTree = false;
@@ -30,12 +32,10 @@ public:
 	~Ann() = default;
 
 private:
-	int makeTree(node<T> *tree, int currentIndex) {
-		
-	}
+	int makeTree(Node<T> *node ) {
 
-	T *X;
-	node<T> trees;
+	}
+	vector<Node<T>> *trees;
 
 
 };
