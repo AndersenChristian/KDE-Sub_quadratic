@@ -15,205 +15,81 @@ using std::function;
 using std::vector;
 using std::string;
 
-std::tuple<int, int, int> test(int n, int d, int k);
-
-int countSameValues(int arr1[], int arr2[], int size) {
-	int count = 0;
-
-	int j = 0; // Pointer for array A
-	int k = 0; // Pointer for array B
-
-	while (j < size && k < size) {
-		if (arr1[j] == arr2[k]) {
-			// If elements are equal, increment count and move both pointers
-			++count;
-			++j;
-			++k;
-		} else if (arr1[j] < arr2[k]) {
-			// If element in A is smaller, move pointer for A
-			++j;
-		} else {
-			// If element in B is smaller, move pointer for B
-			++k;
-		}
+void printVector(vector<float> &data) {
+	for (auto d: data) {
+		std::cout << d << "\t";
 	}
-
-	return count;
+	std::cout << "\n";
 }
 
-std::vector<float> *generateRandomData(int d, int n, std::mt19937 gen) {
-	std::uniform_real_distribution<float> dis(-1.0f, 1.0f);
-
-	// Create a vector of size d*n and fill it with random floats
-	auto *data = new std::vector<float>(d * n);
-	for (int i = 0; i < d * n; ++i) {
-		(*data)[i] = dis(gen);
+void printComparator(const Eigen::MatrixXf &mat, const Eigen::MatrixXf &q, int n) {
+	for (int i = 0; i < mat.rows(); ++i) {
+		std::cout << mat(i, n) << "\t" << q(i) << "\n";
 	}
-
-	return data;
+	std::cout << "\n\n";
 }
 
-std::string intArrayToString(const int arr[], size_t size) {
-	std::stringstream ss;
-	for (size_t i = 0; i < size; ++i) {
-		ss << arr[i] << " ";
+vector<float> dif(const Eigen::MatrixXf &mat, const Eigen::MatrixXf &q, int n, int d){
+	vector<float> dif(d);
+	for (int i = 0; i < mat.rows(); ++i) {
+		dif[i] = abs(mat(i, n)-q(i));
 	}
-	return ss.str();
+	return dif;
 }
 
 int main(int argc, char *argv[]) {
-
-	/*
-	vector<vector<double>> vectors = {
-					{4.0},
-					{4.0},
-					{4.0},
-					{4.0},
-					{2.0},
-					{2.0},
-					{2.0},
-					{2.0}
-	};
-
-	long double epsilon = 1;
-	double sigma = 2;
-	auto mlKDE = new ml_KDE_array<double>(&vectors, epsilon, sigma, Gaussian);
-
-	auto kdeElement = mlKDE->getTreeRoot();
-	std::cout << (*kdeElement)->QueryNewPoint({2.0}) << "\n";
-
-	std::cout << ((kdeElement == (mlKDE->getChild(kdeElement,0))) ? 1 : 0 ) << "\n";
-
-	kdeElement = mlKDE->getChild(kdeElement,0);
-
-	std::cout << (*kdeElement)->QueryNewPoint({2.0}) << "\n";
-	std::cout << (*(kdeElement + 1))->QueryNewPoint({2.0}) << "\n";
-
-	kdeElement = mlKDE->getChild(kdeElement,0);
-
-	std::cout << ((kdeElement == (mlKDE->getChild(kdeElement,0))) ? 1 : 0 ) << "\n";
-
-	//std::cout << kde.second->QueryNewPoint({3.0});
-
-	//std::cout << "KDE:" << sizeof(KDE<double>) << "\tKDE_EXACT:" << sizeof(KDE_exact<double>);
-
-
-
-	//tear down \
-	delete kde;
-
-	// Clear all vectors and deallocate memory
-	std::for_each(vectors.begin(), vectors.end(), [](std::vector<double>& inner_vec) {
-			inner_vec.clear();
-	});
-
-	// Clear the outer vector
-	vectors.clear();
-
-	 */
-
-	/*
-
-	vector<vector<float>> vectors = {
-					{4.0},
-					{4.0},
-					{4.0},
-					{4.0},
-					{2.0},
-					{2.0},
-					{2.0},
-					{2.0}
-	};
-
-	auto *ann = new Ann<float>(vectors, 1);
-
-
-	delete ann;
-
-	*/
-
-	/*
-	int result[20](0);
-	int timeAverage = 0;
-
-	for(int i = 0; i < 100000; i++){
-		auto data = test(100000, 200, 20);
-		result[std::get<0>(data)] ++ ;
-		//if(i == 0) timeAverage =
-	}
-
- */
-
-	//correctness();
-	//test3();
-
-	return 0;
-}
-
-/*
-std::tuple<int, int, int> test(int n, int d, int k) {
-	// Create a random number engine
-	std::random_device rd;
-	std::mt19937 gen(rd()); // Mersenne Twister engine
-
-	// Create a uniform real distribution in the range [-1, 1]
-	std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
-
-
-	//int n = 100000, d = 200, k = 20;
-
+	int n = 10000, d = 10, k = 10;
+	double target_recall = 0.5;
 	Eigen::MatrixXf X = Eigen::MatrixXf::Random(d, n);
 	Eigen::MatrixXf q = Eigen::VectorXf::Random(d);
 
-	for (int i = 0; i < d; i++) {
-		for (int j = 0; j < n; j++) {
-			X(i, j) = dist(gen);
-		}
-	}
-
-	for (int i = 0; i < d; i++) {
-		q(i) = dist(gen);
-	}
-
-	//std::cout << test << "\n";
-
-	double target_recall = 0.9;
-	//Eigen::MatrixXf X = Eigen::MatrixXf::Random(d, n);
-	//Eigen::MatrixXf q = Eigen::VectorXf::Random(d);
-
-	//std::cout << X << "\n" ;
-
 	Eigen::VectorXi indices(k), indices_exact(k);
+	vector<float> distance(k), distance_exact(k);
 
-	auto start = std::chrono::high_resolution_clock::now();
-	Mrpt::exact_knn(q, X, k, indices_exact.data());
-	auto end = std::chrono::high_resolution_clock::now();
-	//std::cout << indices_exact.transpose() << "\t time:" << end-start << std::endl;
+	Mrpt::exact_knn(q, X, k, indices_exact.data(), distance_exact.data());
 
 	Mrpt mrpt(X);
 	mrpt.grow_autotune(target_recall, k);
 
-	start = std::chrono::high_resolution_clock::now();
-	mrpt.query(q, indices.data());
-	end = std::chrono::high_resolution_clock::now();
-	//std::cout << indices.transpose() << "\t time:" << end-start << std::endl;
+	mrpt.query(q, indices.data(), distance.data());
 
-	//Result:
+	//output
+	std::cout << "Indicies in expected size:\n";
+	std::cout << indices_exact.transpose() << "\n";
+	std::cout << indices.transpose() << "\n\n";
 
-	int count = 0;
+	std::cout << "Actual distances:\n";
+	printVector(distance_exact);
+	printVector(distance);
+	std::cout << "\n";
 
+	//What are the distances?
+	std::cout << "distance understanding:\n";
+	printComparator(X, q, 0);
 
-	// Compare each element of vec1 with elements of vec2
-	for (int i = 0; i < indices_exact.size(); ++i) {
-		for (int j = 0; j < indices.size(); ++j) {
-			if (indices_exact(i) == indices(j)) {
-				count++;
-				break; // Move to the next element of vec1
-			}
-		}
+	std::cout << "difference in each dimension:\n";
+	vector<float> difs = dif(X,q,indices_exact(0),d);
+	printVector(difs);
+
+	//dif squared for each dimension
+	for(float *ptr = difs.data(); ptr < difs.end().base(); ++ptr ){
+		*ptr *= *ptr;
+	}
+	printVector(difs);
+
+	//sum and root
+	float sum = 0;
+	for(const float f : difs){
+		sum += f;
 	}
 
-	std::cout << count << "/" << k;
+	std::cout << "sum as float: " << sum << "\n";
+	auto sumD = (double) sum;
+	std::cout << "sum as double: " << sumD << "\n";
+	sumD = sqrt(sumD);
+	std::cout << "sqrt distance: " << sumD << "\n";
 
-	return new std::tuple<float,float,float>(0.1,0.1,0.1);
-}*/
+
+
+	return 0;
+}
