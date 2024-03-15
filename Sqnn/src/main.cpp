@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
 	sumD = sqrt(sumD);
 	std::cout << "sqrt distance: " << sumD << "\n";
 
-	
+
 
 
 
