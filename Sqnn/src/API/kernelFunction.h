@@ -48,7 +48,7 @@ namespace kernelFunction {
      * @param sigma bandwidth, must be greater then 0
      */
     template<Arithmetic T>
-    using kernelLambda = std::function<T(vector<T> x, vector<T> y, double signma)>;
+    using kernelLambda = std::function<T(Eigen::VectorXf x, Eigen::VectorXf y, double signma)>;
 
     /**
      * Given an ENUM of kernelType returns the corresponding lambda functions
@@ -63,7 +63,7 @@ namespace kernelFunction {
             //Gaussian kernel = e^(-||x-y||^2) where ||x-y||^2 is second norm
             //Second norm = sqrt(|x0-y0|^2 + ... + |xd-yd|^2)
             case Gaussian:
-                return kernelLambda<T>([](vector<T> x, vector<T> y, double sigma) -> T {
+                return kernelLambda<T>([](Eigen::VectorXf x, Eigen::VectorXf y, double sigma) -> T {
                     T sum = 0;
                     for (int i = 0; i < x.size(); i++)
                         sum += mat::pow(mat::abs(x[i] - y[i]), 2);
@@ -77,7 +77,7 @@ namespace kernelFunction {
         }
 
         //default (unreachable only there to avoid compiler warning)
-        return [](vector<T> x, vector<T> y, double) -> T { return T{}; };
+        return [](Eigen::VectorXf x, Eigen::VectorXf y, double) -> T { return T{}; };
     }
 }
 
