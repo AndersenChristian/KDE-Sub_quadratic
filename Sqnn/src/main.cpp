@@ -57,13 +57,38 @@ float computeTau(Eigen::MatrixXf X, int n, double sigma) {
 	return tau;
 }
 
+void seedEigenRandom() {
+	// Use a random device to seed the generator
+	std::random_device rd;
+	generator.seed(rd());
+}
+
+Eigen::MatrixXf generateRandomMatrix(int d, int n) {
+	std::uniform_real_distribution<float> distribution(-1.0, 1.0);
+	Eigen::MatrixXf randomMatrix(d, n);
+
+	for (int i = 0; i < d; ++i) {
+		for (int j = 0; j < n; ++j) {
+			randomMatrix(i, j) = distribution(generator);
+		}
+	}
+
+	return randomMatrix;
+}
+
+bool hasValue(Eigen::VectorXi& k, int start, int end, int n) {
+	if(start == end) return k[n] == n;
+	int m = end-start;
+	if (k[m] < n) return hasValue(k, start, m-1, n);
+	return hasValue(k,m,end,n);
+}
+
 int main(int argc, char *argv[]) {
 	int n = 10000, d = 10, k = 10;
 	double target_recall = 0.5;
 	float epsilon = 0.01;
-	std::random_device rd;
-	generator.seed(rd());
-	Eigen::MatrixXf X = Eigen::MatrixXf::Random(d, n);
+	seedEigenRandom();
+	Eigen::MatrixXf X = generateRandomMatrix(d, n);
 	Eigen::MatrixXf q = Eigen::VectorXf::Random(d);
 
 	Eigen::VectorXi indices(k), indices_exact(k);
@@ -117,8 +142,28 @@ int main(int argc, char *argv[]) {
 	std::cout << "\ntau:\t" << tau;
 
 	//random sampling
-	int sampleAmount = 1 / ((epsilon * epsilon)*tau);
-	std::cout << "\nsample amount:\t" << sampleAmount;
+	int sampleAmount = 1 / ((epsilon * epsilon) * tau);
+	std::cout << "\n\nsample amount:\t" << sampleAmount;
+
+	//sorting the index list of k nearest neighbor to reduce the kontrol time for all samples.
+	std::sort(indices.begin(), indices.end());
+
+
+	float randomSampleDistanceSum = 0;
+	std::uniform_int_distribution<int> distribution(0, n);
+	int selectIndex;
+	auto kernel = kernelFunction::kernel_function<float>(kernelType::Gaussian);
+	for (int i = 0; i < sampleAmount; ++i) {
+		do {
+			selectIndex = distribution(generator);
+			std::cout << selectIndex;
+			if (hasValue(indices, 0, k, selectIndex)) continue;
+			randomSampleDistanceSum += kernel(X.col(selectIndex), q, 1);
+			break;
+		} while (true);
+	}
+	randomSampleDistanceSum /= sampleAmount;
+	std::cout << "\n\nsampleSum=\t" << randomSampleDistanceSum;
 
 
 	return 0;
