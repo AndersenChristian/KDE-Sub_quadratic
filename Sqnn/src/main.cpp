@@ -11,10 +11,13 @@
 #include <algorithm>
 //#include "ANN/Mrpt.h"
 #include <chrono>
+#include <random>
 
 using std::function;
 using std::vector;
 using std::string;
+
+std::default_random_engine generator;
 
 void printVector(vector<float> &data) {
 	for (auto d: data) {
@@ -30,25 +33,25 @@ void printComparator(const Eigen::MatrixXf &mat, const Eigen::MatrixXf &q, int n
 	std::cout << "\n\n";
 }
 
-vector<float> dif(const Eigen::MatrixXf &mat, const Eigen::MatrixXf &q, int n, int d){
+vector<float> dif(const Eigen::MatrixXf &mat, const Eigen::MatrixXf &q, int n, int d) {
 	vector<float> dif(d);
 	for (int i = 0; i < mat.rows(); ++i) {
-		dif[i] = abs(mat(i, n)-q(i));
+		dif[i] = abs(mat(i, n) - q(i));
 	}
 	return dif;
 }
 
-template <Arithmetic T>
-float computeTau(Eigen::MatrixXf X, int d, int n, double sigma){
+template<Arithmetic T>
+float computeTau(Eigen::MatrixXf X, int n, double sigma) {
 	auto kernel = kernelFunction::kernel_function<T>(kernelType::Gaussian);
-	float tau = 1;
-	vector<T> point1, point2;
-	for(int i = 0; i < n; ++i){
-		for(int j = 0 ; j < n; ++j){
+	Eigen::VectorXf point1, point2;
+	float tau = 1, distance;
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < n; ++j) {
 			if (i == j) continue;
-			//point1 =
-
-			//tau = kernel()
+			point1 = X.col(i), point2 = X.col(j);
+			distance = kernel(point1, point2, sigma);
+			tau = distance < tau ? distance : tau;
 		}
 	}
 	return tau;
@@ -57,6 +60,9 @@ float computeTau(Eigen::MatrixXf X, int d, int n, double sigma){
 int main(int argc, char *argv[]) {
 	int n = 10000, d = 10, k = 10;
 	double target_recall = 0.5;
+	float epsilon = 0.01;
+	std::random_device rd;
+	generator.seed(rd());
 	Eigen::MatrixXf X = Eigen::MatrixXf::Random(d, n);
 	Eigen::MatrixXf q = Eigen::VectorXf::Random(d);
 
@@ -85,18 +91,18 @@ int main(int argc, char *argv[]) {
 	printComparator(X, q, 0);
 
 	std::cout << "difference in each dimension:\n";
-	vector<float> difs = dif(X,q,indices_exact(0),d);
+	vector<float> difs = dif(X, q, indices_exact(0), d);
 	printVector(difs);
 
 	//dif squared for each dimension
-	for(float *ptr = difs.data(); ptr < difs.end().base(); ++ptr ){
+	for (float *ptr = difs.data(); ptr < difs.end().base(); ++ptr) {
 		*ptr *= *ptr;
 	}
 	printVector(difs);
 
 	//sum and root
 	float sum = 0;
-	for(const float f : difs){
+	for (const float f: difs) {
 		sum += f;
 	}
 
@@ -106,8 +112,13 @@ int main(int argc, char *argv[]) {
 	sumD = sqrt(sumD);
 	std::cout << "sqrt distance: " << sumD << "\n";
 
+	//tau calculation
+	float tau = computeTau<float>(X, n, 1);
+	std::cout << "\ntau:\t" << tau;
 
-
+	//random sampling
+	int sampleAmount = 1 / ((epsilon * epsilon)*tau);
+	std::cout << "\nsample amount:\t" << sampleAmount;
 
 
 	return 0;
