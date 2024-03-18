@@ -162,6 +162,7 @@ int main(int argc, char *argv[]) {
 			break;
 		} while (true);
 	}
+	//TODO something runs out of index around here.
 	randomSampleDistanceSum /= sampleAmount;
 	std::cout << "\n\nsampleSum=\t" << randomSampleDistanceSum;
 
