@@ -33,7 +33,7 @@ public:
 
 private:
 	int makeTree(Node<T> *node ) {
-
+		return 0;
 	}
 	vector<Node<T>> *trees;
 
