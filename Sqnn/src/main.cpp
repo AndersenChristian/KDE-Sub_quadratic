@@ -4,6 +4,7 @@
 
 #include "KDE/KDE_exact.h"
 #include "ANN/ANN.h"
+#include "API/kernelFunction.h"
 
 #include <iostream>
 #include <vector>
@@ -35,6 +36,22 @@ vector<float> dif(const Eigen::MatrixXf &mat, const Eigen::MatrixXf &q, int n, i
 		dif[i] = abs(mat(i, n)-q(i));
 	}
 	return dif;
+}
+
+template <Arithmetic T>
+float computeTau(Eigen::MatrixXf X, int d, int n, double sigma){
+	auto kernel = kernelFunction::kernel_function<T>(kernelType::Gaussian);
+	float tau = 1;
+	vector<T> point1, point2;
+	for(int i = 0; i < n; ++i){
+		for(int j = 0 ; j < n; ++j){
+			if (i == j) continue;
+			//point1 =
+
+			//tau = kernel()
+		}
+	}
+	return tau;
 }
 
 int main(int argc, char *argv[]) {
