@@ -8,6 +8,7 @@
 #include <functional>
 #include <cmath>
 #include <vector>
+#include <Eigen/Dense>
 #include "ENUM/kernelType.h"
 
 using std::vector;
