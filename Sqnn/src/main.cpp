@@ -13,6 +13,7 @@
 #include <chrono>
 #include <random>
 #include <unordered_set>
+#include <omp.h>
 
 using std::function;
 using std::vector;
@@ -109,7 +110,6 @@ int main(int argc, char *argv[]) {
 	const float sigma = 5;
 
 
-
 	seedEigenRandom();
 	Eigen::MatrixXf X = Eigen::MatrixXf(d, n);
 	Eigen::MatrixXf q = Eigen::VectorXf(d);
@@ -137,13 +137,13 @@ int main(int argc, char *argv[]) {
 	//Distances
 	std::cout << "\ndistances\n";
 	for (int i = 0; i < numberOfCandidates; i++) {
-		std::cout << exp(-distance[i]/sigma) << " ";
+		std::cout << exp(-distance[i] / sigma) << " ";
 	}
 
 	//trying to get the actual KDE and approx KDE
-	int sumA = 0, sumB = 0;
-	for (int i = 0 ; i < numberOfCandidates; ++i)
-		sumA += exp(-distance[i]/sigma);
+	float sumA = 0, sumB = 0;
+	for (int i = 0; i < numberOfCandidates; ++i)
+		sumA += exp(-distance[i] / sigma);
 
 
 	vector<int> sampleIndexes(m);
@@ -151,18 +151,51 @@ int main(int argc, char *argv[]) {
 	std::sort(candidates.begin(), candidates.end());
 	srand(time(nullptr));
 
-	while(sampleTaken < m){
+	while (sampleTaken < m) {
 		int sampleIndex = rand() % n; //TODO update to c++ 11 random generator.
-		if(hasValue(candidates, sampleIndex))
+		if (hasValue(candidates, sampleIndex))
 			continue;
 		sampleIndexes[sampleTaken++] = sampleIndex;
 	}
 
 	std::cout << "\n\nsample:\n";
 	printVector<int>(sampleIndexes);
+	auto kernel = kernelFunction::kernel_function<float>(kernelType::Gaussian);
 
 
 	//sum of B
+	vector<float> distancesB(m);
+#pragma omp parallel for
+	for (int i = 0; i < m; ++i) {
+		distancesB[i] = exp(-(X.col(sampleIndexes[i])-q).squaredNorm()/sigma);
+	}
+
+	for (int i = 0; i < m; ++i) {
+		sumB += distancesB[i];
+	}
+
+	std::cout << "A: " << sumA << "\tB: " << sumB;
+
+	//actual KDE value vs aprox.
+	sumA /= (float) k;
+	sumB /= (float) m;
+	float kdeAprox = (float)k/n * sumA + (float)(n-k)/n * sumB;
+	std::cout << "\n\nKDEapprox: " << kdeAprox;
+
+	//actual
+	vector<float> allDistance(n);
+#pragma omp parallel
+	for (int i = 0; i < n; ++i) {
+		allDistance[i] = exp(-(X.col(i)-q).squaredNorm()/sigma);
+	}
+
+	float sumKDE;
+	for (int i = 0; i < n; ++i) {
+		sumKDE += allDistance[i];
+	}
+	sumKDE /= n;
+
+	std::cout << "\tKDE: " << sumKDE;
 
 
 
