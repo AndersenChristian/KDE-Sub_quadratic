@@ -731,7 +731,11 @@ public:
 			*out_n_elected = n_elected;
 		}
 
-		exact_knn(q, k, elected, n_elected, out, out_distances);
+		for(int i = 0; i < n_elected; ++i){
+			out[i] = elected[i];
+		}
+
+		//exact_knn(q, k, elected, n_elected, out, out_distances);
 	}
 
 	/**
