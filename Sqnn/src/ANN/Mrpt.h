@@ -738,6 +738,11 @@ public:
 			out[i] = -1;
 		}
 
+
+#pragma omp parallel for
+		for(int i = 0; i < n_elected; i++)
+			out_distances[i] = (X.col(out[i])-q).squaredNorm();
+
 		//exact_knn(q, k, elected, n_elected, out, out_distances);
 	}
 
