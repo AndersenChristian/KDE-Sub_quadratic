@@ -12,6 +12,7 @@
 //#include "ANN/Mrpt.h"
 #include <chrono>
 #include <random>
+#include <unordered_set>
 
 using std::function;
 using std::vector;
@@ -19,9 +20,10 @@ using std::string;
 
 std::default_random_engine generator;
 
-void printVector(vector<float> &data) {
+template<typename T>
+void printVector(vector<T> &data) {
 	for (auto d: data) {
-		std::cout << d << "\t";
+		std::cout << d << " ";
 	}
 	std::cout << "\n";
 }
@@ -76,16 +78,38 @@ void generateRandomMatrix(Eigen::MatrixXf &X, Eigen::MatrixXf &q, int d, int n) 
 }
 
 bool hasValue(Eigen::VectorXi &k, int start, int end, int n) {
-	if (start == end) return k[n] == n;
-	int m = end - start;
-	if (k[m] < n) return hasValue(k, start, m - 1, n);
-	return hasValue(k, m, end, n);
+	if (start == end) return k[start] == n;
+	int m = end - start / 2;
+	if (k[m] < n) return hasValue(k, m + 1, end, n);
+	return hasValue(k, start, m, n);
+}
+
+bool hasValue(const Eigen::VectorXi &candidates, int value) {
+	int start = 0;
+	int end = candidates.size() - 1;
+
+	while (start <= end) {
+		int mid = start + (end - start) / 2;
+		if (candidates[mid] == value) {
+			return true;
+		} else if (candidates[mid] < value) {
+			start = mid + 1;
+		} else {
+			end = mid - 1;
+		}
+	}
+	return false;
 }
 
 int main(int argc, char *argv[]) {
-	int n = 10000, d = 10, k = 1000;
-	double target_recall = 0.5;
-	float epsilon = 0.01;
+	//basic variable
+	//TODO get as arguments or from file.
+	const int n = 10000, d = 10, k = 1000, m = 1000;
+	const double target_recall = 0.5;
+	const float sigma = 5;
+
+
+
 	seedEigenRandom();
 	Eigen::MatrixXf X = Eigen::MatrixXf(d, n);
 	Eigen::MatrixXf q = Eigen::VectorXf(d);
@@ -113,8 +137,35 @@ int main(int argc, char *argv[]) {
 	//Distances
 	std::cout << "\ndistances\n";
 	for (int i = 0; i < numberOfCandidates; i++) {
-		std::cout << distance[i] << " ";
+		std::cout << exp(-distance[i]/sigma) << " ";
 	}
+
+	//trying to get the actual KDE and approx KDE
+	int sumA = 0, sumB = 0;
+	for (int i = 0 ; i < numberOfCandidates; ++i)
+		sumA += exp(-distance[i]/sigma);
+
+
+	vector<int> sampleIndexes(m);
+	int sampleTaken = 0;
+	std::sort(candidates.begin(), candidates.end());
+	srand(time(nullptr));
+
+	while(sampleTaken < m){
+		int sampleIndex = rand() % n; //TODO update to c++ 11 random generator.
+		if(hasValue(candidates, sampleIndex))
+			continue;
+		sampleIndexes[sampleTaken++] = sampleIndex;
+	}
+
+	std::cout << "\n\nsample:\n";
+	printVector<int>(sampleIndexes);
+
+
+	//sum of B
+
+
+
 
 
 
