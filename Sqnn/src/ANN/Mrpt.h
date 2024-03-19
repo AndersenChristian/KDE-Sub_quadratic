@@ -731,7 +731,19 @@ public:
 			*out_n_elected = n_elected;
 		}
 
-		exact_knn(q, k, elected, n_elected, out, out_distances);
+		for(int i = 0; i < n_elected; ++i){
+			out[i] = elected[i];
+		}
+		for(int i = n_elected; i < k; ++i){
+			out[i] = -1;
+		}
+
+
+#pragma omp parallel for
+		for(int i = 0; i < n_elected; i++)
+			out_distances[i] = (X.col(out[i])-q).squaredNorm();
+
+		//exact_knn(q, k, elected, n_elected, out, out_distances);
 	}
 
 	/**

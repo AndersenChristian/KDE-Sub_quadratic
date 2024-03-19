@@ -3,288 +3,232 @@
 //
 
 #include "KDE/KDE_exact.h"
-#include "src/API/kernelFunction.h"
 #include "ANN/ANN.h"
-#include "ENUM/kernelType.h"
-#include "KDE/ml-KDE_array.h"
-#include "../test/TFucntionality.h"
+#include "API/kernelFunction.h"
 
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <Eigen/Dense>
 //#include "ANN/Mrpt.h"
 #include <chrono>
+#include <random>
+#include <unordered_set>
+#include <omp.h>
 
 using std::function;
 using std::vector;
 using std::string;
 
-std::tuple<int, int, int> test(int n, int d, int k);
+std::default_random_engine generator;
 
-int countSameValues(int arr1[], int arr2[], int size) {
-	int count = 0;
+template<typename T>
+void printVector(vector<T> &data) {
+	for (auto d: data) {
+		std::cout << d << " ";
+	}
+	std::cout << "\n";
+}
 
-	int j = 0; // Pointer for array A
-	int k = 0; // Pointer for array B
+void printComparator(const Eigen::MatrixXf &mat, const Eigen::MatrixXf &q, int n) {
+	for (int i = 0; i < mat.rows(); ++i) {
+		std::cout << mat(i, n) << "\t" << q(i) << "\n";
+	}
+	std::cout << "\n\n";
+}
 
-	while (j < size && k < size) {
-		if (arr1[j] == arr2[k]) {
-			// If elements are equal, increment count and move both pointers
-			++count;
-			++j;
-			++k;
-		} else if (arr1[j] < arr2[k]) {
-			// If element in A is smaller, move pointer for A
-			++j;
+vector<float> dif(const Eigen::MatrixXf &mat, const Eigen::MatrixXf &q, int n, int d) {
+	vector<float> dif(d);
+	for (int i = 0; i < mat.rows(); ++i) {
+		dif[i] = abs(mat(i, n) - q(i));
+	}
+	return dif;
+}
+
+template<Arithmetic T>
+float computeTau(Eigen::MatrixXf &X, Eigen::MatrixXf &d, int n, double sigma) {
+	auto kernel = kernelFunction::kernel_function<T>(kernelType::Gaussian);
+	Eigen::VectorXf point1, point2;
+	float tau = 1, distance;
+	for (int i = 0; i < n; ++i) {
+		for (int j = 0; j < n; ++j) {
+			if (i == j) continue;
+			point1 = X.col(i), point2 = X.col(j);
+			distance = kernel(point1, point2, sigma);
+			tau = distance < tau ? distance : tau;
+		}
+	}
+	return tau;
+}
+
+void seedEigenRandom() {
+	// Use a random device to seed the generator
+	std::random_device rd;
+	generator.seed(rd());
+}
+
+void generateRandomMatrix(Eigen::MatrixXf &X, Eigen::MatrixXf &q, int d, int n) {
+	std::uniform_real_distribution<float> distribution(-2, 2);
+	for (int i = 0; i < d; ++i) {
+		for (int j = 0; j < n; ++j) {
+			X(i, j) = distribution(generator);
+		}
+	}
+	for (int i = 0; i < d; ++i) {
+		q(i) = distribution(generator);
+	}
+}
+
+bool hasValue(Eigen::VectorXi &k, int start, int end, int n) {
+	if (start == end) return k[start] == n;
+	int m = end - start / 2;
+	if (k[m] < n) return hasValue(k, m + 1, end, n);
+	return hasValue(k, start, m, n);
+}
+
+bool hasValue(const Eigen::VectorXi &candidates, int value) {
+	int start = 0;
+	int end = candidates.size() - 1;
+
+	while (start <= end) {
+		int mid = start + (end - start) / 2;
+		if (candidates[mid] == value) {
+			return true;
+		} else if (candidates[mid] < value) {
+			start = mid + 1;
 		} else {
-			// If element in B is smaller, move pointer for B
-			++k;
+			end = mid - 1;
 		}
 	}
-
-	return count;
-}
-
-std::vector<float>* generateRandomData(int d, int n, std::mt19937 gen) {
-	std::uniform_real_distribution<float> dis(-1.0f, 1.0f);
-
-	// Create a vector of size d*n and fill it with random floats
-	auto* data = new std::vector<float>(d * n);
-	for (int i = 0; i < d * n; ++i) {
-		(*data)[i] = dis(gen);
-	}
-
-	return data;
-}
-
-std::string intArrayToString(const int arr[], size_t size) {
-	std::stringstream ss;
-	for (size_t i = 0; i < size; ++i) {
-		ss << arr[i] << " ";
-	}
-	return ss.str();
-}
-
-void manyTest() {
-	const int k_start = 10, k_max = 51;
-	int hits;
-	const int tests = 500;
-	int result[k_max - k_start];
-
-	for (int k = k_start; k < k_max; k++) {
-		hits = 0;
-		int indexExact[k];
-		int indexAprox[k];
-		for (int i = 0; i < tests; i++) {
-			//std::cout << "run: " << i << "\n";
-
-			// Initialize random number generator
-			std::random_device rd;
-			std::mt19937 gen(rd());
-
-			// Generate random values for d and n
-			std::uniform_int_distribution<int> d_distribution(10, 30);
-			std::uniform_int_distribution<int> n_distribution(500, 1000);
-			int d = d_distribution(gen);
-			int n = n_distribution(gen);
-
-			//std::cout << "d: " << d << "\tn:" << n << "\n";
-
-			vector<float> *data = generateRandomData(d, n, gen);
-			//std::cout << "data gen success." << "\n";
-
-			auto *ann = new Ann(data->data(), d, n, k, 0.5, 0.9);
-			//std::cout << "Ann gen success." << "\n";
-
-			auto *point = new vector<float>(d, 0.0f);
-			//std::cout << "point gen success." << "\n";
-
-			ann->exact(point->data(), indexExact);
-			//std::cout << "exact data gen success." << "\n";
-
-			ann->aprox(point->data(), indexAprox);
-			//std::cout << "aprox data gen success." << "\n";
-
-			std::sort(indexExact, indexExact + k);
-			std::sort(indexAprox, indexAprox + k);
-
-			int count = countSameValues(indexExact, indexAprox, k);
-
-			//std::cout << "exact: " << intArrayToString(indexExact, k) << "\n";
-			//std::cout << "aprox: " << intArrayToString(indexAprox, k) << "\n";
-			//std::cout << count << "/" << k << "\n";
-
-			hits += count;
-
-			delete ann;
-			delete data;
-			delete point;
-		}
-		std::cout << "\nresult: " << hits << "\tmax: " << tests * k << "\n\n";
-		result[k - k_start] = hits;
-	}
-
-	for (int i = 0; i < k_max - k_start; i++) {
-		std::cout << "k: " << i + k_start << " = ";
-		std::cout << ((float) result[i] / (float) (i + k_start)) / (float) tests << "\t";
-
-	}
+	return false;
 }
 
 int main(int argc, char *argv[]) {
-
-	/*
-	vector<vector<double>> vectors = {
-					{4.0},
-					{4.0},
-					{4.0},
-					{4.0},
-					{2.0},
-					{2.0},
-					{2.0},
-					{2.0}
-	};
-
-	long double epsilon = 1;
-	double sigma = 2;
-	auto mlKDE = new ml_KDE_array<double>(&vectors, epsilon, sigma, Gaussian);
-
-	auto kdeElement = mlKDE->getTreeRoot();
-	std::cout << (*kdeElement)->QueryNewPoint({2.0}) << "\n";
-
-	std::cout << ((kdeElement == (mlKDE->getChild(kdeElement,0))) ? 1 : 0 ) << "\n";
-
-	kdeElement = mlKDE->getChild(kdeElement,0);
-
-	std::cout << (*kdeElement)->QueryNewPoint({2.0}) << "\n";
-	std::cout << (*(kdeElement + 1))->QueryNewPoint({2.0}) << "\n";
-
-	kdeElement = mlKDE->getChild(kdeElement,0);
-
-	std::cout << ((kdeElement == (mlKDE->getChild(kdeElement,0))) ? 1 : 0 ) << "\n";
-
-	//std::cout << kde.second->QueryNewPoint({3.0});
-
-	//std::cout << "KDE:" << sizeof(KDE<double>) << "\tKDE_EXACT:" << sizeof(KDE_exact<double>);
+	//basic variable
+	//TODO get as arguments or from file.
+	const int n = 10000, d = 10, k = 1000, m = 1000;
+	const double target_recall = 0.5;
+	const float sigma = 5;
 
 
+	seedEigenRandom();
+	Eigen::MatrixXf X = Eigen::MatrixXf(d, n);
+	Eigen::MatrixXf q = Eigen::VectorXf(d);
+	generateRandomMatrix(X, q, d, n);
 
-	//tear down \
-	delete kde;
-
-	// Clear all vectors and deallocate memory
-	std::for_each(vectors.begin(), vectors.end(), [](std::vector<double>& inner_vec) {
-			inner_vec.clear();
-	});
-
-	// Clear the outer vector
-	vectors.clear();
-
-	 */
-
-	/*
-
-	vector<vector<float>> vectors = {
-					{4.0},
-					{4.0},
-					{4.0},
-					{4.0},
-					{2.0},
-					{2.0},
-					{2.0},
-					{2.0}
-	};
-
-	auto *ann = new Ann<float>(vectors, 1);
-
-
-	delete ann;
-
-	*/
-
-	/*
-	int result[20](0);
-	int timeAverage = 0;
-
-	for(int i = 0; i < 100000; i++){
-		auto data = test(100000, 200, 20);
-		result[std::get<0>(data)] ++ ;
-		//if(i == 0) timeAverage =
-	}
-
- */
-
-	//correctness();
-	//test3();
-
-	return 0;
-}
-
-/*
-std::tuple<int, int, int> test(int n, int d, int k) {
-	// Create a random number engine
-	std::random_device rd;
-	std::mt19937 gen(rd()); // Mersenne Twister engine
-
-	// Create a uniform real distribution in the range [-1, 1]
-	std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
-
-
-	//int n = 100000, d = 200, k = 20;
-
-	Eigen::MatrixXf X = Eigen::MatrixXf::Random(d, n);
-	Eigen::MatrixXf q = Eigen::VectorXf::Random(d);
-
-	for (int i = 0; i < d; i++) {
-		for (int j = 0; j < n; j++) {
-			X(i, j) = dist(gen);
-		}
-	}
-
-	for (int i = 0; i < d; i++) {
-		q(i) = dist(gen);
-	}
-
-	//std::cout << test << "\n";
-
-	double target_recall = 0.9;
-	//Eigen::MatrixXf X = Eigen::MatrixXf::Random(d, n);
-	//Eigen::MatrixXf q = Eigen::VectorXf::Random(d);
-
-	//std::cout << X << "\n" ;
-
-	Eigen::VectorXi indices(k), indices_exact(k);
-
-	auto start = std::chrono::high_resolution_clock::now();
-	Mrpt::exact_knn(q, X, k, indices_exact.data());
-	auto end = std::chrono::high_resolution_clock::now();
-	//std::cout << indices_exact.transpose() << "\t time:" << end-start << std::endl;
+	Eigen::VectorXi indices(k);
+	vector<float> distance(k);
+	int numberOfCandidates;
 
 	Mrpt mrpt(X);
 	mrpt.grow_autotune(target_recall, k);
 
-	start = std::chrono::high_resolution_clock::now();
-	mrpt.query(q, indices.data());
-	end = std::chrono::high_resolution_clock::now();
-	//std::cout << indices.transpose() << "\t time:" << end-start << std::endl;
+	mrpt.query(q, indices.data(), distance.data(), &numberOfCandidates);
 
-	//Result:
+	//output
+	std::cout << "Indicies in order - size: " << indices.size() << "\n";
+	std::cout << indices.transpose() << "\n\n";
+	Eigen::VectorXi candidates(numberOfCandidates);
+	for (int i = 0; i < numberOfCandidates; ++i) {
+		candidates[i] = indices[i];
+	}
+	std::cout << "fixed candidate list - size: " << numberOfCandidates << "\n";
+	std::cout << candidates.transpose() << "\n";
 
-	int count = 0;
-
-
-	// Compare each element of vec1 with elements of vec2
-	for (int i = 0; i < indices_exact.size(); ++i) {
-		for (int j = 0; j < indices.size(); ++j) {
-			if (indices_exact(i) == indices(j)) {
-				count++;
-				break; // Move to the next element of vec1
-			}
-		}
+	//Distances
+	std::cout << "\ndistances\n";
+	for (int i = 0; i < numberOfCandidates; i++) {
+		std::cout << exp(-distance[i] / sigma) << " ";
 	}
 
-	std::cout << count << "/" << k;
+	//trying to get the actual KDE and approx KDE
+	float sumA = 0, sumB = 0;
+	for (int i = 0; i < numberOfCandidates; ++i)
+		sumA += exp(-distance[i] / sigma);
 
-	return new std::tuple<float,float,float>(0.1,0.1,0.1);
-}*/
+
+	vector<int> sampleIndexes(m);
+	int sampleTaken = 0;
+	std::sort(candidates.begin(), candidates.end());
+	srand(time(nullptr));
+
+	while (sampleTaken < m) {
+		int sampleIndex = rand() % n; //TODO update to c++ 11 random generator.
+		if (hasValue(candidates, sampleIndex))
+			continue;
+		sampleIndexes[sampleTaken++] = sampleIndex;
+	}
+
+	std::cout << "\n\nsample:\n";
+	printVector<int>(sampleIndexes);
+	auto kernel = kernelFunction::kernel_function<float>(kernelType::Gaussian);
+
+
+	//sum of B
+	float sum = 0;
+#pragma omp parallel for reduction(+: sum)
+		for (int i = 0; i < m; ++i) {
+			sum += exp(-(X.col(sampleIndexes[i]) - q).squaredNorm() / sigma);
+		}
+
+	std::cout << "A: " << sumA << "\tB: " << sum;
+
+	//actual KDE value vs aprox.
+	sumA /= (float) k;
+	sumB = (float) sum/m;
+	float kdeAprox = (float)k/n * sumA + (float)(n-k)/n * sumB;
+	std::cout << "\n\nKDEapprox: " << kdeAprox;
+
+	//actual
+	vector<float> allDistance(n);
+#pragma omp parallel
+	for (int i = 0; i < n; ++i) {
+		allDistance[i] = exp(-(X.col(i)-q).squaredNorm()/sigma);
+	}
+
+	float sumKDE;
+	for (int i = 0; i < n; ++i) {
+		sumKDE += allDistance[i];
+	}
+	sumKDE /= n;
+
+	std::cout << "\tKDE: " << sumKDE;
+
+
+
+
+
+
+	//tau calculation
+	//float tau = computeTau<float>(X, n, 1);
+	//std::cout << "\ntau:\t" << tau;
+
+	//random sampling
+	//int sampleAmount = 1 / ((epsilon * epsilon) * tau);
+	//std::cout << "\n\nsample amount:\t" << sampleAmount;
+
+	//sorting the index list of k nearest neighbor to reduce the kontrol time for all samples.
+	//std::sort(indices.begin(), indices.end());
+
+
+	/*
+	float randomSampleDistanceSum = 0;
+	std::uniform_int_distribution<int> distribution(0, n);
+	int selectIndex;
+	auto kernel = kernelFunction::kernel_function<float>(kernelType::Gaussian);
+	for (int i = 0; i < sampleAmount; ++i) {
+		do {
+			selectIndex = distribution(generator);
+			std::cout << selectIndex;
+			if (hasValue(indices, 0, k, selectIndex)) continue;
+			randomSampleDistanceSum += kernel(X.col(selectIndex), q, 1);
+			break;
+		} while (true);
+	}
+	//TODO something runs out of index around here.
+	randomSampleDistanceSum /= sampleAmount;
+	std::cout << "\n\nsampleSum=\t" << randomSampleDistanceSum;
+	 */
+
+
+	return 0;
+}

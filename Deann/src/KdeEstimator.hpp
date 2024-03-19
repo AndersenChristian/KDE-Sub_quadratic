@@ -3,6 +3,7 @@
 
 #include "FastRNG.hpp"
 #include "Kernel.hpp"
+#include "Array.hpp"
 #include <random>
 #include <optional>
 
