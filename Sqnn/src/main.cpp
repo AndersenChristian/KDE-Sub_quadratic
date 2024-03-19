@@ -42,7 +42,7 @@ vector<float> dif(const Eigen::MatrixXf &mat, const Eigen::MatrixXf &q, int n, i
 }
 
 template<Arithmetic T>
-float computeTau(Eigen::MatrixXf X, int n, double sigma) {
+float computeTau(Eigen::MatrixXf &X, Eigen::MatrixXf &d, int n, double sigma) {
 	auto kernel = kernelFunction::kernel_function<T>(kernelType::Gaussian);
 	Eigen::VectorXf point1, point2;
 	float tau = 1, distance;
@@ -63,92 +63,74 @@ void seedEigenRandom() {
 	generator.seed(rd());
 }
 
-Eigen::MatrixXf generateRandomMatrix(int d, int n) {
-	std::uniform_real_distribution<float> distribution(-1.0, 1.0);
-	Eigen::MatrixXf randomMatrix(d, n);
-
+void generateRandomMatrix(Eigen::MatrixXf &X, Eigen::MatrixXf &q, int d, int n) {
+	std::uniform_real_distribution<float> distribution(-2, 2);
 	for (int i = 0; i < d; ++i) {
 		for (int j = 0; j < n; ++j) {
-			randomMatrix(i, j) = distribution(generator);
+			X(i, j) = distribution(generator);
 		}
 	}
-
-	return randomMatrix;
+	for (int i = 0; i < d; ++i) {
+		q(i) = distribution(generator);
+	}
 }
 
-bool hasValue(Eigen::VectorXi& k, int start, int end, int n) {
-	if(start == end) return k[n] == n;
-	int m = end-start;
-	if (k[m] < n) return hasValue(k, start, m-1, n);
-	return hasValue(k,m,end,n);
+bool hasValue(Eigen::VectorXi &k, int start, int end, int n) {
+	if (start == end) return k[n] == n;
+	int m = end - start;
+	if (k[m] < n) return hasValue(k, start, m - 1, n);
+	return hasValue(k, m, end, n);
 }
 
 int main(int argc, char *argv[]) {
-	int n = 10000, d = 10, k = 10;
+	int n = 10000, d = 10, k = 1000;
 	double target_recall = 0.5;
 	float epsilon = 0.01;
 	seedEigenRandom();
-	Eigen::MatrixXf X = generateRandomMatrix(d, n);
-	Eigen::MatrixXf q = Eigen::VectorXf::Random(d);
+	Eigen::MatrixXf X = Eigen::MatrixXf(d, n);
+	Eigen::MatrixXf q = Eigen::VectorXf(d);
+	generateRandomMatrix(X, q, d, n);
 
-	Eigen::VectorXi indices(k), indices_exact(k);
-	vector<float> distance(k), distance_exact(k);
-
-	Mrpt::exact_knn(q, X, k, indices_exact.data(), distance_exact.data());
+	Eigen::VectorXi indices(k);
+	vector<float> distance(k);
+	int numberOfCandidates;
 
 	Mrpt mrpt(X);
 	mrpt.grow_autotune(target_recall, k);
 
-	mrpt.query(q, indices.data(), distance.data());
+	mrpt.query(q, indices.data(), distance.data(), &numberOfCandidates);
 
 	//output
-	std::cout << "Indicies in expected size:\n";
-	std::cout << indices_exact.transpose() << "\n";
+	std::cout << "Indicies in order - size: " << indices.size() << "\n";
 	std::cout << indices.transpose() << "\n\n";
-
-	std::cout << "Actual distances:\n";
-	printVector(distance_exact);
-	printVector(distance);
-	std::cout << "\n";
-
-	//What are the distances?
-	std::cout << "distance understanding:\n";
-	printComparator(X, q, 0);
-
-	std::cout << "difference in each dimension:\n";
-	vector<float> difs = dif(X, q, indices_exact(0), d);
-	printVector(difs);
-
-	//dif squared for each dimension
-	for (float *ptr = difs.data(); ptr < difs.end().base(); ++ptr) {
-		*ptr *= *ptr;
+	Eigen::VectorXi candidates(numberOfCandidates);
+	for (int i = 0; i < numberOfCandidates; ++i) {
+		candidates[i] = indices[i];
 	}
-	printVector(difs);
+	std::cout << "fixed candidate list - size: " << numberOfCandidates << "\n";
+	std::cout << candidates.transpose() << "\n";
 
-	//sum and root
-	float sum = 0;
-	for (const float f: difs) {
-		sum += f;
+	//Distances
+	std::cout << "\ndistances\n";
+	for (int i = 0; i < numberOfCandidates; i++) {
+		std::cout << distance[i] << " ";
 	}
 
-	std::cout << "sum as float: " << sum << "\n";
-	auto sumD = (double) sum;
-	std::cout << "sum as double: " << sumD << "\n";
-	sumD = sqrt(sumD);
-	std::cout << "sqrt distance: " << sumD << "\n";
+
 
 	//tau calculation
-	float tau = computeTau<float>(X, n, 1);
-	std::cout << "\ntau:\t" << tau;
+	//float tau = computeTau<float>(X, n, 1);
+	//std::cout << "\ntau:\t" << tau;
 
 	//random sampling
-	int sampleAmount = 1 / ((epsilon * epsilon) * tau);
-	std::cout << "\n\nsample amount:\t" << sampleAmount;
+	//int sampleAmount = 1 / ((epsilon * epsilon) * tau);
+	//std::cout << "\n\nsample amount:\t" << sampleAmount;
 
 	//sorting the index list of k nearest neighbor to reduce the kontrol time for all samples.
-	std::sort(indices.begin(), indices.end());
+	//std::sort(indices.begin(), indices.end());
 
 
+	/*
 	float randomSampleDistanceSum = 0;
 	std::uniform_int_distribution<int> distribution(0, n);
 	int selectIndex;
@@ -165,6 +147,7 @@ int main(int argc, char *argv[]) {
 	//TODO something runs out of index around here.
 	randomSampleDistanceSum /= sampleAmount;
 	std::cout << "\n\nsampleSum=\t" << randomSampleDistanceSum;
+	 */
 
 
 	return 0;
