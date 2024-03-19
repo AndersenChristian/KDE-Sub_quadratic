@@ -734,6 +734,9 @@ public:
 		for(int i = 0; i < n_elected; ++i){
 			out[i] = elected[i];
 		}
+		for(int i = n_elected; i < k; ++i){
+			out[i] = -1;
+		}
 
 		//exact_knn(q, k, elected, n_elected, out, out_distances);
 	}
