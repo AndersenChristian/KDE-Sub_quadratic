@@ -164,21 +164,17 @@ int main(int argc, char *argv[]) {
 
 
 	//sum of B
-	vector<float> distancesB(m);
-#pragma omp parallel for
-	for (int i = 0; i < m; ++i) {
-		distancesB[i] = exp(-(X.col(sampleIndexes[i])-q).squaredNorm()/sigma);
-	}
+	float sum = 0;
+#pragma omp parallel for reduction(+: sum)
+		for (int i = 0; i < m; ++i) {
+			sum += exp(-(X.col(sampleIndexes[i]) - q).squaredNorm() / sigma);
+		}
 
-	for (int i = 0; i < m; ++i) {
-		sumB += distancesB[i];
-	}
-
-	std::cout << "A: " << sumA << "\tB: " << sumB;
+	std::cout << "A: " << sumA << "\tB: " << sum;
 
 	//actual KDE value vs aprox.
 	sumA /= (float) k;
-	sumB /= (float) m;
+	sumB = (float) sum/m;
 	float kdeAprox = (float)k/n * sumA + (float)(n-k)/n * sumB;
 	std::cout << "\n\nKDEapprox: " << kdeAprox;
 
