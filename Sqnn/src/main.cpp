@@ -134,14 +134,9 @@ int main(int argc, char *argv[]) {
 	std::cout << "fixed candidate list - size: " << numberOfCandidates << "\n";
 	std::cout << candidates.transpose() << "\n";
 
-	//Distances
-	std::cout << "\ndistances\n";
-	for (int i = 0; i < numberOfCandidates; i++) {
-		std::cout << exp(-distance[i] / sigma) << " ";
-	}
-
 	//trying to get the actual KDE and approx KDE
-	float sumA = 0, sumB = 0;
+	//TODO: stop using distance from ANN, and paralise into a sum instead (reduced mem)
+	float sumA = 0, sumB;
 	for (int i = 0; i < numberOfCandidates; ++i)
 		sumA += exp(-distance[i] / sigma);
 
@@ -165,24 +160,28 @@ int main(int argc, char *argv[]) {
 
 	//sum of B
 	float sum = 0;
-#pragma omp parallel for reduction(+: sum)
-		for (int i = 0; i < m; ++i) {
-			sum += exp(-(X.col(sampleIndexes[i]) - q).squaredNorm() / sigma);
-		}
+	int index;
+#pragma omp parallel for private(index) reduction(+: sum)
+	for (int i = 0; i < m; ++i) {
+		do {
+			index = random() % n; //TODO: change to C11 random
+		} while (std::find(sampleIndexes.begin(), sampleIndexes.end(), index) < sampleIndexes.end());
+		sum += exp(-(X.col(sampleIndexes[i]) - q).squaredNorm() / sigma);
+	}
 
 	std::cout << "A: " << sumA << "\tB: " << sum;
 
 	//actual KDE value vs aprox.
 	sumA /= (float) k;
-	sumB = (float) sum/m;
-	float kdeAprox = (float)k/n * sumA + (float)(n-k)/n * sumB;
+	sumB = (float) sum / m;
+	float kdeAprox = (float) k / n * sumA + (float) (n - k) / n * sumB;
 	std::cout << "\n\nKDEapprox: " << kdeAprox;
 
 	//actual
 	vector<float> allDistance(n);
 #pragma omp parallel
 	for (int i = 0; i < n; ++i) {
-		allDistance[i] = exp(-(X.col(i)-q).squaredNorm()/sigma);
+		allDistance[i] = exp(-(X.col(i) - q).squaredNorm() / sigma);
 	}
 
 	float sumKDE;
