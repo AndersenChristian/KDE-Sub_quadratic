@@ -178,15 +178,10 @@ int main(int argc, char *argv[]) {
 	std::cout << "\n\nKDEapprox: " << kdeAprox;
 
 	//actual
-	vector<float> allDistance(n);
-#pragma omp parallel
+	float sumKDE = 0;
+#pragma omp parallel for reduction(+:sumKDE)
 	for (int i = 0; i < n; ++i) {
-		allDistance[i] = exp(-(X.col(i) - q).squaredNorm() / sigma);
-	}
-
-	float sumKDE;
-	for (int i = 0; i < n; ++i) {
-		sumKDE += allDistance[i];
+		sumKDE += exp(-(X.col(i) - q).squaredNorm() / sigma);
 	}
 	sumKDE /= n;
 
