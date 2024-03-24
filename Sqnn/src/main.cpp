@@ -105,6 +105,7 @@ bool hasValue(const Eigen::VectorXi &candidates, int value) {
 int main(int argc, char *argv[]) {
 	//basic variable
 	//TODO get as arguments or from file.
+	//TODO bigger n for testing, as the amount of sample required is to high for accurate result.
 	const int n = 10000, d = 10, k = 1000, m = 1000;
 	const double target_recall = 0.5;
 	const float sigma = 5;

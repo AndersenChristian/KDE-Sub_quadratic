@@ -716,6 +716,7 @@ public:
 		Eigen::VectorXi votes = Eigen::VectorXi::Zero(n_samples);
 
 		// count votes
+		//TODO: can be reworked to less work, since number of votes doesn't matter.
 		for (int n_tree = 0; n_tree < n_trees; ++n_tree) {
 			int leaf_begin = leaf_first_indices[found_leaves[n_tree]];
 			int leaf_end = leaf_first_indices[found_leaves[n_tree] + 1];
