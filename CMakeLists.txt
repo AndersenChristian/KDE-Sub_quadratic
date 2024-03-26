@@ -29,6 +29,7 @@ set(MAIN_SOURCES
         Sqnn/src/main.h
         Sqnn/src/ANN/ANN.h
         Sqnn/test/TFucntionality.h
+        Sqnn/src/KdeUsingMrpt.h
 )
 
 file(GLOB API_SOURCES Sqnn/src/API/*.h)
