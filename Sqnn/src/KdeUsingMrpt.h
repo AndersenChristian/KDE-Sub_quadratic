@@ -9,6 +9,7 @@
 #include <cmath>
 #include <utility>
 #include <vector>
+#include <chrono>
 
 #include "kernelFunction.h"
 
@@ -17,11 +18,11 @@ public:
 	//TODO implementation
 	//Should only handle allocation. Make method for isValid after.
 	//TODO: include and save lambda for distance
-	KdeUsingMrpt(Eigen::MatrixXf &data, int n, int d, int k, int samples, float sigma)
+	KdeUsingMrpt(Eigen::MatrixXf &data, int n, int d, int k, int samples, int trees, float sigma)
 			: data(data), n(n), d(d), samples(samples), KNN(k), sigma(sigma), mrpt(data) {
 
 		//Needed for the ANN to be setup.
-		mrpt.grow_autotune(TARGET_RECALL, KNN);
+		mrpt.grow_autotune(TARGET_RECALL, KNN, trees);
 
 		//random number-generator setup
 		std::random_device rd;
