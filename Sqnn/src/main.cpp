@@ -2,8 +2,6 @@
 // Created by cj on 6-2-24.
 //
 
-#include "KDE/KDE_exact.h"
-#include "ANN/ANN.h"
 #include "kernelFunction.h"
 
 #include <iostream>
@@ -39,7 +37,7 @@ int main(int argc, char *argv[]) {
 	//basic variable
 	//TODO get as arguments or from file.
 	//TODO bigger n for testing, as the amount of sample required is to high for accurate result.
-	const int n = 100000, d = 10, k = 1000, m = 5000;
+	const int n = 100000, d = 10, k = 50, m = 5000;
 	const float sigma = 5;
 
 	Eigen::MatrixXf X = Eigen::MatrixXf(d, n);
@@ -48,13 +46,16 @@ int main(int argc, char *argv[]) {
 
 	KdeUsingMrpt kde(X, n, d, m, k, sigma);
 
-	std::cout << "a";
 
 	float app, exact;
+	auto start = std::chrono::system_clock::now();
 	app = kde.query(q);
+	auto between = std::chrono::system_clock::now();
 	exact = kde.query_exact(q);
+	auto end = std::chrono::system_clock::now();
 
-	std::cout << "approx: " << app << "\texact: " << exact << std::endl;
+	std::cout << "approx: " << app << "\texact: " << exact;
+	std::cout << "\nT-app: " << between - start << "\tT-exact: " << end - between << std::endl;
 
 	return 0;
 }

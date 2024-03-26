@@ -9,7 +9,6 @@
 #include <cmath>
 #include <vector>
 #include <Eigen/Dense>
-#include "ENUM/kernelType.h"
 
 using std::vector;
 
@@ -59,11 +58,11 @@ namespace kernel {
      * @return kernelLambda of type T
      */
     template<Arithmetic T>
-    inline kernelLambda<T> kernel_function(kernelType kernel) {
+    inline kernelLambda<T> kernel_function(kernel::type kernel) {
         switch (kernel) {
             //Gaussian kernel = e^(-||x-y||^2) where ||x-y||^2 is second norm
             //Second norm = sqrt(|x0-y0|^2 + ... + |xd-yd|^2)
-            case Gaussian:
+					case kernel::type::Gaussian:
                 return kernelLambda<T>([](Eigen::VectorXf x, Eigen::VectorXf y, double sigma) -> T {
                     T sum = 0;
                     for (int i = 0; i < x.size(); i++)
@@ -71,9 +70,9 @@ namespace kernel {
                     sum = mat::sqrt(sum/(2* pow(sigma,2)));
                     return mat::exp(-sum);
                 });
-            case Exponential:
+					case kernel::type::Exponential:
                 break;
-            case Laplacian:
+					case kernel::type::Laplacian:
                 break;
         }
 
