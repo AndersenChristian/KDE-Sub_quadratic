@@ -4,7 +4,7 @@
 
 #include "KDE/KDE_exact.h"
 #include "ANN/ANN.h"
-#include "API/kernelFunction.h"
+#include "kernelFunction.h"
 
 #include <iostream>
 #include <vector>
@@ -46,11 +46,11 @@ int main(int argc, char *argv[]) {
 	Eigen::MatrixXf q = Eigen::VectorXf(d);
 	generateRandomMatrix(X, q, d, n);
 
-	KdeUsingMrpt kde(X, n, d, m, sigma);
+	KdeUsingMrpt kde(X, n, d, m, k, sigma);
 
 	std::cout << "a";
 
-	float app = 0, exact = 0;
+	float app, exact;
 	app = kde.query(q);
 	exact = kde.query_exact(q);
 

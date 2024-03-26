@@ -23,11 +23,12 @@ namespace mat{
     using std::exp;
 }
 
-using kernelType::Gaussian;
-using kernelType::Exponential;
-using kernelType::Laplacian;
-
-namespace kernelFunction {
+namespace kernel {
+	enum class type {
+		Gaussian,
+		Exponential,
+		Laplacian
+	};
 
     /**
      * Concept to limit T to arithmetic types

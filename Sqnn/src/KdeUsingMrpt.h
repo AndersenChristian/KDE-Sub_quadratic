@@ -10,13 +10,15 @@
 #include <utility>
 #include <vector>
 
+#include "kernelFunction.h"
+
 class KdeUsingMrpt {
 public:
 	//TODO implementation
 	//Should only handle allocation. Make method for isValid after.
 	//TODO: include and save lambda for distance
-	KdeUsingMrpt(Eigen::MatrixXf &data, int n, int d, int samples, float sigma)
-			: data(data), n(n), d(d), samples(samples), sigma(sigma), mrpt(data) {
+	KdeUsingMrpt(Eigen::MatrixXf &data, int n, int d, int k, int samples, float sigma)
+			: data(data), n(n), d(d), samples(samples), KNN(k), sigma(sigma), mrpt(data) {
 
 		//Needed for the ANN to be setup.
 		mrpt.grow_autotune(TARGET_RECALL, KNN);
@@ -44,7 +46,7 @@ public:
 		int numberOfCandidates;
 		mrpt.query(q, ann_list.data(), nullptr, &numberOfCandidates);
 
-		//compute A
+		//compute NN contribution
 		float sum_a = 0;
 		//TODO. should q be a part of the omp? and if so, shared to private (overhead vs cache miss)
 #pragma omp parallel for reduction(+: sum_a)
@@ -56,7 +58,7 @@ public:
 		sum_a /= (float) numberOfCandidates;
 
 
-		//compute B
+		//compute sample contribution
 		float sum_b;
 		int index;
 #pragma omp parallel for private(index) reduction(+: sum_b)
@@ -76,12 +78,12 @@ public:
 
 
 private:
-	const int KNN = 1000;
+	const int KNN;
 	const double TARGET_RECALL = 0.5;
-
 	Mrpt mrpt;
 	Eigen::MatrixXf data;
 	std::default_random_engine generator;
+
 	const int n, d, samples;
 	const float sigma;
 

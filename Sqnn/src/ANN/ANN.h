@@ -6,7 +6,7 @@
 #define KDE_SUB_QUADRATIC_ANN_H
 
 #include "Mrpt.h"
-#include "../API/kernelFunction.h"
+#include "src/kernelFunction.h"
 
 template<typename T>
 struct Node{
