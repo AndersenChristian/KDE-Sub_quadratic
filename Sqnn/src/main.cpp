@@ -37,15 +37,17 @@ int main(int argc, char *argv[]) {
 	//basic variable
 	//TODO get as arguments or from file.
 	//TODO bigger n for testing, as the amount of sample required is to high for accurate result.
-	const int n = 10000, d = 2000, k = 100, m = 1000, trees = 100;
-	const float sigma = 100;
+	const int n = 100000, d = 10000, k = 100, m = 30000, trees = 100;
+	const float sigma = 10000;
 
 	Eigen::MatrixXf X = Eigen::MatrixXf(d, n);
 	Eigen::MatrixXf q = Eigen::VectorXf(d);
 	generateRandomMatrix(X, q, d, n);
 
+	double cStart = omp_get_wtime();
 	KdeUsingMrpt kde(X, n, d, m, k, trees, sigma);
-	std::cout << "init finished\n";
+	double cEnd = omp_get_wtime();
+	std::cout << "init finished\nIt took: " << cEnd - cStart << "\n";
 
 
 	float app, exact;
