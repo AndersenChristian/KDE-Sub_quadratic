@@ -15,6 +15,8 @@
 #include <unordered_set>
 #include <omp.h>
 
+#include "KdeUsingMrpt.h"
+
 using std::function;
 using std::vector;
 using std::string;
@@ -106,7 +108,7 @@ int main(int argc, char *argv[]) {
 	//basic variable
 	//TODO get as arguments or from file.
 	//TODO bigger n for testing, as the amount of sample required is to high for accurate result.
-	const int n = 10000, d = 10, k = 1000, m = 1000;
+	const int n = 10000, d = 10, k = 1000, m = 5000;
 	const double target_recall = 0.5;
 	const float sigma = 5;
 
@@ -116,12 +118,18 @@ int main(int argc, char *argv[]) {
 	Eigen::MatrixXf q = Eigen::VectorXf(d);
 	generateRandomMatrix(X, q, d, n);
 
+	KdeUsingMrpt kde(X, n, d, m, sigma);
+
+
+
+	/*
+
 	Eigen::VectorXi indices(k);
 	vector<float> distance(k);
 	int numberOfCandidates;
 
 	Mrpt mrpt(X);
-	mrpt.grow_autotune(target_recall, k);
+	mrpt.grow_autotune(target_recall, 1000);
 
 	mrpt.query(q, indices.data(), distance.data(), &numberOfCandidates);
 
@@ -173,9 +181,9 @@ int main(int argc, char *argv[]) {
 	std::cout << "A: " << sumA << "\tB: " << sum;
 
 	//actual KDE value vs aprox.
-	sumA /= (float) k;
+	sumA /= (float) numberOfCandidates;
 	sumB = (float) sum / m;
-	float kdeAprox = (float) k / n * sumA + (float) (n - k) / n * sumB;
+	float kdeAprox = (float) numberOfCandidates / n * sumA + (float) (n - numberOfCandidates) / n * sumB;
 	std::cout << "\n\nKDEapprox: " << kdeAprox;
 
 	//actual
@@ -187,6 +195,8 @@ int main(int argc, char *argv[]) {
 	sumKDE /= n;
 
 	std::cout << "\tKDE: " << sumKDE;
+
+	 */
 
 
 
