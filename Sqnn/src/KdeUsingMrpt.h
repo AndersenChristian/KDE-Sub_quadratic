@@ -16,7 +16,7 @@ public:
 	//Should only handle allocation. Make method for isValid after.
 	//TODO: include and save lambda for distance
 	KdeUsingMrpt(Eigen::MatrixXf &data, int n, int d, int samples, float sigma)
-			: data(data), n(n), d(d), samples(samples), sigma(sigma), mrpt(this->data), ann_list(KNN) {
+			: data(data), n(n), d(d), samples(samples), sigma(sigma), mrpt(data) {
 
 		//Needed for the ANN to be setup.
 		mrpt.grow_autotune(TARGET_RECALL, KNN);
@@ -35,7 +35,11 @@ public:
 		return sum / (float) n;
 	}
 
+
 	float query(const Eigen::VectorXf q) {
+		std::vector<int> ann_list(n);
+		std::vector<float> distances(n);
+
 		//Get candidates
 		int numberOfCandidates;
 		mrpt.query(q, ann_list.data(), nullptr, &numberOfCandidates);
@@ -44,12 +48,13 @@ public:
 		float sum_a = 0;
 		//TODO. should q be a part of the omp? and if so, shared to private (overhead vs cache miss)
 #pragma omp parallel for reduction(+: sum_a)
-		for (int i = 0; i < numberOfCandidates; i++) {
+		for (int i = 0; i < numberOfCandidates; ++i) {
 			int index = ann_list[i];
 			//TODO: move distance computation into the lambda
 			sum_a += std::exp(-(data.col(index) - q).squaredNorm() / sigma);
 		}
 		sum_a /= (float) numberOfCandidates;
+
 
 		//compute B
 		float sum_b;
@@ -58,23 +63,24 @@ public:
 		for (int i = 0; i < samples; ++i) {
 			do {
 				index = randomIndex(0, n);
-			} while (std::find(ann_list.begin(), ann_list.begin() + numberOfCandidates, index) < ann_list.end());
-			sum_b += std::exp(-(data.col(ann_list[i]) - q).squaredNorm() / sigma);
+			} while (std::find(ann_list.begin(), ann_list.begin() + numberOfCandidates, index) !=
+							 ann_list.begin() + numberOfCandidates);
+			sum_b += std::exp(-(data.col(index) - q).squaredNorm() / sigma);
 		}
 		sum_b /= (float) samples;
 
 		//compute total approx
 		return (float) numberOfCandidates / (float) n * sum_a + (float) (n - numberOfCandidates) / (float) n * sum_b;
+
 	}
 
 
 private:
-	const int KNN = 100;
+	const int KNN = 1000;
 	const double TARGET_RECALL = 0.5;
 
 	Mrpt mrpt;
 	Eigen::MatrixXf data;
-	std::vector<int> ann_list;
 	std::default_random_engine generator;
 	const int n, d, samples;
 	const float sigma;

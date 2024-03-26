@@ -120,6 +120,14 @@ int main(int argc, char *argv[]) {
 
 	KdeUsingMrpt kde(X, n, d, m, sigma);
 
+	std::cout << "a";
+
+	float app = 0, exact = 0;
+	app = kde.query(q);
+	exact = kde.query_exact(q);
+
+	std::cout << "approx: " << app << "\texact: " << exact << std::endl;
+
 
 
 	/*
@@ -174,8 +182,8 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < m; ++i) {
 		do {
 			index = random() % n; //TODO: change to C11 random
-		} while (std::find(sampleIndexes.begin(), sampleIndexes.end(), index) < sampleIndexes.end());
-		sum += exp(-(X.col(sampleIndexes[i]) - q).squaredNorm() / sigma);
+		} while (std::find(sampleIndexes.begin(), sampleIndexes.end(), index) != sampleIndexes.end());
+		sum += exp(-(X.col(sampleIndexes[index]) - q).squaredNorm() / sigma);
 	}
 
 	std::cout << "A: " << sumA << "\tB: " << sum;
