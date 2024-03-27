@@ -18,8 +18,9 @@ public:
 	//TODO implementation
 	//Should only handle allocation. Make method for isValid after.
 	//TODO: include and save lambda for distance
-	KdeUsingMrpt(Eigen::MatrixXf &data, int n, int d, int k, int samples, int trees, float sigma)
-			: data(data), n(n), d(d), samples(samples), KNN(k), sigma(sigma), mrpt(data) {
+	KdeUsingMrpt(Eigen::MatrixXf &data, int n, int d, int k, int samples, int trees, float sigma,
+							 kernel::kernelLambda<float> kernel)
+			: data(data), n(n), d(d), samples(samples), KNN(k), sigma(sigma), mrpt(data), kernel(std::move(kernel)) {
 
 		//Needed for the ANN to be setup.
 		mrpt.grow_autotune(TARGET_RECALL, KNN, trees);
@@ -33,7 +34,7 @@ public:
 		float sum;
 #pragma omp parallel for reduction(+:sum)
 		for (int i = 0; i < n; ++i) {
-			sum += std::exp(-(data.col(i) - q).squaredNorm() / sigma);
+			sum += kernel(data.col(i), q, sigma);
 		}
 		return sum / (float) n;
 	}
@@ -53,8 +54,7 @@ public:
 #pragma omp parallel for reduction(+: sum_a)
 		for (int i = 0; i < numberOfCandidates; ++i) {
 			int index = ann_list[i];
-			//TODO: move distance computation into the lambda
-			sum_a += std::exp(-(data.col(index) - q).squaredNorm() / sigma);
+			sum_a += kernel(data.col(index), q, sigma);
 		}
 		sum_a /= (float) numberOfCandidates;
 
@@ -68,7 +68,7 @@ public:
 				index = randomIndex(0, n);
 			} while (std::find(ann_list.begin(), ann_list.begin() + numberOfCandidates, index) !=
 							 ann_list.begin() + numberOfCandidates);
-			sum_b += std::exp(-(data.col(index) - q).squaredNorm() / sigma);
+			sum_b += kernel(data.col(index), q, sigma);
 		}
 		sum_b /= (float) samples;
 
@@ -81,8 +81,9 @@ public:
 private:
 	const int KNN;
 	const double TARGET_RECALL = 0.5;
+	const Eigen::MatrixXf data;
+	const kernel::kernelLambda<float> kernel;
 	Mrpt mrpt;
-	Eigen::MatrixXf data;
 	std::default_random_engine generator;
 
 	const int n, d, samples;
