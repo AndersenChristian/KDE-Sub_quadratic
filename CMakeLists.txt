@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Set compiler flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -Ofast -march=native -fopenmp")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -Ofast -march=native")
 
 include_directories(Sqnn)
 include_directories(Sqnn/src)
@@ -27,8 +28,7 @@ find_package(Eigen3 REQUIRED)
 set(MAIN_SOURCES
         Sqnn/src/main.cpp
         Sqnn/src/main.h
-        Sqnn/src/ANN/ANN.h
-        Sqnn/test/TFucntionality.h
+        Sqnn/src/KdeUsingMrpt.h
 )
 
 file(GLOB API_SOURCES Sqnn/src/API/*.h)
