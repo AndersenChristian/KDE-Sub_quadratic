@@ -6,10 +6,8 @@
 #define KDE_SUB_QUADRATIC_KDEUSINGMRPT_H
 
 #include <ANN/Mrpt.h>
-#include <cmath>
 #include <utility>
 #include <vector>
-#include <chrono>
 
 #include "kernelFunction.h"
 
@@ -30,7 +28,7 @@ public:
 		generator.seed(rd());
 	}
 
-	float query_exact(const Eigen::VectorXf q) {
+	float query_exact(const Eigen::VectorXf &q) {
 		float sum;
 #pragma omp parallel for reduction(+:sum)
 		for (int i = 0; i < n; ++i) {
@@ -40,7 +38,7 @@ public:
 	}
 
 
-	float query(const Eigen::VectorXf q) {
+	float query(const Eigen::VectorXf &q) {
 		std::vector<int> ann_list(n);
 		std::vector<float> distances(n);
 
@@ -50,7 +48,6 @@ public:
 
 		//compute NN contribution
 		float sum_a = 0;
-		//TODO. should q be a part of the omp? and if so, shared to private (overhead vs cache miss)
 #pragma omp parallel for reduction(+: sum_a)
 		for (int i = 0; i < numberOfCandidates; ++i) {
 			int index = ann_list[i];
