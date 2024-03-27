@@ -34,8 +34,8 @@ int main(int argc, char *argv[]) {
 	//basic variable
 	//TODO get as arguments or from file.
 	//TODO bigger n for testing, as the amount of sample required is to high for accurate result.
-	const int n = 10000, d = 2000, k = 100, m = 2000, trees = 10;
-	const float sigma = 5;
+	const int n = 10000, d = 200, k = 1000, m = 2000, trees = 10;
+	const float sigma = 2000;
 	kernel::type kernelType = kernel::type::Gaussian;
 	kernel::kernelLambda<float> kernel = kernel::kernel_function<float>(kernelType);
 
@@ -72,11 +72,11 @@ int main(int argc, char *argv[]) {
 	printf("precision: %e\n\n", std::abs(1 - (app / exact)));
 
 	printf("Times\n");
-	printf("nearest neighbor construction time: %e seconds\n", cEnd - cStart);
-	printf("exact compute time: %e seconds\n", between - start);
-	printf("approx compute time: %e seconds\n", end - between);
-	printf("gained speedup: %e seconds\n", (between - start) - (end - between));
-	printf("speedup in decimal: %f\n", (end - between) / (between - start));
+	printf("nearest neighbor construction time: %.3e seconds\n", cEnd - cStart);
+	printf("exact compute time: %.3e seconds\n", between - start);
+	printf("approx compute time: %.3e seconds\n", end - between);
+	printf("gained speedup: %.3e seconds\n", (between - start) - (end - between));
+	printf("time taken for approx vs actual in percent decimal: %.3f\n", (end - between) / (between - start));
 
 
 	return 0;

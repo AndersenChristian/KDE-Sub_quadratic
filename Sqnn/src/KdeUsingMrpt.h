@@ -77,7 +77,7 @@ public:
 
 private:
 	const int KNN;
-	const double TARGET_RECALL = 0.5;
+	const double TARGET_RECALL = 0.9;
 	const Eigen::MatrixXf data;
 	const kernel::kernelLambda<float> kernel;
 	Mrpt mrpt;
