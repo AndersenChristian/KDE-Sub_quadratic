@@ -6,10 +6,7 @@
 
 #include <iostream>
 #include <vector>
-#include <algorithm>
-#include <chrono>
 #include <random>
-#include <unordered_set>
 #include <omp.h>
 
 #include "KdeUsingMrpt.h"
@@ -49,7 +46,6 @@ int main(int argc, char *argv[]) {
 	double cStart = omp_get_wtime();
 	KdeUsingMrpt kde(X, n, d, m, k, trees, sigma, kernel);
 	double cEnd = omp_get_wtime();
-	std::cout << "init finished\nIt took: " << cEnd - cStart << "\n";
 
 
 	float app, exact;
@@ -59,8 +55,29 @@ int main(int argc, char *argv[]) {
 	exact = kde.query_exact(q);
 	double end = omp_get_wtime();
 
-	std::cout << "\napprox: " << app << "\texact: " << exact;
-	std::cout << "\nT-app: " << between - start << "\tT-exact: " << end - between << std::endl;
+	//std::cout << "\napprox: " << app << "\texact: " << exact;
+	//std::cout << "\nT-app: " << between - start << "\tT-exact: " << end - between << std::endl;
+
+	//print section
+	printf("program execution completed\n");
+	printf("meta data:\n");
+	printf("n: %d\td: %d\n", n, d);
+	printf("(k)-nn: %d\ttrees: %d\n", k, trees);
+	printf("samples: %d\t sigma: %f\n\n", m, sigma);
+
+	printf("data analysis:\n");
+	printf("expected KDE-value: %e\n", exact);
+	printf("approx value: %e\n", app);
+	printf("actual difference: %e\n", std::abs(app - exact));
+	printf("precision: %e\n\n", std::abs(1 - (app / exact)));
+
+	printf("Times\n");
+	printf("nearest neighbor construction time: %e seconds\n", cEnd - cStart);
+	printf("exact compute time: %e seconds\n", between - start);
+	printf("approx compute time: %e seconds\n", end - between);
+	printf("gained speedup: %e seconds\n", (between - start) - (end - between));
+	printf("speedup in decimal: %f\n", (end - between) / (between - start));
+
 
 	return 0;
 }
