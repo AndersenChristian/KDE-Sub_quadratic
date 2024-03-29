@@ -8,6 +8,10 @@
 #include <vector>
 #include <random>
 #include <omp.h>
+#include <filesystem>
+#include <fstream>
+#include <string>
+
 
 #include "KdeUsingMrpt.h"
 
@@ -30,18 +34,75 @@ void generateRandomMatrix(Eigen::MatrixXf &X, Eigen::MatrixXf &q, int d, int n) 
 	}
 }
 
+std::vector<std::string> splitString(const std::string& str) {
+	std::istringstream iss(str);
+	std::vector<std::string> tokens;
+	std::string token;
+	while (iss >> token) {
+		if (!token.empty()) {
+			tokens.push_back(token);
+		}
+	}
+	return tokens;
+}
+
 int main(int argc, char *argv[]) {
-	//basic variable
-	//TODO get as arguments or from file.
-	//TODO bigger n for testing, as the amount of sample required is to high for accurate result.
-	const int n = 10000, d = 200, k = 1000, m = 2000, trees = 10;
+	int n, d;
+	const int k = 1000, m = 2000, trees = 10;
 	const float sigma = 2000;
 	kernel::type kernelType = kernel::type::Gaussian;
 	kernel::kernelLambda<float> kernel = kernel::kernel_function<float>(kernelType);
 
-	Eigen::MatrixXf X = Eigen::MatrixXf(d, n);
-	Eigen::MatrixXf q = Eigen::VectorXf(d);
-	generateRandomMatrix(X, q, d, n);
+	Eigen::MatrixXf X;
+	Eigen::MatrixXf q;
+
+	printf("%d\n\n", argc);
+
+	//read data vs autogen
+	if (argc > 1) {
+		std::string filename = ("../Sqnn/data/" + std::string(argv[1]));
+		// Open the file
+		std::ifstream file(filename);
+
+		// Check if the file opened successfully
+		if (file.is_open()) {
+			//TODO: loop and safe.
+			//TODO: maybe parallel? not sure yet, or if that could cause mem issue
+			std::string line;
+			std::string token;
+			std::stringstream ss(line);
+
+			std::getline(file, line);
+			std::vector<string> data = splitString(line);
+			n = std::stoi(data[0]);
+			d = std::stoi(data[1]);
+
+			printf("%d\t%d", n, d);
+
+			X = Eigen::MatrixXf(d,n);
+
+			for(int i = 0; i < n; ++i){
+				std::getline(file,line);
+				data = splitString(line);
+				for(int j = 0; j < data.size(); ++j)
+					X(j,i) = std::stof(data[j]);
+			}
+
+		} else {
+			printf("couldn't find file.\nshutdown...");
+			return -1;
+		}
+		file.close();
+
+
+		//return 0;
+	} else {
+		n = 10000;
+		d = 1000;
+		X = Eigen::MatrixXf(d, n);
+		q = Eigen::VectorXf(d);
+		generateRandomMatrix(X, q, d, n);
+	}
 
 	double cStart = omp_get_wtime();
 	KdeUsingMrpt kde(X, n, d, m, k, trees, sigma, kernel);
