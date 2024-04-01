@@ -48,7 +48,7 @@ namespace kernel {
      * @param sigma bandwidth, must be greater then 0
      */
     template<Arithmetic T>
-    using kernelLambda = std::function<T(Eigen::VectorXf x, Eigen::VectorXf y, double signma)>;
+    using kernelLambda = std::function<T(const Eigen::VectorXf &x, const Eigen::VectorXf &y, double sigma)>;
 
     /**
      * Given an ENUM of kernelType returns the corresponding lambda functions
@@ -58,16 +58,17 @@ namespace kernel {
      * @return kernelLambda of type T
      */
     template<Arithmetic T>
+    //TODO: add sigma as apart of the construction, as that could make it const.
     inline kernelLambda<T> kernel_function(kernel::type kernel) {
         switch (kernel) {
             //Gaussian kernel = e^(-||x-y||^2) where ||x-y||^2 is second norm
             //Second norm = sqrt(|x0-y0|^2 + ... + |xd-yd|^2)
 					case kernel::type::Gaussian:
-                return kernelLambda<T>([](Eigen::VectorXf x, Eigen::VectorXf y, double sigma) -> T {
+                return kernelLambda<T>([](const Eigen::VectorXf &x, const Eigen::VectorXf &y, double sigma) -> T {
                     T sum = 0;
                     for (int i = 0; i < x.size(); i++)
                         sum += mat::pow(mat::abs(x[i] - y[i]), 2);
-                    sum = mat::sqrt(sum/(2* pow(sigma,2)));
+                    sum = mat::sqrt(sum/(2* (sigma * sigma)));
                     return mat::exp(-sum);
                 });
 					case kernel::type::Exponential:
@@ -77,7 +78,7 @@ namespace kernel {
         }
 
         //default (unreachable only there to avoid compiler warning)
-        return [](Eigen::VectorXf x, Eigen::VectorXf y, double) -> T { return T{}; };
+        return [](const Eigen::VectorXf &x, const Eigen::VectorXf &y, double) -> T { return T{}; };
     }
 }
 
