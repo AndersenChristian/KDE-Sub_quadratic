@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <type_traits>
 
 
 #include "KdeUsingMrpt.h"
@@ -48,13 +49,15 @@ std::vector<std::string> splitString(const std::string& str) {
 
 int main(int argc, char *argv[]) {
 	int n, d;
-	const int k = 1000, m = 2000, trees = 10;
+	const int k = 170, m = 500, trees = 10;
 	const float sigma = 2000;
 	kernel::type kernelType = kernel::type::Gaussian;
 	kernel::kernelLambda<float> kernel = kernel::kernel_function<float>(kernelType);
 
 	Eigen::MatrixXf X;
 	Eigen::MatrixXf q;
+
+	omp_set_num_threads(1);
 
 	printf("%d\n\n", argc);
 
@@ -77,23 +80,21 @@ int main(int argc, char *argv[]) {
 			n = std::stoi(data[0]);
 			d = std::stoi(data[1]);
 
-			printf("%d\t%d", n, d);
-
 			X = Eigen::MatrixXf(d,n);
+			q = Eigen::VectorXf(d);
 
 			for(int i = 0; i < n; ++i){
 				std::getline(file,line);
 				data = splitString(line);
-				for(int j = 0; j < data.size(); ++j)
+				for(int j = 0; j < d; ++j)
 					X(j,i) = std::stof(data[j]);
 			}
-
+			for(int i = 0; i < d; ++i) q(i) = 0;
 		} else {
 			printf("couldn't find file.\nshutdown...");
 			return -1;
 		}
 		file.close();
-
 
 		//return 0;
 	} else {
@@ -131,13 +132,15 @@ int main(int argc, char *argv[]) {
 	printf("approx value: %e\n", app);
 	printf("actual difference: %e\n", std::abs(app - exact));
 	printf("precision: %e\n\n", std::abs(1 - (app / exact)));
+	
+	const double appTime = between - start, exaTime = end - between;
 
 	printf("Times\n");
 	printf("nearest neighbor construction time: %.3e seconds\n", cEnd - cStart);
-	printf("exact compute time: %.3e seconds\n", between - start);
-	printf("approx compute time: %.3e seconds\n", end - between);
-	printf("gained speedup: %.3e seconds\n", (between - start) - (end - between));
-	printf("time taken for approx vs actual in percent decimal: %.3f\n", (end - between) / (between - start));
+	printf("exact compute time: %.3e seconds\n", exaTime);
+	printf("approx compute time: %.3e seconds\n", appTime);
+	printf("gained speedup: %.3e seconds\n", (exaTime) - appTime);
+	printf("speedup: %.3f\n", exaTime / appTime);
 
 
 	return 0;
