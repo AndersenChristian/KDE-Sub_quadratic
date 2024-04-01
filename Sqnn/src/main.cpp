@@ -4,15 +4,12 @@
 
 #include "kernelFunction.h"
 
-#include <iostream>
 #include <vector>
 #include <random>
 #include <omp.h>
 #include <filesystem>
 #include <fstream>
 #include <string>
-#include <type_traits>
-
 
 #include "KdeUsingMrpt.h"
 
@@ -50,16 +47,15 @@ std::vector<std::string> splitString(const std::string& str) {
 int main(int argc, char *argv[]) {
 	int n, d;
 	const int k = 170, m = 500, trees = 10;
-	const float sigma = 2000;
+	const double sigma = 2000;
 	kernel::type kernelType = kernel::type::Gaussian;
 	kernel::kernelLambda<float> kernel = kernel::kernel_function<float>(kernelType);
 
 	Eigen::MatrixXf X;
 	Eigen::MatrixXf q;
 
+	//limit amounts of cores
 	omp_set_num_threads(1);
-
-	printf("%d\n\n", argc);
 
 	//read data vs autogen
 	if (argc > 1) {
@@ -72,7 +68,6 @@ int main(int argc, char *argv[]) {
 			//TODO: loop and safe.
 			//TODO: maybe parallel? not sure yet, or if that could cause mem issue
 			std::string line;
-			std::string token;
 			std::stringstream ss(line);
 
 			std::getline(file, line);
