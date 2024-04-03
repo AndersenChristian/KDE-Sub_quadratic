@@ -32,6 +32,7 @@ set(MAIN_SOURCES
         Sqnn/src/main.cpp
         Sqnn/src/main.h
         Sqnn/src/KdeUsingMrpt.h
+        Sqnn/src/supportFunctions.h
 )
 
 file(GLOB API_SOURCES Sqnn/src/API/*.h)
