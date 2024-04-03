@@ -20,12 +20,16 @@ public:
 							 kernel::kernelLambda<float> kernel)
 			: data(data), n(n), d(d), samples(samples), KNN(k), sigma(sigma), mrpt(data), kernel(std::move(kernel)) {
 
+		//random number-generator setup
+		auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+		generator.seed(seed);
+
+		//if no k is needed (low accuracy)
+		//TODO: make sekund constructor since mrpt is still setup.
+		if(k == 0) return;
+
 		//Needed for the ANN to be setup.
 		mrpt.grow_autotune(TARGET_RECALL, KNN, trees);
-
-		//random number-generator setup
-		std::random_device rd;
-		generator.seed(rd());
 	}
 
 	float query_exact(const Eigen::VectorXf &q) {
@@ -39,8 +43,8 @@ public:
 
 
 	float query(const Eigen::VectorXf &q) {
+		if(KNN == 0) return randomSampleAndSum(q);
 		std::vector<int> ann_list(n);
-		std::vector<float> distances(n);
 
 		//Get candidates
 		int numberOfCandidates;
@@ -81,7 +85,7 @@ private:
 	const Eigen::MatrixXf data;
 	const kernel::kernelLambda<float> kernel;
 	Mrpt mrpt;
-	std::default_random_engine generator;
+	std::mt19937 generator;
 
 	const int n, d, samples;
 	const float sigma;
@@ -89,6 +93,14 @@ private:
 	inline int randomIndex(const int min, const int max) {
 		std::uniform_int_distribution<int> distribution(min, max);
 		return distribution(this->generator);
+	}
+
+	inline float randomSampleAndSum(const Eigen::VectorXf &q){
+		float sum = 0;
+		for(int i = 0; i < samples; ++i){
+			sum += kernel(data.col(randomIndex(0,n)),q,sigma);
+		}
+		return sum / (float) samples;
 	}
 };
 

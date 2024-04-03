@@ -46,20 +46,22 @@ std::vector<std::string> splitString(const std::string& str) {
 
 int main(int argc, char *argv[]) {
 	int n, d;
-	const int k = 170, m = 500, trees = 10;
-	const double sigma = 2000;
+	int k = 170, m = 500, trees = 10;
+	double sigma = 2000;
 	kernel::type kernelType = kernel::type::Gaussian;
 	kernel::kernelLambda<float> kernel = kernel::kernel_function<float>(kernelType);
 
 	Eigen::MatrixXf X;
 	Eigen::MatrixXf q;
 
-	//limit amounts of cores
+	//limit amounts of threads and cores for omp
 	omp_set_num_threads(1);
 
 	//read data vs autogen
-	if (argc > 1) {
-		std::string filename = ("../Sqnn/data/" + std::string(argv[1]));
+	if (argc > 3) {
+		k = std::stoi(argv[1]);
+		m = std::stoi(argv[2]);
+		std::string filename = ("../Sqnn/data/" + std::string(argv[3]));
 		// Open the file
 		std::ifstream file(filename);
 
@@ -101,7 +103,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	double cStart = omp_get_wtime();
-	KdeUsingMrpt kde(X, n, d, m, k, trees, sigma, kernel);
+	KdeUsingMrpt kde(X, n, d, k, m, trees, sigma, kernel);
 	double cEnd = omp_get_wtime();
 
 
@@ -126,7 +128,7 @@ int main(int argc, char *argv[]) {
 	printf("expected KDE-value: %e\n", exact);
 	printf("approx value: %e\n", app);
 	printf("actual difference: %e\n", std::abs(app - exact));
-	printf("precision: %e\n\n", std::abs(1 - (app / exact)));
+	printf("precision: %e\n\n", std::abs((exact - app) / exact));
 	
 	const double appTime = between - start, exaTime = end - between;
 
