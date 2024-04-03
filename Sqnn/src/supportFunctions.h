@@ -5,36 +5,52 @@
 #ifndef KDE_SUB_QUADRATIC_SUPPORTFUNCTIONS_H
 #define KDE_SUB_QUADRATIC_SUPPORTFUNCTIONS_H
 
-//#include <Eigen/Core>
 #include "kernelFunction.h"
 
-inline float computeTao(const Eigen::MatrixXf &x, const double sigma,
-												const kernel::kernelLambda<float> &kernel = kernel::kernel_function<float>(
-														kernel::type::Gaussian)) {
-	float tao = 1;
-	for (int i = 0; i < x.cols(); ++i) {
-		for (int j = i; j < x.cols(); ++j) {
-			tao = std::min(kernel(x.row(i), x.row(j), sigma), tao);
+namespace support {
+
+	inline float computeTao(const Eigen::MatrixXf &x, const double sigma,
+													const kernel::kernelLambda<float> &kernel = kernel::kernel_function<float>(
+															kernel::type::Gaussian)) {
+		assert(x.rows() > 0 && x.cols() > 0);
+
+		float tao = 1, taosum = 1;
+		printf("cols:%ld\n", x.cols());
+		printf("rows:%ld\n", x.rows());
+
+#pragma omp parallel private(tao)
+		{
+#pragma omp for
+			for (int i = 0; i < x.cols(); ++i) {
+				if (i % 1000 == 0) printf("process: %d\n", i);
+				for (int j = i + 1; j < x.cols(); ++j) {
+					tao = std::min(kernel(x.col(i), x.col(j), sigma), tao);
+				}
+			}
+#pragma omp critical
+			taosum = std::min(tao, taosum);
+		}
+		return taosum;
+	}
+
+	//setting private
+	namespace privates {
+		inline Eigen::VectorXf sigmas(const Eigen::MatrixXf &x) {
+			Eigen::VectorXf means = x.rowwise().mean();
+			Eigen::MatrixXf squared_diff = (x.array().colwise() - means.array()).pow(2);
+			Eigen::VectorXf variances = squared_diff.rowwise().mean();
+			Eigen::VectorXf sd = variances.array().sqrt();
+			return sd;
 		}
 	}
-	return tao;
-}
 
-inline Eigen::VectorXf sigmas(const Eigen::MatrixXf &x){
-	Eigen::VectorXf means = x.colwise().mean();
-	Eigen::MatrixXf squared_diff = (x.array().colwise() - means.array().pow(2));
-	Eigen::VectorXf variances = squared_diff.rowwise().mean();
-	Eigen::VectorXf sd = variances.array().sqrt();
-	return sd;
-}
+	inline double sigmaExtreme(const Eigen::MatrixXf &x) {
+		return privates::sigmas(x).maxCoeff();
+	}
 
-inline double sigmaExtreme(const Eigen::MatrixXf &x){
-	return sigmas(x).maxCoeff();
+	inline double sigmaAverage(const Eigen::MatrixXf &x) {
+		return privates::sigmas(x).mean();
+	}
 }
-
-inline double sigmaAverage(const Eigen::MatrixXf &x){
-	return sigmas(x).mean();
-}
-
 
 #endif //KDE_SUB_QUADRATIC_SUPPORTFUNCTIONS_H
