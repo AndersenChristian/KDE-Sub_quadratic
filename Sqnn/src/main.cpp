@@ -79,9 +79,9 @@ bool loadData(const string filename, int &n, int &d, Eigen::MatrixXf &X, Eigen::
 int main(int argc, char *argv[]) {
 	int n, d;
 	int k = 170, m = 500, trees = 10;
-	double sigma = 2000;
+	double sigma = 5;
 	kernel::type kernelType = kernel::type::Gaussian;
-	kernel::kernelLambda<float> kernel = kernel::kernel_function<float>(kernelType);
+	kernel::kernelLambda<float> kernel = kernel::kernel_function<float>(kernelType, sigma);
 
 	Eigen::MatrixXf X;
 	Eigen::VectorXf q;
@@ -120,6 +120,7 @@ int main(int argc, char *argv[]) {
 	double cStart = omp_get_wtime();
 	KdeUsingMrpt kde(X, n, d, k, m, trees, sigma, kernel);
 	double cEnd = omp_get_wtime();
+	std::cout << "init finished\nIt took: " << cEnd - cStart << "\n";
 
 
 	float app, exact;
