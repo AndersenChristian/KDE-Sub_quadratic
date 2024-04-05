@@ -15,22 +15,21 @@
 
 class KdeUsingMrpt {
 public:
-	//TODO implementation
-	//Should only handle allocation. Make method for isValid after.
-	//TODO: include and save lambda for distance
-	KdeUsingMrpt(Eigen::MatrixXf &data, int n, int d, int k, int samples, int trees, float sigma,
+	//TODO Should only handle allocation. Make method for isValid after.
+	KdeUsingMrpt(Eigen::MatrixXf &data, int n, int d, int k, int samples, int trees,
 							 kernel::kernelLambda<float> kernel)
-			: data(data), n(n), d(d), samples(samples), KNN(k), sigma(sigma), mrpt(data), kernel(std::move(kernel)) {
+			: data(data), n(n), d(d), samples(samples), KNN(k), mrpt(data), kernel(std::move(kernel)) {
 
 		//Needed for the ANN to be setup.
 		mrpt.grow_autotune(TARGET_RECALL, KNN, trees);
 
 		//random number-generator setup
+		//TODO: change to better random number generator
 		std::random_device rd;
 		generator.seed(rd());
 	}
 
-	float query_exact(const Eigen::VectorXf q) {
+	float query_exact(const Eigen::VectorXf &q) {
 		float sum;
 #pragma omp parallel for reduction(+:sum)
 		for (int i = 0; i < n; ++i) {
@@ -40,7 +39,7 @@ public:
 	}
 
 
-	float query(const Eigen::VectorXf q) {
+	float query(const Eigen::VectorXf &q) {
 		std::vector<int> ann_list(n);
 		std::vector<float> distances(n);
 
@@ -87,7 +86,6 @@ private:
 	std::default_random_engine generator;
 
 	const int n, d, samples;
-	const float sigma;
 
 	inline int randomIndex(const int min, const int max) {
 		std::uniform_int_distribution<int> distribution(min, max);
