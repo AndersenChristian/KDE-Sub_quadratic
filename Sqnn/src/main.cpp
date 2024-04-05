@@ -38,9 +38,9 @@ int main(int argc, char *argv[]) {
 	//TODO get as arguments or from file.
 	//TODO bigger n for testing, as the amount of sample required is to high for accurate result.
 	const int n = 10000, d = 2000, k = 100, m = 2000, trees = 10;
-	const float sigma = 5;
+	const double sigma = 5;
 	kernel::type kernelType = kernel::type::Gaussian;
-	kernel::kernelLambda<float> kernel = kernel::kernel_function<float>(kernelType);
+	kernel::kernelLambda<float> kernel = kernel::kernel_function<float>(kernelType, sigma);
 
 	Eigen::MatrixXf X = Eigen::MatrixXf(d, n);
 	Eigen::MatrixXf q = Eigen::VectorXf(d);

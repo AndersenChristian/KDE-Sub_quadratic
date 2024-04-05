@@ -34,7 +34,7 @@ public:
 		float sum;
 #pragma omp parallel for reduction(+:sum)
 		for (int i = 0; i < n; ++i) {
-			sum += kernel(data.col(i), q, sigma);
+			sum += kernel(data.col(i), q);
 		}
 		return sum / (float) n;
 	}
@@ -54,7 +54,7 @@ public:
 #pragma omp parallel for reduction(+: sum_a)
 		for (int i = 0; i < numberOfCandidates; ++i) {
 			int index = ann_list[i];
-			sum_a += kernel(data.col(index), q, sigma);
+			sum_a += kernel(data.col(index), q);
 		}
 		sum_a /= (float) numberOfCandidates;
 
@@ -68,7 +68,7 @@ public:
 				index = randomIndex(0, n);
 			} while (std::find(ann_list.begin(), ann_list.begin() + numberOfCandidates, index) !=
 							 ann_list.begin() + numberOfCandidates);
-			sum_b += kernel(data.col(index), q, sigma);
+			sum_b += kernel(data.col(index), q);
 		}
 		sum_b /= (float) samples;
 
