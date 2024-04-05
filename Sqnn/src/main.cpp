@@ -6,17 +6,10 @@
 
 #include <iostream>
 #include <vector>
-#include <algorithm>
-#include <chrono>
 #include <random>
-#include <unordered_set>
 #include <omp.h>
 
 #include "KdeUsingMrpt.h"
-
-using std::function;
-using std::vector;
-using std::string;
 
 void generateRandomMatrix(Eigen::MatrixXf &X, Eigen::MatrixXf &q, int d, int n) {
 	std::uniform_real_distribution<float> distribution(-1, 1);
