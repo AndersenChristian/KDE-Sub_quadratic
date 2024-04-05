@@ -10,8 +10,7 @@
 namespace support {
 
 	inline float computeTao(const Eigen::MatrixXf &x, const double sigma,
-													const kernel::kernelLambda<float> &kernel = kernel::kernel_function<float>(
-															kernel::type::Gaussian)) {
+													const kernel::kernelLambda<float> &kernel) {
 		assert(x.rows() > 0 && x.cols() > 0);
 
 		float tao = 1, taosum = 1;
@@ -24,7 +23,7 @@ namespace support {
 			for (int i = 0; i < x.cols(); ++i) {
 				if (i % 1000 == 0) printf("process: %d\n", i);
 				for (int j = i + 1; j < x.cols(); ++j) {
-					tao = std::min(kernel(x.col(i), x.col(j), sigma), tao);
+					tao = std::min(kernel(x.col(i), x.col(j)), tao);
 				}
 			}
 #pragma omp critical

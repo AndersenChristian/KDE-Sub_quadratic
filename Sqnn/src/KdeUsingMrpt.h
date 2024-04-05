@@ -95,7 +95,7 @@ private:
 	inline float randomSampleAndSum(const Eigen::VectorXf &q){
 		float sum = 0;
 		for(int i = 0; i < samples; ++i){
-			sum += kernel(data.col(randomIndex(0,n)),q,sigma);
+			sum += kernel(data.col(randomIndex(0,n)),q);
 		}
 		return sum / (float) samples;
 	}

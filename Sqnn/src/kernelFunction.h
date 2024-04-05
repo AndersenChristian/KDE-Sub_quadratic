@@ -77,7 +77,7 @@ namespace kernel {
 		}
 
 		//default (unreachable only there to avoid compiler warning)
-		return [](const Eigen::VectorXf &x, const Eigen::VectorXf &y, double) -> T { return T{}; };
+		return [](const Eigen::VectorXf &x, const Eigen::VectorXf &y) -> T { return T{}; };
 	}
 }
 
