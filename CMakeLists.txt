@@ -18,6 +18,9 @@ include_directories(Sqnn/src)
 # Find Eigen
 find_package(Eigen3 REQUIRED)
 
+# Exclude ANN/Mrpt.h from compilation
+set_source_files_properties(path/to/ANN/Mrpt.h PROPERTIES HEADER_FILE_ONLY TRUE)
+
 # Include directories
 #include_directories(cpp lib)
 
@@ -29,6 +32,7 @@ set(MAIN_SOURCES
         Sqnn/src/main.cpp
         Sqnn/src/main.h
         Sqnn/src/KdeUsingMrpt.h
+        Sqnn/src/supportFunctions.h
 )
 
 file(GLOB API_SOURCES Sqnn/src/API/*.h)

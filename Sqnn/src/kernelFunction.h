@@ -47,7 +47,7 @@ namespace kernel {
 	 * @param x, y both need to be same size, else it may lead to unwanted behavior.
 	 */
 	template<Arithmetic T>
-	using kernelLambda = std::function<T(Eigen::VectorXf x, Eigen::VectorXf y)>;
+	using kernelLambda = std::function<T(const Eigen::VectorXf &x, const Eigen::VectorXf &y)>;
 
 	/**
 	 * Given an ENUM of kernelType returns the corresponding lambda functions
@@ -63,7 +63,7 @@ namespace kernel {
 			//Gaussian kernel = e^(-||x-y||^2) where ||x-y||^2 is second norm
 			//Second norm = sqrt(|x0-y0|^2 + ... + |xd-yd|^2)
 			case kernel::type::Gaussian:
-				return kernelLambda<T>([sigma_squared](Eigen::VectorXf x, Eigen::VectorXf y) -> T {
+				return kernelLambda<T>([sigma_squared](const Eigen::VectorXf &x, const Eigen::VectorXf &y) -> T {
 					T sum = 0;
 					for (int i = 0; i < x.size(); i++)
 						sum += mat::pow(mat::abs(x[i] - y[i]), 2);
@@ -77,7 +77,7 @@ namespace kernel {
 		}
 
 		//default (unreachable only there to avoid compiler warning)
-		return [](Eigen::VectorXf x, Eigen::VectorXf y) -> T { return T{}; };
+		return [](const Eigen::VectorXf &x, const Eigen::VectorXf &y) -> T { return T{}; };
 	}
 }
 

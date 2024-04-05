@@ -6,10 +6,8 @@
 #define KDE_SUB_QUADRATIC_KDEUSINGMRPT_H
 
 #include <ANN/Mrpt.h>
-#include <cmath>
 #include <utility>
 #include <vector>
-#include <chrono>
 
 #include "kernelFunction.h"
 
@@ -20,13 +18,16 @@ public:
 							 kernel::kernelLambda<float> kernel)
 			: data(data), n(n), d(d), samples(samples), KNN(k), mrpt(data), kernel(std::move(kernel)) {
 
+		//random number-generator setup
+		auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+		generator.seed(seed);
+
+		//if no k is needed (low accuracy)
+		//TODO: make sekund constructor since mrpt is still setup.
+		if(k == 0) return;
+
 		//Needed for the ANN to be setup.
 		mrpt.grow_autotune(TARGET_RECALL, KNN, trees);
-
-		//random number-generator setup
-		//TODO: change to better random number generator
-		std::random_device rd;
-		generator.seed(rd());
 	}
 
 	float query_exact(const Eigen::VectorXf &q) {
@@ -40,8 +41,8 @@ public:
 
 
 	float query(const Eigen::VectorXf &q) {
+		if(KNN == 0) return randomSampleAndSum(q);
 		std::vector<int> ann_list(n);
-		std::vector<float> distances(n);
 
 		//Get candidates
 		int numberOfCandidates;
@@ -49,7 +50,6 @@ public:
 
 		//compute NN contribution
 		float sum_a = 0;
-		//TODO. should q be a part of the omp? and if so, shared to private (overhead vs cache miss)
 #pragma omp parallel for reduction(+: sum_a)
 		for (int i = 0; i < numberOfCandidates; ++i) {
 			int index = ann_list[i];
@@ -79,17 +79,25 @@ public:
 
 private:
 	const int KNN;
-	const double TARGET_RECALL = 0.5;
+	const double TARGET_RECALL = 0.9;
 	const Eigen::MatrixXf data;
 	const kernel::kernelLambda<float> kernel;
 	Mrpt mrpt;
-	std::default_random_engine generator;
+	std::mt19937 generator;
 
 	const int n, d, samples;
 
 	inline int randomIndex(const int min, const int max) {
 		std::uniform_int_distribution<int> distribution(min, max);
 		return distribution(this->generator);
+	}
+
+	inline float randomSampleAndSum(const Eigen::VectorXf &q){
+		float sum = 0;
+		for(int i = 0; i < samples; ++i){
+			sum += kernel(data.col(randomIndex(0,n)),q);
+		}
+		return sum / (float) samples;
 	}
 };
 
