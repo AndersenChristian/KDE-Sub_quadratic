@@ -6,7 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Set compiler flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -Ofast -march=native -fopenmp")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -Ofast -march=native")
+#for profiling
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -Ofast -march=native -fopenmp -O0")
 
 include_directories(Sqnn)
 include_directories(Sqnn/src)
@@ -30,7 +31,6 @@ set_source_files_properties(path/to/ANN/Mrpt.h PROPERTIES HEADER_FILE_ONLY TRUE)
 # Define variables for source files
 set(MAIN_SOURCES
         Sqnn/src/main.cpp
-        Sqnn/src/main.h
         Sqnn/src/KdeUsingMrpt.h
         Sqnn/src/supportFunctions.h
 )
