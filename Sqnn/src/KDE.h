@@ -7,9 +7,17 @@
 
 #include <Eigen/Dense>
 
-class KDE{
+#include "kernelFunction.h"
+
+class KDE {
 public:
-	virtual void query_exact(Eigen::VectorXf &) = 0;
-	virtual void query(Eigen::VectorXf &) = 0;
+	virtual float query_exact(const Eigen::VectorXf &q) = 0;
+
+	virtual float query(const Eigen::VectorXf &q) = 0;
+
+	virtual const Eigen::MatrixXf *getDataRef() = 0;
+
+	virtual const kernel::kernelLambda<float>* getKernel() = 0;
 };
+
 #endif //KDE_SUB_QUADRATIC_KDE_H
