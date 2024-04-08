@@ -10,8 +10,9 @@
 #include <vector>
 
 #include "kernelFunction.h"
+#include "KDE.h"
 
-class KdeUsingMrpt {
+class KdeUsingMrpt : KDE{
 public:
 	//TODO Should only handle allocation. Make method for isValid after.
 	KdeUsingMrpt(Eigen::MatrixXf &data, int n, int d, int k, int samples, int trees,
