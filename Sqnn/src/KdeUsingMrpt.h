@@ -10,8 +10,9 @@
 #include <vector>
 
 #include "kernelFunction.h"
+#include "KDE.h"
 
-class KdeUsingMrpt {
+class KdeUsingMrpt : KDE {
 public:
 	//TODO Should only handle allocation. Make method for isValid after.
 	KdeUsingMrpt(Eigen::MatrixXf &data, int n, int d, int k, int samples, int trees,
@@ -24,13 +25,13 @@ public:
 
 		//if no k is needed (low accuracy)
 		//TODO: make sekund constructor since mrpt is still setup.
-		if(k == 0) return;
+		if (k == 0) return;
 
 		//Needed for the ANN to be setup.
 		mrpt.grow_autotune(TARGET_RECALL, KNN, trees);
 	}
 
-	float query_exact(const Eigen::VectorXf &q) {
+	float query_exact(const Eigen::VectorXf &q) override {
 		float sum;
 #pragma omp parallel for reduction(+:sum)
 		for (int i = 0; i < n; ++i) {
@@ -40,8 +41,8 @@ public:
 	}
 
 
-	float query(const Eigen::VectorXf &q) {
-		if(KNN == 0) return randomSampleAndSum(q);
+	float query(const Eigen::VectorXf &q) override {
+		if (KNN == 0) return randomSampleAndSum(q);
 		std::vector<int> ann_list(n);
 
 		//Get candidates
@@ -76,6 +77,14 @@ public:
 
 	}
 
+	const Eigen::MatrixXf *getDataRef() override {
+		return &data;
+	}
+
+	const kernel::kernelLambda<float>* getKernel(){
+		return &kernel;
+	}
+
 
 private:
 	const int KNN;
@@ -92,10 +101,10 @@ private:
 		return distribution(this->generator);
 	}
 
-	inline float randomSampleAndSum(const Eigen::VectorXf &q){
+	inline float randomSampleAndSum(const Eigen::VectorXf &q) {
 		float sum = 0;
-		for(int i = 0; i < samples; ++i){
-			sum += kernel(data.col(randomIndex(0,n)),q);
+		for (int i = 0; i < samples; ++i) {
+			sum += kernel(data.col(randomIndex(0, n)), q);
 		}
 		return sum / (float) samples;
 	}
