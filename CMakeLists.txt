@@ -35,6 +35,7 @@ set(MAIN_SOURCES
         Sqnn/src/supportFunctions.h
         Sqnn/src/sample.h
         Sqnn/src/KDE.h
+        Sqnn/src/ioOperation.h
 )
 
 file(GLOB API_SOURCES Sqnn/src/API/*.h)

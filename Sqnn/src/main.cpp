@@ -11,6 +11,7 @@
 #include <fstream>
 #include <string>
 
+#include "ioOperation.h"
 #include "KdeUsingMrpt.h"
 #include "supportFunctions.h"
 
@@ -33,49 +34,6 @@ void generateRandomMatrix(Eigen::MatrixXf &X, Eigen::VectorXf &q, int d, int n) 
 	}
 }
 
-std::vector<std::string> splitString(const std::string &str) {
-	std::istringstream iss(str);
-	vector<string> result;
-	for (string s; iss >> s;) {
-		result.push_back(s);
-	}
-	return result;
-}
-
-bool loadData(const string filename, int &n, int &d, Eigen::MatrixXf &X, Eigen::VectorXf &q) {
-	// Open the file
-	std::ifstream file(filename);
-
-	// Check if the file opened successfully
-	if (file.is_open()) {
-		//TODO: loop and safe.
-		//TODO: maybe parallel? not sure yet, or if that could cause mem issue
-		std::string line;
-		std::stringstream ss(line);
-
-		std::getline(file, line);
-		std::vector<string> data = splitString(line);
-		n = std::stoi(data[0]);
-		d = std::stoi(data[1]);
-
-		X = Eigen::MatrixXf(d, n);
-		q = Eigen::VectorXf(d);
-
-		for (int i = 0; i < n; ++i) {
-			std::getline(file, line);
-			data = splitString(line);
-			for (int j = 0; j < d; ++j)
-				X(j, i) = std::stof(data[j]);
-		}
-		for (int i = 0; i < d; ++i) q(i) = 0;
-		file.close();
-		return true;
-	} else {
-		printf("couldn't find file.\nshutdown...");
-		return false;
-	}
-}
-
 int main(int argc, char *argv[]) {
 	int n, d;
 	int k = 170, m = 500, trees = 10;
@@ -89,7 +47,7 @@ int main(int argc, char *argv[]) {
 	//If dataset is passed but no info on parameters, we assume that we have to compute them
 	if (argc == 2) {
 		std::string filename = ("../Sqnn/data/" + std::string(argv[1]));
-		if (!loadData(filename, n, d, X, q)) return -1;
+		if (!io::loadData(filename, n, d, X, q)) return -1;
 		double sigmaAvg = support::sigmaAverage(X), sigmaExt = support::sigmaExtreme(X);
 		float taoAvg = support::computeTao(X, sigmaAvg, kernel), taoExt = support::computeTao(X, sigmaExt, kernel);
 		printf("sigma average:\t%f\n", sigmaAvg);
@@ -108,7 +66,7 @@ int main(int argc, char *argv[]) {
 		m = std::stoi(argv[2]);
 		sigma = std::stod(argv[3]);
 		std::string filename = ("../Sqnn/data/" + std::string(argv[4]));
-		if (!loadData(filename, n, d, X, q)) return -1;
+		if (!io::loadData(filename, n, d, X, q)) return -1;
 	} else {
 		n = 10000;
 		d = 1000;
