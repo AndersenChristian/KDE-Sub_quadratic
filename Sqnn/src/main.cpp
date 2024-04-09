@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 		std::string filename = ("../Sqnn/data/" + std::string(argv[1]));
 		if (!io::loadData(filename, n, d, X, q)) return -1;
 		double sigmaAvg = support::sigmaAverage(X), sigmaExt = support::sigmaExtreme(X);
-		float taoAvg = support::computeTao(X, sigmaAvg, kernel), taoExt = support::computeTao(X, sigmaExt, kernel);
+		float taoAvg = support::computeTao(X, kernel), taoExt = support::computeTao(X, kernel);
 		printf("sigma average:\t%f\n", sigmaAvg);
 		printf("sigma extreme:\t%f\n", sigmaExt);
 		printf("tao average:\t%f\n", taoAvg);
@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	double cStart = omp_get_wtime();
-	KdeUsingMrpt kde(X, n, d, k, m, trees, kernel);
+	KdeUsingMrpt kde(X, n, k, m, trees, kernel);
 	double cEnd = omp_get_wtime();
 
 
