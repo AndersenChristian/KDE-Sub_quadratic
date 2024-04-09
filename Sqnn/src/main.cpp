@@ -11,9 +11,10 @@
 #include <fstream>
 #include <string>
 
-#include "ioOperation.h"
+#include "IoOperation.h"
 #include "KdeUsingMrpt.h"
 #include "supportFunctions.h"
+#include "sample.h"
 
 using std::function;
 using std::vector;
@@ -49,7 +50,7 @@ int main(int argc, char *argv[]) {
 		std::string filename = ("../Sqnn/data/" + std::string(argv[1]));
 		if (!io::loadData(filename, n, d, X, q)) return -1;
 		double sigmaAvg = support::sigmaAverage(X), sigmaExt = support::sigmaExtreme(X);
-		float taoAvg = support::computeTao(X, sigmaAvg, kernel), taoExt = support::computeTao(X, sigmaExt, kernel);
+		float taoAvg = support::computeTao(X, kernel), taoExt = support::computeTao(X, kernel);
 		printf("sigma average:\t%f\n", sigmaAvg);
 		printf("sigma extreme:\t%f\n", sigmaExt);
 		printf("tao average:\t%f\n", taoAvg);
@@ -76,7 +77,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	double cStart = omp_get_wtime();
-	KdeUsingMrpt kde(X, n, d, k, m, trees, kernel);
+	KdeUsingMrpt kde(X, n, k, m, trees, kernel);
 	double cEnd = omp_get_wtime();
 
 
@@ -110,7 +111,19 @@ int main(int argc, char *argv[]) {
 	printf("exact compute time: %.3e seconds\n", exaTime);
 	printf("approx compute time: %.3e seconds\n", appTime);
 	printf("gained speedup: %.3e seconds\n", (exaTime) - appTime);
-	printf("speedup: %.3f\n", exaTime / appTime);
+	printf("speedup: %.3f\n\n", exaTime / appTime);
+
+	std::vector<float> weightedDegree(n);
+	degreeWeight(&kde, weightedDegree.data());
+
+	printf("didn't crash\n\n");
+
+	const int vertexSampleAmount = 10000;
+	std::vector<int> vertex(vertexSampleAmount);
+	vertexSampling(n, weightedDegree.data(), vertexSampleAmount, vertex.data());
+
+	printf("didn't crash\n\n");
+
 
 
 	return 0;

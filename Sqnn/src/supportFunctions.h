@@ -9,27 +9,21 @@
 
 namespace support {
 
-	inline float computeTao(const Eigen::MatrixXf &x, const double sigma,
-													const kernel::kernelLambda<float> &kernel) {
+	inline float computeTao(const Eigen::MatrixXf &x, const kernel::kernelLambda<float> &kernel) {
 		assert(x.rows() > 0 && x.cols() > 0);
 
-		float tao = 1, taosum = 1;
+		float tao = 1;
 		printf("cols:%ld\n", x.cols());
 		printf("rows:%ld\n", x.rows());
 
-#pragma omp parallel private(tao)
-		{
-#pragma omp for
+#pragma omp parallel for reduction(min:tao) default(shared)
 			for (int i = 0; i < x.cols(); ++i) {
 				if (i % 1000 == 0) printf("process: %d\n", i);
 				for (int j = i + 1; j < x.cols(); ++j) {
 					tao = std::min(kernel(x.col(i), x.col(j)), tao);
 				}
 			}
-#pragma omp critical
-			taosum = std::min(tao, taosum);
-		}
-		return taosum;
+		return tao;
 	}
 
 	//setting private

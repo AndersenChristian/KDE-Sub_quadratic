@@ -12,12 +12,12 @@
 #include "kernelFunction.h"
 #include "KDE.h"
 
-class KdeUsingMrpt : KDE {
+class KdeUsingMrpt : public KDE {
 public:
 	//TODO Should only handle allocation. Make method for isValid after.
-	KdeUsingMrpt(Eigen::MatrixXf &data, int n, int d, int k, int samples, int trees,
+	KdeUsingMrpt(Eigen::MatrixXf &data, int n, int k, int samples, int trees,
 							 kernel::kernelLambda<float> kernel)
-			: data(data), n(n), d(d), samples(samples), KNN(k), mrpt(data), kernel(std::move(kernel)) {
+			: KNN(k), data(data), kernel(std::move(kernel)), mrpt(data), n(n), samples(samples) {
 
 		//random number-generator setup
 		auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
@@ -32,8 +32,8 @@ public:
 	}
 
 	float query_exact(const Eigen::VectorXf &q) override {
-		float sum;
-#pragma omp parallel for reduction(+:sum)
+		float sum = 0;
+#pragma omp parallel for reduction(+:sum) shared(q) default(none)
 		for (int i = 0; i < n; ++i) {
 			sum += kernel(data.col(i), q);
 		}
@@ -47,11 +47,11 @@ public:
 
 		//Get candidates
 		int numberOfCandidates;
-		mrpt.query(q, ann_list.data(), nullptr, &numberOfCandidates);
+		mrpt.query(q, ann_list.data(), &numberOfCandidates);
 
 		//compute NN contribution
 		float sum_a = 0;
-#pragma omp parallel for reduction(+: sum_a)
+#pragma omp parallel for reduction(+: sum_a) shared(ann_list, numberOfCandidates, q) default(none)
 		for (int i = 0; i < numberOfCandidates; ++i) {
 			int index = ann_list[i];
 			sum_a += kernel(data.col(index), q);
@@ -60,12 +60,12 @@ public:
 
 
 		//compute sample contribution
-		float sum_b;
+		float sum_b = 0;
 		int index;
-#pragma omp parallel for private(index) reduction(+: sum_b)
+#pragma omp parallel for private(index) reduction(+: sum_b) shared(numberOfCandidates, ann_list, q) default(none)
 		for (int i = 0; i < samples; ++i) {
 			do {
-				index = randomIndex(0, n);
+				index = randomIndex(n);
 			} while (std::find(ann_list.begin(), ann_list.begin() + numberOfCandidates, index) !=
 							 ann_list.begin() + numberOfCandidates);
 			sum_b += kernel(data.col(index), q);
@@ -81,7 +81,7 @@ public:
 		return &data;
 	}
 
-	const kernel::kernelLambda<float>* getKernel(){
+	const kernel::kernelLambda<float>* getKernel() override{
 		return &kernel;
 	}
 
@@ -94,17 +94,17 @@ private:
 	Mrpt mrpt;
 	std::mt19937 generator;
 
-	const int n, d, samples;
+	const int n, samples;
 
-	inline int randomIndex(const int min, const int max) {
-		std::uniform_int_distribution<int> distribution(min, max);
+	inline int randomIndex(const int max) {
+		std::uniform_int_distribution<int> distribution(0, max);
 		return distribution(this->generator);
 	}
 
 	inline float randomSampleAndSum(const Eigen::VectorXf &q) {
 		float sum = 0;
 		for (int i = 0; i < samples; ++i) {
-			sum += kernel(data.col(randomIndex(0, n)), q);
+			sum += kernel(data.col(randomIndex(n)), q);
 		}
 		return sum / (float) samples;
 	}
