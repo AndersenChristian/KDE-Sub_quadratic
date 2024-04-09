@@ -11,9 +11,10 @@
 #include <fstream>
 #include <string>
 
-#include "ioOperation.h"
+#include "IoOperation.h"
 #include "KdeUsingMrpt.h"
 #include "supportFunctions.h"
+#include "sample.h"
 
 using std::function;
 using std::vector;
@@ -110,7 +111,19 @@ int main(int argc, char *argv[]) {
 	printf("exact compute time: %.3e seconds\n", exaTime);
 	printf("approx compute time: %.3e seconds\n", appTime);
 	printf("gained speedup: %.3e seconds\n", (exaTime) - appTime);
-	printf("speedup: %.3f\n", exaTime / appTime);
+	printf("speedup: %.3f\n\n", exaTime / appTime);
+
+	std::vector<float> weightedDegree(n);
+	degreeWeight(&kde, weightedDegree.data());
+
+	printf("didn't crash\n\n");
+
+	const int vertexSampleAmount = 10000;
+	std::vector<int> vertex(vertexSampleAmount);
+	vertexSampling(n, weightedDegree.data(), vertexSampleAmount, vertex.data());
+
+	printf("didn't crash\n\n");
+
 
 
 	return 0;

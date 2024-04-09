@@ -12,9 +12,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -Ofast -march=native -fopenmp
 include_directories(Sqnn)
 include_directories(Sqnn/src)
 
-# Find FLANN using pkg-config
-#find_package(PkgConfig REQUIRED)
-#pkg_check_modules(FLANN REQUIRED flann)
+# for errors when compiling
+add_compile_options(-Wall -Wextra -pedantic)
 
 # Find Eigen
 find_package(Eigen3 REQUIRED)
@@ -35,7 +34,7 @@ set(MAIN_SOURCES
         Sqnn/src/supportFunctions.h
         Sqnn/src/sample.h
         Sqnn/src/KDE.h
-        Sqnn/src/ioOperation.h
+        Sqnn/src/IoOperation.h
 )
 
 file(GLOB API_SOURCES Sqnn/src/API/*.h)

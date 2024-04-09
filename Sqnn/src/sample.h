@@ -16,7 +16,7 @@ inline void degreeWeight(KDE *kde, float *out) {
 	const float ownContribution = 1; //TODO make this calculated based on kernel.
 	const Eigen::MatrixXf *data = kde->getDataRef();
 	for (int i = 0; i < data->rows(); ++i) {
-		out[i] = kde->query(data->col(i)) - ownContribution;
+		out[i] = kde->query(data->col(i)) - (1 / (float) data->rows()) * ownContribution;
 	}
 }
 
@@ -38,14 +38,14 @@ inline void vertexSampling(int n, float *in, int samples, int *out) {
 		start = 0, end = n - 1;
 		while (start != end) {
 			m = (end - start) / 2;
-			a = start == 0 ? in[m] : in[m] - in[start - 1];	//ensures no out of index
+			a = start == 0 ? in[m] : in[m] - in[start - 1];  //ensures no out of index
 			b = in[end] - in[m];
 			std::uniform_real_distribution<float> distribution(0, a + b); //setup distribution limitation
 			v = distribution(generator);
 			if (v < a)
-				end = m;
+				end -= m;
 			else
-				start = m + 1;
+				start += m + 1;
 		}
 		out[i] = start;
 	}
