@@ -385,11 +385,9 @@ public:
 	* @param k number of nearest neighbors searched for
 	* @param vote_threshold - number of votes required for a query point to be included in the candidate set
 	* @param out output buffer (size = k) for the indices of k approximate nearest neighbors
-	* @param out_distances optional output buffer (size = k) for distances to k approximate nearest neighbors
 	* @param out_n_elected optional output parameter (size = 1) for the candidate set size
 	*/
-	void query(const float *data, int k, int vote_threshold, int *out,
-						 float *out_distances = nullptr, int *out_n_elected = nullptr) const {
+	void query(const float *data, int k, int vote_threshold, int *out, int *out_n_elected = nullptr) const {
 
 		if (k <= 0 || k > n_samples) {
 			throw std::out_of_range("k must belong to the set {1, ..., n}.");
@@ -489,11 +487,9 @@ public:
 	*
 	* @param q pointer to an array containing the query point
 	* @param out output buffer (size = k) for the indices of k approximate nearest neighbors
-	* @param out_distances optional output buffer (size = k) for distances to k approximate nearest neighbors
 	* @param out_n_elected optional output parameter (size = 1) for the candidate set size
 	*/
-	void query(const float *q, int *out, float *out_distances = nullptr,
-						 int *out_n_elected = nullptr) const {
+	void query(const float *q, int *out, int *out_n_elected = nullptr) const {
 		if (index_type == normal) {
 			throw std::logic_error("The index is not autotuned: k and vote threshold has to be specified.");
 		}
@@ -502,7 +498,7 @@ public:
 			throw std::logic_error("The target recall level has to be set before making queries.");
 		}
 
-		query(q, k, votes, out, out_distances, out_n_elected);
+		query(q, k, votes, out, out_n_elected);
 	}
 
 	/**
@@ -510,12 +506,10 @@ public:
 	*
 	* @param q Eigen ref to the query point
 	* @param out output buffer (size = k) for the indices of k approximate nearest neighbors
-	* @param out_distances optional output buffer (size = k) for distances to k approximate nearest neighbors
 	* @param out_n_elected optional output parameter (size = 1) for the candidate set size
 	*/
-	void query(const Eigen::Ref<const Eigen::VectorXf> &q, int *out, float *out_distances = nullptr,
-						 int *out_n_elected = nullptr) const {
-		query(q.data(), out, out_distances, out_n_elected);
+	void query(const Eigen::Ref<const Eigen::VectorXf> &q, int *out, int *out_n_elected = nullptr) const {
+		query(q.data(), out, out_n_elected);
 	}
 
 	/**@}*/

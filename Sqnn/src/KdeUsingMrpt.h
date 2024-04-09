@@ -47,7 +47,7 @@ public:
 
 		//Get candidates
 		int numberOfCandidates;
-		mrpt.query(q, ann_list.data(), nullptr, &numberOfCandidates);
+		mrpt.query(q, ann_list.data(), &numberOfCandidates);
 
 		//compute NN contribution
 		float sum_a = 0;
@@ -65,7 +65,7 @@ public:
 #pragma omp parallel for private(index) reduction(+: sum_b) shared(numberOfCandidates, ann_list, q) default(none)
 		for (int i = 0; i < samples; ++i) {
 			do {
-				index = randomIndex(0, n);
+				index = randomIndex(n);
 			} while (std::find(ann_list.begin(), ann_list.begin() + numberOfCandidates, index) !=
 							 ann_list.begin() + numberOfCandidates);
 			sum_b += kernel(data.col(index), q);
@@ -96,15 +96,15 @@ private:
 
 	const int n, samples;
 
-	inline int randomIndex(const int min, const int max) {
-		std::uniform_int_distribution<int> distribution(min, max);
+	inline int randomIndex(const int max) {
+		std::uniform_int_distribution<int> distribution(0, max);
 		return distribution(this->generator);
 	}
 
 	inline float randomSampleAndSum(const Eigen::VectorXf &q) {
 		float sum = 0;
 		for (int i = 0; i < samples; ++i) {
-			sum += kernel(data.col(randomIndex(0, n)), q);
+			sum += kernel(data.col(randomIndex(n)), q);
 		}
 		return sum / (float) samples;
 	}
