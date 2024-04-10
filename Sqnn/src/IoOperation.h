@@ -21,6 +21,19 @@ namespace io {
 		return result;
 	}
 
+	/**
+	 * expect that the first line of a file contains n, m, rho and h in that order. where rho
+	 * is the 2 points furthest apart
+	 *
+	 * @param filename
+	 * @param n
+	 * @param d
+	 * @return
+	 */
+	inline bool loadMetaData(const std::string *filename, int *n, int *d, std::pair<int,int> *rho, int *h){
+
+	}
+
 	inline bool loadData(const std::string &filename, int &n, int &d, Eigen::MatrixXf &X, Eigen::VectorXf &q) {
 		// Open the file
 		std::ifstream file(filename);

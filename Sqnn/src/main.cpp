@@ -7,8 +7,6 @@
 #include <vector>
 #include <random>
 #include <omp.h>
-#include <filesystem>
-#include <fstream>
 #include <string>
 
 #include "IoOperation.h"
@@ -75,7 +73,7 @@ int main(int argc, char *argv[]) {
 		q = Eigen::VectorXf(d);
 		generateRandomMatrix(X, q, d, n);
 	}
-
+	/*
 	double cStart = omp_get_wtime();
 	KdeUsingMrpt kde(X, n, k, m, trees, kernel);
 	double cEnd = omp_get_wtime();
@@ -124,7 +122,7 @@ int main(int argc, char *argv[]) {
 
 	printf("didn't crash\n\n");
 
-
+	*/
 
 	return 0;
 }
