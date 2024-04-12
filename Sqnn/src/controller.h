@@ -16,10 +16,12 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, const int dimension
 						const int samples, const int trees, const float rho, const double sigma) {
 	kernel::kernelLambda<float> kernel = kernel::kernel_function<float>(kernel::type::Gaussian, sigma);
 
-	//compute rho.
-	//TODO: actually use
-
 	//TODO: multi-level KDE instead
+	//how tall is the tree?
+	const int treeHeight = std::ceil(std::log(vertices / samples)/std::log(2));
+	KdeUsingMrpt kdeTree[treeHeight];
+
+
 	const KdeUsingMrpt kde(data, vertices, nearestNeighbor, samples, trees, &kernel);
 	//TODO: Remove the Naive, only for testing.
 	const KdeNaive kdeNaive(data, vertices, &kernel);

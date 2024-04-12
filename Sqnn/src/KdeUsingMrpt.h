@@ -71,6 +71,14 @@ public:
 		return data;
 	}
 
+	std::vector<float> getExactDistance(Eigen::VectorXf &q){
+		std::vector<float> list;
+		for(int i = 0; i < n; ++i){
+			list[i] = (*kernel)(data.col(i),q);
+		}
+		return list;
+	}
+
 
 private:
 	const int KNN;
