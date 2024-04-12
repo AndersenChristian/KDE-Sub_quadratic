@@ -12,6 +12,7 @@
 class KDE {
 public:
 	virtual float query(const Eigen::VectorXf &q) = 0;
+	virtual const Eigen::MatrixXf& getData() = 0;
 };
 
 #endif //KDE_SUB_QUADRATIC_KDE_H

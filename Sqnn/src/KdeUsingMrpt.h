@@ -67,6 +67,10 @@ public:
 
 	}
 
+	const Eigen::MatrixXf& getData() override {
+		return data;
+	}
+
 
 private:
 	const int KNN;

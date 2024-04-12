@@ -21,20 +21,7 @@ namespace io {
 		return result;
 	}
 
-	/**
-	 * expect that the first line of a file contains n, m, rho and h in that order. where rho
-	 * is the 2 points furthest apart
-	 *
-	 * @param filename
-	 * @param n
-	 * @param d
-	 * @return
-	 */
-	inline bool loadMetaData(const std::string *filename, int *n, int *d, std::pair<int,int> *rho, int *h){
-
-	}
-
-	inline bool loadData(const std::string &filename, int &n, int &d, Eigen::MatrixXf &X, Eigen::VectorXf &q) {
+	inline bool loadData(const std::string &filename, int &n, int &d, float &rho, float &h, Eigen::MatrixXf &X) {
 		// Open the file
 		std::ifstream file(filename);
 
@@ -49,9 +36,10 @@ namespace io {
 			std::vector<std::string> data = splitString(line);
 			n = std::stoi(data[0]);
 			d = std::stoi(data[1]);
+			rho = std::stof(data[2]);
+			h = std:: stof(data[3]);
 
 			X = Eigen::MatrixXf(d, n);
-			q = Eigen::VectorXf(d);
 
 			for (int i = 0; i < n; ++i) {
 				std::getline(file, line);
@@ -59,7 +47,6 @@ namespace io {
 				for (int j = 0; j < d; ++j)
 					X(j, i) = std::stof(data[j]);
 			}
-			for (int i = 0; i < d; ++i) q(i) = 0;
 			file.close();
 			return true;
 		} else {

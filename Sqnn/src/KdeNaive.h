@@ -26,6 +26,10 @@ public:
 		return sum / (float) n;
 	}
 
+	const Eigen::MatrixXf& getData() override {
+		return data;
+	}
+
 private:
 	const Eigen::MatrixXf &data;
 	const kernel::kernelLambda<float> *kernel;
