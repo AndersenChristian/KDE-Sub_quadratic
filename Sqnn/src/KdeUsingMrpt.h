@@ -15,9 +15,9 @@
 class KdeUsingMrpt : public KDE {
 public:
 	//TODO Should only handle allocation. Make method for isValid after.
-	KdeUsingMrpt(Eigen::MatrixXf &data, int n, int k, int samples, int trees,
-							 kernel::kernelLambda<float> kernel)
-			: KNN(k), data(data), kernel(std::move(kernel)), mrpt(data), n(n), samples(samples) {
+	KdeUsingMrpt(const Eigen::MatrixXf &data, int n, int k, int samples, int trees,
+							 kernel::kernelLambda<float> *kernel)
+			: KNN(k), data(data), kernel(kernel), mrpt(data), n(n), samples(samples) {
 
 		//random number-generator setup
 		auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
@@ -30,16 +30,6 @@ public:
 		//Needed for the ANN to be setup.
 		mrpt.grow_autotune(TARGET_RECALL, KNN, trees);
 	}
-
-	float query_exact(const Eigen::VectorXf &q) override {
-		float sum = 0;
-#pragma omp parallel for reduction(+:sum) shared(q) default(none)
-		for (int i = 0; i < n; ++i) {
-			sum += kernel(data.col(i), q);
-		}
-		return sum / (float) n;
-	}
-
 
 	float query(const Eigen::VectorXf &q) override {
 		if (KNN == 0) return randomSampleAndSum(q);
@@ -54,7 +44,7 @@ public:
 #pragma omp parallel for reduction(+: sum_a) shared(ann_list, numberOfCandidates, q) default(none)
 		for (int i = 0; i < numberOfCandidates; ++i) {
 			int index = ann_list[i];
-			sum_a += kernel(data.col(index), q);
+			sum_a += (*kernel)(data.col(index), q);
 		}
 		sum_a /= (float) numberOfCandidates;
 
@@ -68,7 +58,7 @@ public:
 				index = randomIndex(n);
 			} while (std::find(ann_list.begin(), ann_list.begin() + numberOfCandidates, index) !=
 							 ann_list.begin() + numberOfCandidates);
-			sum_b += kernel(data.col(index), q);
+			sum_b += (*kernel)(data.col(index), q);
 		}
 		sum_b /= (float) samples;
 
@@ -77,20 +67,16 @@ public:
 
 	}
 
-	const Eigen::MatrixXf *getDataRef() override {
-		return &data;
-	}
-
-	const kernel::kernelLambda<float>* getKernel() override{
-		return &kernel;
+	const Eigen::MatrixXf& getData() override {
+		return data;
 	}
 
 
 private:
 	const int KNN;
 	const double TARGET_RECALL = 0.9;
-	const Eigen::MatrixXf data;
-	const kernel::kernelLambda<float> kernel;
+	const Eigen::MatrixXf &data;
+	const kernel::kernelLambda<float> *kernel;
 	Mrpt mrpt;
 	std::mt19937 generator;
 
@@ -104,7 +90,7 @@ private:
 	inline float randomSampleAndSum(const Eigen::VectorXf &q) {
 		float sum = 0;
 		for (int i = 0; i < samples; ++i) {
-			sum += kernel(data.col(randomIndex(n)), q);
+			sum += (*kernel)(data.col(randomIndex(n)), q);
 		}
 		return sum / (float) samples;
 	}

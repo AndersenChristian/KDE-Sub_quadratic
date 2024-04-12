@@ -13,13 +13,10 @@
 
 #include "KDE.h"
 
-inline void degreeWeight(KDE *kde, float *out) {
-	const Eigen::MatrixXf *data = kde->getDataRef();
-	const kernel::kernelLambda<float> *kernel = kde->getKernel();
-	const float ownContribution = (*kernel)(data->col(0), data->col(0));
-
-	for (int i = 0; i < data->rows(); ++i) {
-		out[i] = kde->query(data->col(i)) - (1 / (float) data->rows()) * ownContribution;
+inline void degreeWeight(KDE *kde, float *out, const float ownContribution) {
+	const Eigen::MatrixXf &data = kde->getData();
+	for (int i = 0; i < data.rows(); ++i) {
+		out[i] = kde->query(data.col(i)) - (1 / (float) data.rows()) * ownContribution;
 	}
 }
 
