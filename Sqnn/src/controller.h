@@ -16,13 +16,20 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, const int dimension
 						const int samples, const int trees, const float rho, const double sigma) {
 	kernel::kernelLambda<float> kernel = kernel::kernel_function<float>(kernel::type::Gaussian, sigma);
 
-//compute rho.
-//TODO: actually use
+	//compute rho.
+	//TODO: actually use
 
-//TODO: multi-level KDE instead
+	//TODO: multi-level KDE instead
 	const KdeUsingMrpt kde(data, vertices, nearestNeighbor, samples, trees, &kernel);
-//TODO: Remove the Naive, only for testing.
+	//TODO: Remove the Naive, only for testing.
 	const KdeNaive kdeNaive(data, vertices, &kernel);
+
+	//TODO: weight
+
+	//TODO: Sample vertex
+
+	//TODO: sample edges
+
 }
 
 #endif //KDE_SUB_QUADRATIC_CONTROLLER_H
