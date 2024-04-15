@@ -17,7 +17,7 @@ public:
 	//TODO Should only handle allocation. Make method for isValid after.
 	KdeUsingMrpt(const Eigen::MatrixXf &data, int k, int samples, int trees,
 							 kernel::kernelLambda<float> *kernel)
-			: KNN(k), data(data), kernel(kernel), mrpt(data), n((int) data.rows()), samples(samples) {
+			: KNN(k), data(std::move(data)), kernel(kernel), mrpt(data), n((int) data.rows()), samples(samples) {
 
 		//random number-generator setup
 		auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
@@ -41,7 +41,7 @@ public:
 
 		//compute NN contribution
 		float sum_a = 0;
-#pragma omp parallel for reduction(+: sum_a) shared(ann_list, numberOfCandidates, q) default(none)
+//#pragma omp parallel for reduction(+: sum_a) shared(ann_list, numberOfCandidates, q) default(none)
 		for (int i = 0; i < numberOfCandidates; ++i) {
 			int index = ann_list[i];
 			sum_a += (*kernel)(data.col(index), q);
@@ -52,7 +52,7 @@ public:
 		//compute sample contribution
 		float sum_b = 0;
 		int index;
-#pragma omp parallel for private(index) reduction(+: sum_b) shared(numberOfCandidates, ann_list, q) default(none)
+//#pragma omp parallel for private(index) reduction(+: sum_b) shared(numberOfCandidates, ann_list, q) default(none)
 		for (int i = 0; i < samples; ++i) {
 			do {
 				index = randomIndex(n);
@@ -79,8 +79,6 @@ public:
 		return list;
 	}
 
-	~KdeUsingMrpt() override = default;
-
 
 private:
 	const int KNN;
@@ -92,12 +90,12 @@ private:
 
 	const int n, samples;
 
-	inline int randomIndex(const int max) {
-		std::uniform_int_distribution<int> distribution(0, max);
+	int randomIndex(const int max) {
+		std::uniform_int_distribution<int> distribution(0, max - 1);
 		return distribution(this->generator);
 	}
 
-	inline float randomSampleAndSum(const Eigen::VectorXf &q) {
+	float randomSampleAndSum(const Eigen::VectorXf &q) {
 		float sum = 0;
 		for (int i = 0; i < samples; ++i) {
 			sum += (*kernel)(data.col(randomIndex(n)), q);

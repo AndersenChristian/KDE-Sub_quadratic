@@ -38,7 +38,16 @@ int main(int argc, char *argv[]) {
 		if (!io::loadData(filename, n, d, rho, h, X)) return -1;
 	}
 
-	runCppStyle(X, n, d, k, m, trees, rho, sigma, 0.01);
+	//runCppStyle(X, n, d, k, m, trees, rho, sigma, 0.01);
+
+
+
+	//TESTING SECTION
+	for(int i = 0; i < 100000; ++i){
+		printf("%d\t%f\n",i,kernel(X.col(1), X.col(2)));
+	}
+
+	//fflush(stdout);
 
 	return 0;
 }

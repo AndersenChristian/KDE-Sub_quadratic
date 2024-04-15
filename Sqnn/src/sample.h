@@ -13,11 +13,14 @@
 
 #include "KDE.h"
 
-inline void degreeWeight(KDE *kde, float *out, const float ownContribution) {
+inline std::vector<float> degreeWeight(KDE *kde, float *out, const float ownContribution) {
 	const Eigen::MatrixXf &data = kde->getData();
-	for (int i = 0; i < data.rows(); ++i) {
-		out[i] = kde->query(data.col(i)) - (1 / (float) data.rows()) * ownContribution;
+	printf("dataSize: %ld", data.cols());
+	std::vector<float> _out(data.cols());
+	for (int i = 0; i < data.cols(); ++i) {
+		_out[i] = kde->query(data.col(i)) - (1. / (float) data.rows()) * ownContribution;
 	}
+	return _out;
 }
 
 inline void vertexSampling(int n, float *in, int samples, int *out) {
