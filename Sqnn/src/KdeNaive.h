@@ -14,8 +14,8 @@
 
 class KdeNaive : public KDE {
 public:
-	KdeNaive(const Eigen::MatrixXf &data, int n, kernel::kernelLambda<float> *kernel)
-			: data(data), kernel(kernel), n(n) {}
+	KdeNaive(const Eigen::MatrixXf &data, kernel::kernelLambda<float> *kernel)
+			: data(data), kernel(kernel), n((int) data.rows()) {}
 
 	float query(const Eigen::VectorXf &q) override {
 		float sum = 0;
@@ -29,6 +29,8 @@ public:
 	const Eigen::MatrixXf& getData() override {
 		return data;
 	}
+
+	~KdeNaive() override = default;
 
 private:
 	const Eigen::MatrixXf &data;

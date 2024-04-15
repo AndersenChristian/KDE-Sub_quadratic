@@ -15,9 +15,9 @@
 class KdeUsingMrpt : public KDE {
 public:
 	//TODO Should only handle allocation. Make method for isValid after.
-	KdeUsingMrpt(const Eigen::MatrixXf &data, int n, int k, int samples, int trees,
+	KdeUsingMrpt(const Eigen::MatrixXf &data, int k, int samples, int trees,
 							 kernel::kernelLambda<float> *kernel)
-			: KNN(k), data(data), kernel(kernel), mrpt(data), n(n), samples(samples) {
+			: KNN(k), data(data), kernel(kernel), mrpt(data), n((int) data.rows()), samples(samples) {
 
 		//random number-generator setup
 		auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
@@ -67,17 +67,19 @@ public:
 
 	}
 
-	const Eigen::MatrixXf& getData() override {
+	const Eigen::MatrixXf &getData() override {
 		return data;
 	}
 
-	std::vector<float> getExactDistance(Eigen::VectorXf &q){
+	std::vector<float> getExactDistance(Eigen::VectorXf &q) {
 		std::vector<float> list;
-		for(int i = 0; i < n; ++i){
-			list[i] = (*kernel)(data.col(i),q);
+		for (int i = 0; i < n; ++i) {
+			list[i] = (*kernel)(data.col(i), q);
 		}
 		return list;
 	}
+
+	~KdeUsingMrpt() override = default;
 
 
 private:
