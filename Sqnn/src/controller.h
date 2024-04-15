@@ -10,11 +10,12 @@
 #include "kernelFunction.h"
 #include "KdeUsingMrpt.h"
 #include "KdeNaive.h"
+#include "sample.h"
 #include "KDE.h"
 
 inline void
 runCppStyle(const Eigen::MatrixXf &data, const int vertices, const int dimensions, const int nearestNeighbor,
-						const int samples, const int trees, [[maybe_unused]] const float rho, const double sigma) {
+						const int samples, const int trees, [[maybe_unused]] const float rho, const double sigma, const double epsilon) {
 	kernel::kernelLambda<float> kernel = kernel::kernel_function<float>(kernel::type::Gaussian, sigma);
 
 	//TODO: multi-level KDE instead
@@ -47,10 +48,13 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, const int dimension
 	//const KdeNaive kdeNaive(data, &kernel);
 
 	//TODO: weight
+	std::vector<float> vertexWeight(vertices);
+	const float ownContribution = (float) (1.0 - epsilon) * kernel(data.row(0), data.row(0));
+	degreeWeight(kdeTree[1].get(), vertexWeight.data(), ownContribution);
 
 	//TODO: Sample vertex
 
-	//TODO: sample edges
+	//TODO: sample edges and assign values
 
 }
 

@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 		if (!io::loadData(filename, n, d, rho, h, X)) return -1;
 	}
 
-	runCppStyle(X, n, d, k, m, trees, rho, sigma);
+	runCppStyle(X, n, d, k, m, trees, rho, sigma, 0.01);
 
 	return 0;
 }
