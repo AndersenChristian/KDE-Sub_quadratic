@@ -28,8 +28,6 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
 	std::vector<std::unique_ptr<KDE>> kdeTree;
 	kdeTree.resize(nodes);
 
-
-	/*
 	for (int i = 1; i < nodes; ++i) {
 		int layer = (int) std::log2(i);
 		int NodesOnCurrentLayer = (int) (std::pow(2, layer));
@@ -45,24 +43,13 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
 																																		 samples, trees, &kernel));
 
 	}
-	 */
-
-	kdeTree[1] = std::unique_ptr<KDE>(std::make_unique<KdeUsingMrpt>(data, nearestNeighbor,
-																																	 samples, trees, &kernel));
-
 
 	KdeUsingMrpt kde(data, nearestNeighbor, samples, trees, &kernel);
 
-	printf("here\n");
 	//TODO: weight
 	std::vector<float> vertexWeight(vertices);
-	printf("here\n");
 	const float ownContribution = (float) (1.0 - epsilon) * kernel(data.row(0), data.row(0));
-	printf("here\n");
 	degreeWeight(kdeTree[1].get(), vertexWeight.data(), ownContribution);
-	for(int i = 0; i < 5; ++i){
-		printf("%f\n",vertexWeight[i]);
-	}
 
 	//TODO: Sample vertex
 	const int vertexSamplingNr = 2000;
