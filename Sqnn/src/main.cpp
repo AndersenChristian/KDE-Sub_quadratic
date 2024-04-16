@@ -8,6 +8,7 @@
 #include <random>
 #include <omp.h>
 #include <string>
+#include <unistd.h>
 
 #include "IoOperation.h"
 #include "controller.h"
@@ -40,14 +41,23 @@ int main(int argc, char *argv[]) {
 
 	//runCppStyle(X, n, d, k, m, trees, rho, sigma, 0.01);
 
+	KdeUsingMrpt kde(X, k, m, trees, &kernel);
 
-
-	//TESTING SECTION
-	for(int i = 0; i < 100000; ++i){
-		printf("%d\t%f\n",i,kernel(X.col(1), X.col(2)));
+	for (int i = 0; i < 1000; ++i) {
+		printf("%d\t%f\n", i, kde.query(X.col(0)));
 	}
 
-	//fflush(stdout);
+	//sleep(1);
+
+
+
+
+
+	/*TESTING Kernel (working)
+	for(int i = 0; i < 100000; ++i){
+		printf("%d\t%f\n",i,kernel(X.col(1), X.col(2)));
+	}*/
+
 
 	return 0;
 }

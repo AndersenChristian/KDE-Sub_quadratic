@@ -36,7 +36,7 @@ public:
 		std::vector<int> ann_list(n);
 
 		//Get candidates
-		int numberOfCandidates;
+		int numberOfCandidates = 0;
 		mrpt.query(q, ann_list.data(), &numberOfCandidates);
 
 		//compute NN contribution
@@ -83,7 +83,7 @@ public:
 private:
 	const int KNN;
 	const double TARGET_RECALL = 0.9;
-	const Eigen::MatrixXf &data;
+	const Eigen::MatrixXf data;
 	const kernel::kernelLambda<float> *kernel;
 	Mrpt mrpt;
 	std::mt19937 generator;
