@@ -41,7 +41,7 @@ public:
 
 		//compute NN contribution
 		float sum_a = 0;
-//#pragma omp parallel for reduction(+: sum_a) shared(ann_list, numberOfCandidates, q) default(none)
+#pragma omp parallel for reduction(+: sum_a) shared(ann_list, numberOfCandidates, q) default(none)
 		for (int i = 0; i < numberOfCandidates; ++i) {
 			int index = ann_list[i];
 			sum_a += (*kernel)(data.col(index), q);
@@ -52,7 +52,7 @@ public:
 		//compute sample contribution
 		float sum_b = 0;
 		int index;
-//#pragma omp parallel for private(index) reduction(+: sum_b) shared(numberOfCandidates, ann_list, q) default(none)
+#pragma omp parallel for private(index) reduction(+: sum_b) shared(numberOfCandidates, ann_list, q) default(none)
 		for (int i = 0; i < samples; ++i) {
 			do {
 				index = randomIndex(n);

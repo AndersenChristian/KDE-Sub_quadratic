@@ -13,14 +13,12 @@
 
 #include "KDE.h"
 
-inline std::vector<float> degreeWeight(KDE *kde, float *out, const float ownContribution) {
+inline void degreeWeight(KDE *kde, float *out, const float ownContribution) {
 	const Eigen::MatrixXf &data = kde->getData();
-	printf("dataSize: %ld", data.cols());
-	std::vector<float> _out(data.cols());
+#pragma omp parallel for shared(out, data, kde, ownContribution) default(none)
 	for (int i = 0; i < data.cols(); ++i) {
-		_out[i] = kde->query(data.col(i)) - (1. / (float) data.rows()) * ownContribution;
+		out[i] = kde->query(data.col(i)) - (1. / (float) data.cols()) * ownContribution;
 	}
-	return _out;
 }
 
 inline void vertexSampling(int n, float *in, int samples, int *out) {
@@ -40,15 +38,16 @@ inline void vertexSampling(int n, float *in, int samples, int *out) {
 	for (int i = 0; i < samples; ++i) {
 		start = 0, end = n - 1;
 		while (start != end) {
-			m = (end - start) / 2;
+			if(start < 0 || end < 0) std::exit(-2);
+			m = start + ((end - start) / 2);
 			a = start == 0 ? in[m] : in[m] - in[start - 1];  //ensures no out of index
 			b = in[end] - in[m];
 			std::uniform_real_distribution<float> distribution(0, a + b); //setup distribution limitation
 			v = distribution(generator);
 			if (v < a)
-				end -= m;
+				end = m;
 			else
-				start += m + 1;
+				start = m + 1;
 		}
 		out[i] = start;
 	}

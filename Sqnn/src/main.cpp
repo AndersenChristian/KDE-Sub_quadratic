@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 	Eigen::MatrixXf X;
 
 	//limit amounts of threads and cores for omp
-	omp_set_num_threads(1);
+	//omp_set_num_threads(1);
 
 	//read data vs autogen
 	if (argc == 5) {
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 	runCppStyle(X, n, d, k, m, trees, rho, sigma, 0.01);
 
 	/*
-
+	//testing the Mrpt
 	//int n = 10000, d = 200, k = 10;
 	double target_recall = 0.9;
 	//Eigen::MatrixXf X = Eigen::MatrixXf::Random(d, n);
@@ -65,6 +65,7 @@ int main(int argc, char *argv[]) {
 
 
 	/*
+	// testing KDE
 	KdeUsingMrpt kde(X, k, m, trees, &kernel);
 	for (int i = 0; i < 1000; ++i) {
 		printf("%d\t%f\n", i, kde.query(X.col(0)));
