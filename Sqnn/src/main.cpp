@@ -19,8 +19,9 @@ using std::string;
 
 
 int main(int argc, char *argv[]) {
+
 	int n, d;
-	int k = 170, m = 500, trees = 10;
+	int k = 10, m = 500, trees = 10;
 	double sigma = 5;
 	float rho, h;
 	kernel::type kernelType = kernel::type::Gaussian;
@@ -39,13 +40,37 @@ int main(int argc, char *argv[]) {
 		if (!io::loadData(filename, n, d, rho, h, X)) return -1;
 	}
 
-	//runCppStyle(X, n, d, k, m, trees, rho, sigma, 0.01);
+	runCppStyle(X, n, d, k, m, trees, rho, sigma, 0.01);
 
+	/*
+
+	//int n = 10000, d = 200, k = 10;
+	double target_recall = 0.9;
+	//Eigen::MatrixXf X = Eigen::MatrixXf::Random(d, n);
+	Eigen::MatrixXf q = X.col(1);
+
+	Eigen::VectorXi indices(k), indices_exact(k);
+
+	Mrpt::exact_knn(q, X, k, indices_exact.data());
+	std::cout << indices_exact.transpose() << std::endl;
+
+	Mrpt mrpt(X);
+	mrpt.grow_autotune(target_recall, k);
+
+	for(int i = 0; i < 1; ++i) {
+		mrpt.query(q, indices.data(), nullptr);
+		std::cout << indices.transpose() << std::endl;
+	}
+	 */
+
+
+	/*
 	KdeUsingMrpt kde(X, k, m, trees, &kernel);
-
 	for (int i = 0; i < 1000; ++i) {
 		printf("%d\t%f\n", i, kde.query(X.col(0)));
 	}
+	 */
+
 
 	//sleep(1);
 

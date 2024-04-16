@@ -17,7 +17,7 @@ public:
 	//TODO Should only handle allocation. Make method for isValid after.
 	KdeUsingMrpt(const Eigen::MatrixXf &data, int k, int samples, int trees,
 							 kernel::kernelLambda<float> *kernel)
-			: KNN(k), data(std::move(data)), kernel(kernel), mrpt(data), n((int) data.rows()), samples(samples) {
+			: KNN(k), data(data), kernel(kernel), mrpt(data), n((int) data.cols()), samples(samples) {
 
 		//random number-generator setup
 		auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
@@ -71,19 +71,10 @@ public:
 		return data;
 	}
 
-	std::vector<float> getExactDistance(Eigen::VectorXf &q) {
-		std::vector<float> list;
-		for (int i = 0; i < n; ++i) {
-			list[i] = (*kernel)(data.col(i), q);
-		}
-		return list;
-	}
-
-
 private:
 	const int KNN;
 	const double TARGET_RECALL = 0.9;
-	const Eigen::MatrixXf data;
+	const Eigen::MatrixXf &data;
 	const kernel::kernelLambda<float> *kernel;
 	Mrpt mrpt;
 	std::mt19937 generator;
