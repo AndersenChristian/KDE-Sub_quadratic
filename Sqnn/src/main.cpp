@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 	Eigen::MatrixXf X;
 
 	//limit amounts of threads and cores for omp
-	omp_set_num_threads(8);
+	omp_set_num_threads(6);
 
 	//read data vs autogen
 	if (argc == 5) {

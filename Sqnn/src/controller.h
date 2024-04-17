@@ -16,7 +16,7 @@
 
 void buildMultiKDE(Eigen::MatrixXf data, std::vector<std::unique_ptr<KDE>> &kde, int index, int k,
 									 int samples, int trees, kernel::kernelLambda<float> kernel) {
-	if (data.cols() <= samples || index > 4) {
+	if (data.cols() <= samples) {
 		//TODO: create something different and return
 		return;
 	}
