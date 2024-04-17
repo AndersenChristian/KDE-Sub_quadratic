@@ -14,6 +14,17 @@
 #include "sample.h"
 #include "KDE.h"
 
+void buildMultiKDE(Eigen::MatrixXf data, std::vector<std::unique_ptr<KDE>> &kde, int index, int k,
+									 int samples, int trees, kernel::kernelLambda<float> kernel) {
+	if (data.cols() <= samples || index > 4) {
+		//TODO: create something different and return
+		return;
+	}
+	kde[index] = std::make_unique<KdeUsingMrpt>(data, k, samples, trees, &kernel);
+	buildMultiKDE(data.block(data.rows(), data.cols() / 2, 0, 0), kde, index * 2, k, samples, trees, kernel);
+	buildMultiKDE(data.block(data.rows(), data.cols() / 2, 0, 0), kde, index * 2 + 1, k, samples, trees, kernel);
+}
+
 void
 runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] const int dimensions,
 						const int nearestNeighbor,
@@ -23,32 +34,46 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
 
 	//TODO: multi-level KDE instead
 	//how tall is the tree?
-	const int treeHeight = std::ceil(std::log2(vertices / samples));
-	const int nodes = (int) std::pow(2, treeHeight + 1);
-	std::vector<std::unique_ptr<KDE>> kdeTree;
-	kdeTree.resize(nodes);
+	const int normalHeight = std::ceil(log2(vertices));
+	const int cutoffHeight = std::ceil(log2(samples));
+	const int treeHeight = normalHeight - cutoffHeight;
+	const int nodes = (int) std::pow(2, treeHeight);
+	std::vector<std::unique_ptr<KDE>> kdeTree(nodes);
+
+	buildMultiKDE(data, kdeTree, 1, nearestNeighbor, samples, trees, kernel);
+
+
+	/*
 
 	for (int i = 1; i < nodes; ++i) {
-		int layer = (int) std::log2(i);
-		int NodesOnCurrentLayer = (int) (std::pow(2, layer));
+		int layer = (int) std::log2(i) + 1;
+		int NodesOnCurrentLayer = (int) (std::pow(2, layer - 1));
 		//Start and End index of the data needed for this layer
 		int dataStartIndex = vertices * (int) ((double) (i - NodesOnCurrentLayer) / NodesOnCurrentLayer);
-		int dataPoints = i % 2 == 0 ? (int) std::ceil(vertices * (1. / NodesOnCurrentLayer)) : vertices * (int) ((1. / NodesOnCurrentLayer));
+		int dataPoints = (int) std::ceil(vertices * (1. / NodesOnCurrentLayer));
 		//creates a sub matrix by reference without doing copying
 		Eigen::MatrixXf subData = data.block(0, dataStartIndex, dimensions, dataPoints);
 		kdeTree[i] = (dataPoints <= samples) ?
-								 std::make_unique<KdeNaive>(subData, &kernel)
-																				 : //TODO: change to something else that works the way we needed.
+								 std::unique_ptr<KDE>(std::make_unique<KdeNaive>(subData, &kernel))
+																				 :
 								 std::unique_ptr<KDE>(std::make_unique<KdeUsingMrpt>(subData, nearestNeighbor,
 																																		 samples, trees, &kernel));
 
 	}
+	 */
 
-	KdeUsingMrpt kde(data, nearestNeighbor, samples, trees, &kernel);
+
+
+	//testing tree setup
+	//kdeTree[1] = std::unique_ptr<KDE>(std::make_unique<KdeUsingMrpt>(data, nearestNeighbor, samples, trees, &kernel));
+	//kdeTree[2] = std::make_unique<KdeNaive>(data, &kernel);
+
+	//FOR TESTING ONLY
+	//KdeUsingMrpt kde(data, nearestNeighbor, samples, trees, &kernel);
 
 	//TODO: weight
 	std::vector<float> vertexWeight(vertices);
-	const float ownContribution = (float) (1.0 - epsilon) * kernel(data.row(0), data.row(0));
+	const float ownContribution = (float) (1.0 - epsilon) * kernel(data.col(0), data.col(0));
 	degreeWeight(kdeTree[1].get(), vertexWeight.data(), ownContribution);
 
 	//TODO: Sample vertex

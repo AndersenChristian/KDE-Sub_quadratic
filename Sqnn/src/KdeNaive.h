@@ -30,6 +30,8 @@ public:
 		return data;
 	}
 
+	~KdeNaive() override = default;
+
 private:
 	const Eigen::MatrixXf &data;
 	const kernel::kernelLambda<float> *kernel;
