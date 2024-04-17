@@ -15,14 +15,14 @@
 #include "KDE.h"
 
 void buildMultiKDE(Eigen::MatrixXf data, std::vector<std::unique_ptr<KDE>> &kde, int index, int k,
-									 int samples, int trees, kernel::kernelLambda<float> kernel) {
+									 int samples, int trees, kernel::kernelLambda<float> *kernel) {
 	if (data.cols() <= samples) {
 		//TODO: create something different and return
 		return;
 	}
-	kde[index] = std::make_unique<KdeUsingMrpt>(data, k, samples, trees, &kernel);
-	buildMultiKDE(data.block(data.rows(), data.cols() / 2, 0, 0), kde, index * 2, k, samples, trees, kernel);
-	buildMultiKDE(data.block(data.rows(), data.cols() / 2, 0, 0), kde, index * 2 + 1, k, samples, trees, kernel);
+	kde[index] = std::make_unique<KdeUsingMrpt>(data, k, samples, trees, kernel);
+	buildMultiKDE(data.block(0, 0, data.rows(), std::ceil(data.cols()/2)), kde, index * 2, k, samples, trees, kernel);
+	buildMultiKDE(data.block(0, data.cols() / 2, data.rows(), data.cols()/2), kde, index * 2 + 1, k, samples, trees, kernel);
 }
 
 void
@@ -40,7 +40,22 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
 	const int nodes = (int) std::pow(2, treeHeight);
 	std::vector<std::unique_ptr<KDE>> kdeTree(nodes);
 
-	buildMultiKDE(data, kdeTree, 1, nearestNeighbor, samples, trees, kernel);
+	buildMultiKDE(data, kdeTree, 1, nearestNeighbor, samples, trees, &kernel);
+
+	//testing how it went, expecting these to be fairly similar.
+	printf("KDE full: %f\n", kdeTree[1]->query(data.col(1)));
+	printf("KDE 1'st: %f\n", kdeTree[2]->query(data.col(1)));
+	printf("KDE 2'nd: %f\n", kdeTree[3]->query(data.col(1)));
+	printf("KDE sum : %f\n", (1. / 2.) * ( kdeTree[2]->query(data.col(1)) + kdeTree[3]->query(data.col(1))));
+	//printf("KDE 4'th: %f\n", kdeTree[4]->query(data.col(1)));
+	//printf("KDE 5'th: %f\n", kdeTree[5]->query(data.col(1)));
+	//printf("KDE 6'th: %f\n", kdeTree[6]->query(data.col(1)));
+	//printf("KDE 7'th: %f\n", kdeTree[7]->query(data.col(1)));
+	float sum = 0;
+	for(int i = 4; i < 8; ++i){
+		sum += kdeTree[i]->query(data.col(1));
+	}
+	printf("KDE l'2: %f\n", sum/4);
 
 
 	/*
@@ -71,6 +86,7 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
 	//FOR TESTING ONLY
 	//KdeUsingMrpt kde(data, nearestNeighbor, samples, trees, &kernel);
 
+	/*
 	//TODO: weight
 	std::vector<float> vertexWeight(vertices);
 	const float ownContribution = (float) (1.0 - epsilon) * kernel(data.col(0), data.col(0));
@@ -80,6 +96,7 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
 	const int vertexSamplingNr = 2000;
 	std::vector<int> vertexSampled(vertexSamplingNr);
 	vertexSampling(vertices, vertexWeight.data(), vertexSamplingNr, vertexSampled.data());
+	 */
 
 	//TODO: sample edges and assign values
 
