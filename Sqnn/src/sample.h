@@ -38,7 +38,7 @@ inline void vertexSampling(int n, float *in, int samples, int *out) {
 	for (int i = 0; i < samples; ++i) {
 		start = 0, end = n - 1;
 		while (start != end) {
-			if(start < 0 || end < 0) std::exit(-2);
+			if (start < 0 || end < 0) std::exit(-2);
 			m = start + ((end - start) / 2);
 			a = start == 0 ? in[m] : in[m] - in[start - 1];  //ensures no out of index
 			b = in[end] - in[m];
@@ -51,6 +51,38 @@ inline void vertexSampling(int n, float *in, int samples, int *out) {
 		}
 		out[i] = start;
 	}
+}
+
+inline int
+proportionalDistanceSampling(const Eigen::VectorXf &q, const Eigen::MatrixXf &x, kernel::kernelLambda<float> &kernel) {
+	int size = (int) x.cols();
+	std::vector<float> weights(size);
+
+	//creates a runnins sum
+	weights[0] = kernel(q, x.col(0));
+	for (int i = 1; i < size; ++i) {
+		weights[i] = kernel(q, x.col(i)) + weights[i - 1];
+	}
+
+	//deal with random selection
+	std::mt19937 generator(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+	std::uniform_real_distribution<float> distribution(0, weights[size - 1]);
+	float ranValue = distribution(generator);
+
+	int low = 0, high = size - 1, result = -1;
+
+	while (low <= high) {
+		int mid = low + (high - low) / 2;
+
+		if (weights[mid] >= ranValue) {
+			result = mid;
+			high = mid - 1; // move to the left to find the smallest element
+		} else {
+			low = mid + 1;
+		}
+	}
+
+	return result;
 }
 
 #endif //KDE_SUB_QUADRATIC_SAMPLE_H

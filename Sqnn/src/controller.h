@@ -2,6 +2,10 @@
 // Created by cj on 10-4-24.
 //
 
+/*NOTE
+ * remember to remove any [maybe_unused] only there right now to suppress compiler warnings.
+ */
+
 #ifndef KDE_SUB_QUADRATIC_CONTROLLER_H
 #define KDE_SUB_QUADRATIC_CONTROLLER_H
 
@@ -21,15 +25,18 @@ void buildMultiKDE(Eigen::MatrixXf data, std::vector<std::unique_ptr<KDE>> &kde,
 		return;
 	}
 	kde[index] = std::make_unique<KdeUsingMrpt>(data, k, samples, trees, kernel);
-	buildMultiKDE(data.block(0, 0, data.rows(), std::ceil(data.cols()/2)), kde, index * 2, k, samples, trees, kernel);
-	buildMultiKDE(data.block(0, data.cols() / 2, data.rows(), data.cols()/2), kde, index * 2 + 1, k, samples, trees, kernel);
+	//recursively creates the tree
+	//TODO change this into a loop instead of recursion
+	buildMultiKDE(data.block(0, 0, data.rows(), std::ceil(data.cols() / 2)), kde, index * 2, k, samples, trees, kernel);
+	buildMultiKDE(data.block(0, data.cols() / 2, data.rows(), data.cols() / 2), kde, index * 2 + 1, k, samples, trees,
+								kernel);
 }
 
 void
 runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] const int dimensions,
 						const int nearestNeighbor,
 						const int samples, const int trees, [[maybe_unused]] const float rho, const double sigma,
-						const double epsilon) {
+						[[maybe_unused]] const double epsilon) {
 	kernel::kernelLambda<float> kernel = kernel::kernel_function<float>(kernel::type::Gaussian, sigma);
 
 	//TODO: multi-level KDE instead
@@ -40,23 +47,31 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
 	const int nodes = (int) std::pow(2, treeHeight);
 	std::vector<std::unique_ptr<KDE>> kdeTree(nodes);
 
-	buildMultiKDE(data, kdeTree, 1, nearestNeighbor, samples, trees, &kernel);
+	//buildMultiKDE(data, kdeTree, 1, nearestNeighbor, samples, trees, &kernel);
 
 	//testing how it went, expecting these to be fairly similar.
-	printf("KDE full: %f\n", kdeTree[1]->query(data.col(1)));
-	printf("KDE 1'st: %f\n", kdeTree[2]->query(data.col(1)));
-	printf("KDE 2'nd: %f\n", kdeTree[3]->query(data.col(1)));
-	printf("KDE sum : %f\n", (1. / 2.) * ( kdeTree[2]->query(data.col(1)) + kdeTree[3]->query(data.col(1))));
+	//printf("KDE full: %f\n", kdeTree[1]->query(data.col(1)));
+	//printf("KDE 1'st: %f\n", kdeTree[2]->query(data.col(1)));
+	//printf("KDE 2'nd: %f\n", kdeTree[3]->query(data.col(1)));
+	//printf("KDE sum : %f\n", (1. / 2.) * (kdeTree[2]->query(data.col(1)) + kdeTree[3]->query(data.col(1))));
 	//printf("KDE 4'th: %f\n", kdeTree[4]->query(data.col(1)));
 	//printf("KDE 5'th: %f\n", kdeTree[5]->query(data.col(1)));
 	//printf("KDE 6'th: %f\n", kdeTree[6]->query(data.col(1)));
 	//printf("KDE 7'th: %f\n", kdeTree[7]->query(data.col(1)));
-	float sum = 0;
-	for(int i = 4; i < 8; ++i){
-		sum += kdeTree[i]->query(data.col(1));
-	}
-	printf("KDE l'2: %f\n", sum/4);
+	//float sum = 0;
+	//for (int i = 4; i < 8; ++i) {
+	//	sum += kdeTree[i]->query(data.col(1));
+	//}
+	//printf("KDE l'2: %f\n", sum / 4);
 
+
+	/*TEST: proportionalDistanceSampling
+	 *
+	 *
+	 *
+	 */
+	int out = proportionalDistanceSampling(data.col(1),data.block(0,0,128,500),kernel);
+	printf("%d\n", out);
 
 	/*
 
@@ -98,7 +113,10 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
 	vertexSampling(vertices, vertexWeight.data(), vertexSamplingNr, vertexSampled.data());
 	 */
 
-	//TODO: sample edges and assign values
+	//TODO: sample edges
+
+
+	//TODO: assign values to sparse graph
 
 }
 
