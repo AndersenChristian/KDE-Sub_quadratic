@@ -85,4 +85,96 @@ proportionalDistanceSampling(const Eigen::VectorXf &q, const Eigen::MatrixXf &x,
 	return result;
 }
 
+inline void
+edgeSampling(std::vector<std::unique_ptr<KDE>> &tree, std::vector<int> &vertices, const Eigen::MatrixXf &data, std::pair<int, int> *out,
+						 kernel::kernelLambda<float> &kernel) {
+	//RNG generator for sampling
+	std::mt19937 generator(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+	std::uniform_real_distribution<float> distribution;
+
+
+	std::vector<std::pair<int, int>> active(vertices.size()); //<point index, tree index>
+	std::vector<std::pair<int, int>> passive(vertices.size());//<point index, tree index>
+
+	//index of the actual point working with
+	int aCurrentPoint = 0;
+	//index of the first empty position in the array or aCurrent depending on what is lowest.
+	int aEmptyPoint = 0;
+	//index of the position after the final data (potentially out of bounce of vector)
+	int aFinishPoint = (int) vertices.size();
+	//index of the last data in the array, -1 if empty
+	int pTopPoint = -1;
+	//index for where to put next digit in the out list
+	int oPoint = 0;
+
+	//fills the active list with all data, and index point to the root of the tree as a starting point.
+	for (int i = 0; i < (int) vertices.size(); ++i) {
+		active[i] = std::pair(vertices[i], 1);
+	}
+
+	//exits if both lists are empty.
+	while (aFinishPoint != 0) {
+
+		//index of the current node position
+		int currentNode = active[0].second;
+
+		//checks if there exist any child notes, else this is leaf and has to be dealt with differently.
+		if (currentNode * 2 < (int) tree.size()) {
+			//reference to both children
+			KDE &left = *tree[currentNode * 2];
+			KDE &right = *tree[currentNode * 2 + 1];
+			//runs for each entry in active.
+			while (aCurrentPoint++ != aFinishPoint) {
+				//grep the vector
+				Eigen::VectorXf vertex = data.col(active[aCurrentPoint].first);
+				//query its contribution to both childing
+				float _a = left.query(vertex);
+				float _b = right.query(vertex);
+
+				//setup distribution for RNG
+				distribution.param(std::uniform_real_distribution<float>::param_type(0, _a + _b));
+
+				if (distribution(generator) < _a) {
+					//going left, so it stays in active for next loop
+					active[aCurrentPoint].second *= 2;
+					active[aEmptyPoint++] = active[aCurrentPoint];
+				} else {
+					//going right, so it is pushed to passive until in becomes that nodes turn.
+					passive[++pTopPoint] = active[aCurrentPoint];
+				}
+			}
+		} else {
+			//it's a leaf
+			//compute block size
+			int rowStartNode = (int) std::pow(std::ceil(std::log2(active[0].second)), 2);
+			int positionInRow = active[0].second % rowStartNode;
+			int startCol = (int) ((double) data.cols() * ((double) positionInRow / (double) rowStartNode));
+			int endCol = (int) ((double) startCol + ((double) data.cols() / (double) rowStartNode));
+
+			//create block
+			Eigen::MatrixXf block = data.block(0, startCol, data.rows(), endCol);
+
+			//sample edges from the block
+			while (aCurrentPoint++ != aFinishPoint) {
+				int partner = proportionalDistanceSampling(data.col(active[aCurrentPoint].first), block, kernel);
+				out[oPoint++] = std::pair(active[aCurrentPoint].first, partner);
+			}
+
+		}
+		if (aEmptyPoint != 0) { //there is still elements in active
+			aFinishPoint = aEmptyPoint;
+			aCurrentPoint = 0;
+			aEmptyPoint = 0;
+		} else {
+			//active list is empty, try and fill it
+			int nextTree = passive[pTopPoint].second;
+			aFinishPoint = 0;
+			while (passive[pTopPoint].second == nextTree) {
+				active[aFinishPoint++] = passive[pTopPoint--];
+			}
+			aFinishPoint++; //push it off such that it doesn't point to last point, but the point after
+		}
+	}
+}
+
 #endif //KDE_SUB_QUADRATIC_SAMPLE_H

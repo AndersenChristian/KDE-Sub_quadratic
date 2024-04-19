@@ -47,7 +47,8 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
 	const int nodes = (int) std::pow(2, treeHeight);
 	std::vector<std::unique_ptr<KDE>> kdeTree(nodes);
 
-	//buildMultiKDE(data, kdeTree, 1, nearestNeighbor, samples, trees, &kernel);
+	buildMultiKDE(data, kdeTree, 1, nearestNeighbor, samples, trees, &kernel);
+	printf("build KDE tree\n");
 
 	//testing how it went, expecting these to be fairly similar.
 	//printf("KDE full: %f\n", kdeTree[1]->query(data.col(1)));
@@ -65,55 +66,30 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
 	//printf("KDE l'2: %f\n", sum / 4);
 
 
-	/*TEST: proportionalDistanceSampling
-	 *
-	 *
-	 *
-	 */
-	int out = proportionalDistanceSampling(data.col(1),data.block(0,0,128,500),kernel);
-	printf("%d\n", out);
+	//test distanceSampling for leaf notes
+	//int out = proportionalDistanceSampling(data.col(1),data.block(0,0,128,500),kernel);
+	//printf("%d\n", out);
 
-	/*
-
-	for (int i = 1; i < nodes; ++i) {
-		int layer = (int) std::log2(i) + 1;
-		int NodesOnCurrentLayer = (int) (std::pow(2, layer - 1));
-		//Start and End index of the data needed for this layer
-		int dataStartIndex = vertices * (int) ((double) (i - NodesOnCurrentLayer) / NodesOnCurrentLayer);
-		int dataPoints = (int) std::ceil(vertices * (1. / NodesOnCurrentLayer));
-		//creates a sub matrix by reference without doing copying
-		Eigen::MatrixXf subData = data.block(0, dataStartIndex, dimensions, dataPoints);
-		kdeTree[i] = (dataPoints <= samples) ?
-								 std::unique_ptr<KDE>(std::make_unique<KdeNaive>(subData, &kernel))
-																				 :
-								 std::unique_ptr<KDE>(std::make_unique<KdeUsingMrpt>(subData, nearestNeighbor,
-																																		 samples, trees, &kernel));
-
-	}
-	 */
-
-
-
-	//testing tree setup
+	//test tree setup
 	//kdeTree[1] = std::unique_ptr<KDE>(std::make_unique<KdeUsingMrpt>(data, nearestNeighbor, samples, trees, &kernel));
 	//kdeTree[2] = std::make_unique<KdeNaive>(data, &kernel);
 
-	//FOR TESTING ONLY
-	//KdeUsingMrpt kde(data, nearestNeighbor, samples, trees, &kernel);
-
-	/*
 	//TODO: weight
 	std::vector<float> vertexWeight(vertices);
 	const float ownContribution = (float) (1.0 - epsilon) * kernel(data.col(0), data.col(0));
 	degreeWeight(kdeTree[1].get(), vertexWeight.data(), ownContribution);
+	printf("weights gathered\n");
 
 	//TODO: Sample vertex
 	const int vertexSamplingNr = 2000;
 	std::vector<int> vertexSampled(vertexSamplingNr);
 	vertexSampling(vertices, vertexWeight.data(), vertexSamplingNr, vertexSampled.data());
-	 */
+	printf("sampled vertex\n");
 
 	//TODO: sample edges
+	std::vector<std::pair<int,int>> edgeSampled(vertexSamplingNr);
+	edgeSampling(kdeTree, vertexSampled, data, edgeSampled.data(), kernel);
+	printf("sampled edges\n");
 
 
 	//TODO: assign values to sparse graph
