@@ -114,6 +114,12 @@ edgeSampling(std::vector<std::unique_ptr<KDE>> &tree, std::vector<int> &vertices
 
 	//exits if both lists are empty.
 	while (aFinishPoint != 0) {
+		//debug prints
+		printf("aCurrent: %d\n", aCurrentPoint);
+		printf("aEmpty: %d\n", aEmptyPoint);
+		printf("aFinish: %d\n", aFinishPoint);
+		printf("pTop: %d\n", pTopPoint);
+		printf("o: %d\n", oPoint);
 
 		//index of the current node position
 		int currentNode = active[0].second;
@@ -140,24 +146,25 @@ edgeSampling(std::vector<std::unique_ptr<KDE>> &tree, std::vector<int> &vertices
 					active[aEmptyPoint++] = active[aCurrentPoint];
 				} else {
 					//going right, so it is pushed to passive until in becomes that nodes turn.
-					passive[++pTopPoint] = active[aCurrentPoint];
+					passive[++pTopPoint] = std::pair(active[aCurrentPoint].first, currentNode * 2 + 1);
 				}
 			}
 		} else {
 			//it's a leaf
 			//compute block size
-			int rowStartNode = (int) std::pow(std::ceil(std::log2(active[0].second)), 2);
+			int rowStartNode = (int) std::pow(2, std::floor(std::log2(active[0].second)));
 			int positionInRow = active[0].second % rowStartNode;
 			int startCol = (int) ((double) data.cols() * ((double) positionInRow / (double) rowStartNode));
-			int endCol = (int) ((double) startCol + ((double) data.cols() / (double) rowStartNode));
+			int dataPoints = (int) ((double) data.cols() / (double) rowStartNode);
 
 			//create block
-			Eigen::MatrixXf block = data.block(0, startCol, data.rows(), endCol);
+			Eigen::MatrixXf block = data.block(0, startCol, data.rows(), dataPoints);
 
 			//sample edges from the block
-			while (aCurrentPoint++ != aFinishPoint) {
+			while (aCurrentPoint != aFinishPoint) {
 				int partner = proportionalDistanceSampling(data.col(active[aCurrentPoint].first), block, kernel);
 				out[oPoint++] = std::pair(active[aCurrentPoint].first, partner);
+				aCurrentPoint++;
 			}
 
 		}
@@ -169,7 +176,7 @@ edgeSampling(std::vector<std::unique_ptr<KDE>> &tree, std::vector<int> &vertices
 			//active list is empty, try and fill it
 			int nextTree = passive[pTopPoint].second;
 			aFinishPoint = 0;
-			while (passive[pTopPoint].second == nextTree) {
+			while (passive[pTopPoint].second == nextTree && pTopPoint != -1) {
 				active[aFinishPoint++] = passive[pTopPoint--];
 			}
 			aFinishPoint++; //push it off such that it doesn't point to last point, but the point after
