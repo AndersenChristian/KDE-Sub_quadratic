@@ -120,6 +120,7 @@ edgeSampling(std::vector<std::unique_ptr<KDE>> &tree, std::vector<int> &vertices
 		printf("aFinish: %d\n", aFinishPoint);
 		printf("pTop: %d\n", pTopPoint);
 		printf("o: %d\n", oPoint);
+		printf("sum: %d\n\n", pTopPoint + oPoint + aFinishPoint);
 
 		//index of the current node position
 		int currentNode = active[0].second;
@@ -168,10 +169,12 @@ edgeSampling(std::vector<std::unique_ptr<KDE>> &tree, std::vector<int> &vertices
 			}
 
 		}
+
+		//todo move/delete this ugly shit
+		if(pTopPoint == -1 && aEmptyPoint == 0) return;
+
 		if (aEmptyPoint != 0) { //there is still elements in active
 			aFinishPoint = aEmptyPoint;
-			aCurrentPoint = 0;
-			aEmptyPoint = 0;
 		} else {
 			//active list is empty, try and fill it
 			int nextTree = passive[pTopPoint].second;
@@ -181,6 +184,9 @@ edgeSampling(std::vector<std::unique_ptr<KDE>> &tree, std::vector<int> &vertices
 			}
 			aFinishPoint++; //push it off such that it doesn't point to last point, but the point after
 		}
+		//reset for next iteration
+		aCurrentPoint = 0;
+		aEmptyPoint = 0;
 	}
 }
 
