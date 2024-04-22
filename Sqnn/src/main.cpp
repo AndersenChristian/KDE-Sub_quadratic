@@ -9,6 +9,9 @@
 #include <omp.h>
 #include <string>
 #include <unistd.h>
+#include <cstdio>
+#include <csignal>
+#include <cstdlib>
 
 #include "IoOperation.h"
 #include "controller.h"
@@ -17,8 +20,52 @@ using std::function;
 using std::vector;
 using std::string;
 
+FILE *outputFile;
+
+// Signal handler function
+void signalHandler(int signum) {
+	printf("Received signal: %d\n", signum);
+	// Flush stdout and sync file system
+	fflush(stdout);
+	fsync(fileno(stdout));
+
+	fclose(outputFile);
+
+	exit(signum);
+}
+
+// Function to generate a filename based on current time
+std::string generateFilename() {
+	// Get current time
+	std::time_t currentTime = std::time(nullptr);
+
+	// Convert time to struct tm
+	std::tm* localTime = std::localtime(&currentTime);
+
+	// Format the filename as YYMMDD-HHMM
+	char filename[20]; // Sufficient size for YYMMDD-HHMM
+	std::strftime(filename, sizeof(filename), "%y%m%d-%H%M", localTime);
+
+	return std::string(filename);
+}
+
 
 int main(int argc, char *argv[]) {
+	// Register signal handler for SIGSEGV (segmentation fault)
+	signal(SIGSEGV, signalHandler);
+	signal(SIGABRT, signalHandler);
+
+	// Generate filename
+	std::string filename = "output_file/" + generateFilename();
+
+	// Open the file using the generated filename
+	outputFile = freopen(filename.c_str(), "w", stdout);
+
+	if (outputFile == nullptr) {
+		// Handle error
+		perror("Error opening file");
+		return 1;
+	}
 
 	int n, d;
 	int k = 10, m = 500, trees = 10;
@@ -29,7 +76,7 @@ int main(int argc, char *argv[]) {
 	Eigen::MatrixXf X;
 
 	//limit amounts of threads and cores for omp
-	omp_set_num_threads(6);
+	omp_set_num_threads(1);
 
 	//read data vs autogen
 	if (argc == 5) {
@@ -84,6 +131,8 @@ int main(int argc, char *argv[]) {
 		printf("%d\t%f\n",i,kernel(X.col(1), X.col(2)));
 	}*/
 
+	// Close the file stream if you no longer need it
+	fclose(outputFile);
 
 	return 0;
 }

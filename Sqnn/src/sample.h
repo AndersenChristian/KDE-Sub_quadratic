@@ -182,7 +182,6 @@ edgeSampling(std::vector<std::unique_ptr<KDE>> &tree, std::vector<int> &vertices
 			while (passive[pTopPoint].second == nextTree && pTopPoint != -1) {
 				active[aFinishPoint++] = passive[pTopPoint--];
 			}
-			aFinishPoint++; //push it off such that it doesn't point to last point, but the point after
 		}
 		//reset for next iteration
 		aCurrentPoint = 0;

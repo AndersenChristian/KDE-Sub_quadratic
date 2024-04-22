@@ -20,12 +20,10 @@
 
 void buildMultiKDE(Eigen::MatrixXf data, std::vector<std::unique_ptr<KDE>> &kde, int index, int k,
 									 int samples, int trees, kernel::kernelLambda<float> *kernel) {
-	if (data.cols() <= samples) {
-		//TODO: create something different and return
-		return;
-	}
+	if (data.cols() <= samples) return;
 	kde[index] = std::make_unique<KdeUsingMrpt>(data, k, samples, trees, kernel);
 	//recursively creates the tree
+	printf("iteration: %d\n",index);
 	//TODO change this into a loop instead of recursion
 	buildMultiKDE(data.block(0, 0, data.rows(), std::ceil(data.cols() / 2)), kde, index * 2, k, samples, trees, kernel);
 	buildMultiKDE(data.block(0, data.cols() / 2, data.rows(), data.cols() / 2), kde, index * 2 + 1, k, samples, trees,
@@ -46,7 +44,12 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
 	const int treeHeight = normalHeight - cutoffHeight;
 	const int nodes = (int) std::pow(2, treeHeight);
 	std::vector<std::unique_ptr<KDE>> kdeTree(nodes);
+	printf("normal height: %d\n", normalHeight);
+	printf("cutoff height: %d\n", cutoffHeight);
+	printf("tree height: %d\n", treeHeight);
+	printf("nodes: %d\n\n", nodes);
 
+	printf("begin KDE-tree construction\n");
 	buildMultiKDE(data, kdeTree, 1, nearestNeighbor, samples, trees, &kernel);
 	printf("build KDE tree\n");
 
