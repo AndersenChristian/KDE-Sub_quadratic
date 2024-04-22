@@ -48,10 +48,11 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
 	printf("cutoff height: %d\n", cutoffHeight);
 	printf("tree height: %d\n", treeHeight);
 	printf("nodes: %d\n\n", nodes);
+	kdeTree[1] = std::make_unique<KdeUsingMrpt>(data, nearestNeighbor, samples, trees, &kernel);
 
-	printf("begin KDE-tree construction\n");
-	buildMultiKDE(data, kdeTree, 1, nearestNeighbor, samples, trees, &kernel);
-	printf("build KDE tree\n");
+	//printf("begin KDE-tree construction\n");
+	//buildMultiKDE(data, kdeTree, 1, nearestNeighbor, samples, trees, &kernel);
+	//printf("build KDE tree\n");
 
 	//testing how it went, expecting these to be fairly similar.
 	//printf("KDE full: %f\n", kdeTree[1]->query(data.col(1)));
@@ -83,6 +84,7 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
 	degreeWeight(kdeTree[1].get(), vertexWeight.data(), ownContribution);
 	printf("weights gathered\n");
 
+	/*
 	//TODO: Sample vertex
 	const int vertexSamplingNr = 2000;
 	std::vector<int> vertexSampled(vertexSamplingNr);
@@ -93,7 +95,7 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
 	std::vector<std::pair<int,int>> edgeSampled(vertexSamplingNr);
 	edgeSampling(kdeTree, vertexSampled, data, edgeSampled.data(), kernel);
 	printf("sampled edges\n");
-
+	*/
 
 	//TODO: assign values to sparse graph
 
