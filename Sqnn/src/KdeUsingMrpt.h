@@ -29,6 +29,7 @@ public:
 
 		//Needed for the ANN to be setup.
 		mrpt.grow_autotune(TARGET_RECALL, KNN, trees);
+		if(!mrpt.is_autotuned()) printf("couldn't autotune!\n\n");
 	}
 
 	float query(const Eigen::VectorXf &q) override {
