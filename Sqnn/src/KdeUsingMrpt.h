@@ -15,10 +15,10 @@
 class KdeUsingMrpt : public KDE {
 public:
 	//TODO Should only handle allocation. Make method for isValid after.
-	KdeUsingMrpt(const Eigen::MatrixXf &data, int n, int k, int samples, int trees,
+	KdeUsingMrpt(const Eigen::MatrixXf &data, int k, int samples, int trees,
 							 kernel::kernelLambda<float> *kernel)
-			: KNN(k), data(data), kernel(kernel), mrpt(data), n(n), samples(samples) {
-
+			: KNN(k), /*data(data.rows(), data.cols())*/ data(data), kernel(kernel), mrpt(data), n((int) data.cols()), samples(samples) {
+		//this->data = data;
 		//random number-generator setup
 		auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
 		generator.seed(seed);
@@ -29,6 +29,7 @@ public:
 
 		//Needed for the ANN to be setup.
 		mrpt.grow_autotune(TARGET_RECALL, KNN, trees);
+		if(!mrpt.is_autotuned()) printf("couldn't autotune!\n\n");
 	}
 
 	float query(const Eigen::VectorXf &q) override {
@@ -36,7 +37,7 @@ public:
 		std::vector<int> ann_list(n);
 
 		//Get candidates
-		int numberOfCandidates;
+		int numberOfCandidates = 0;
 		mrpt.query(q, ann_list.data(), &numberOfCandidates);
 
 		//compute NN contribution
@@ -67,27 +68,28 @@ public:
 
 	}
 
-	const Eigen::MatrixXf& getData() override {
+	const Eigen::MatrixXf &getData() override {
 		return data;
 	}
 
+	~KdeUsingMrpt() override = default;
 
 private:
 	const int KNN;
 	const double TARGET_RECALL = 0.9;
-	const Eigen::MatrixXf &data;
+	const Eigen::MatrixXf data;
 	const kernel::kernelLambda<float> *kernel;
 	Mrpt mrpt;
 	std::mt19937 generator;
 
 	const int n, samples;
 
-	inline int randomIndex(const int max) {
-		std::uniform_int_distribution<int> distribution(0, max);
+	int randomIndex(const int max) {
+		std::uniform_int_distribution<int> distribution(0, max - 1);
 		return distribution(this->generator);
 	}
 
-	inline float randomSampleAndSum(const Eigen::VectorXf &q) {
+	float randomSampleAndSum(const Eigen::VectorXf &q) {
 		float sum = 0;
 		for (int i = 0; i < samples; ++i) {
 			sum += (*kernel)(data.col(randomIndex(n)), q);

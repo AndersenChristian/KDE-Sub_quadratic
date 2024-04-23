@@ -365,6 +365,16 @@ public:
 	}
 
 
+	/**
+	 * Get whether the index has been autotuned.
+	 *
+	 * @return true if the index has been autotuned, false otherwise.
+	*/
+	bool is_autotuned() const {
+		return index_type == autotuned;
+	}
+
+
 	/**@}*/
 
 	/** @name Approximate k-nn search
