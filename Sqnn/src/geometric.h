@@ -28,11 +28,6 @@ namespace geometric {
     }
     return out;
   }
-
-  std::vector<float> DistanceSecondNorm(const Eigen::VectorXf &DATA, const Eigen::VectorXf &POINT) {
-    return DistanceSecondNorm((Eigen::MatrixXf) Eigen::Map<const Eigen::VectorXf>(DATA.data(), DATA.size(), 1), POINT);
-  }
-
 }
 
 #endif //KDE_SUB_QUADRATIC_GEOMETRIC_H
