@@ -9,13 +9,13 @@
 #include <Eigen/Dense>
 #include <chrono>
 #include <random>
-#include "kernelFunction.h"
+#include "kernel_function.h"
 
 #include "KDE.h"
 
 namespace sample {
 
-  inline void degreeWeight(KDE *kde, float *out, const float ownContribution) {
+  inline void DegreeWeight(KDE *kde, float *out, const float ownContribution) {
     const Eigen::MatrixXf &data = kde->getData();
 #pragma omp parallel for shared(out, data, kde, ownContribution) default(none)
     for (int i = 0; i < data.cols(); ++i) {

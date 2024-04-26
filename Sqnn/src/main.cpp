@@ -2,7 +2,7 @@
 // Created by cj on 6-2-24.
 //
 
-#include "kernelFunction.h"
+#include "kernel_function.h"
 
 #include <vector>
 #include <random>

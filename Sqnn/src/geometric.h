@@ -6,7 +6,7 @@
 #define KDE_SUB_QUADRATIC_GEOMETRIC_H
 
 #include <Eigen/Dense>
-#include <math.h>
+#include <cmath>
 
 namespace geometric{
   std::vector<float> Distance(const Eigen::MatrixXf &DATA, const Eigen::VectorXf &POINT){

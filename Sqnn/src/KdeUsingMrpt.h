@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-#include "kernelFunction.h"
+#include "kernel_function.h"
 #include "KDE.h"
 
 class KdeUsingMrpt : public KDE {

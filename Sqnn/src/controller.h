@@ -12,7 +12,7 @@
 #include <Eigen/Dense>
 #include <iostream>
 
-#include "kernelFunction.h"
+#include "kernel_function.h"
 #include "KdeUsingMrpt.h"
 #include "KdeNaive.h"
 #include "sample.h"
@@ -81,7 +81,7 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
 	//TODO: weight
 	std::vector<float> vertexWeight(vertices);
 	const float ownContribution = (float) (1.0 - epsilon) * kernel(data.col(0), data.col(0));
-	sample::degreeWeight(kdeTree[1].get(), vertexWeight.data(), ownContribution);
+  sample::DegreeWeight(kdeTree[1].get(), vertexWeight.data(), ownContribution);
 	printf("weights gathered\n");
 
 	/*

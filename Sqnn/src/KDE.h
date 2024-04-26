@@ -7,7 +7,7 @@
 
 #include <Eigen/Dense>
 
-#include "kernelFunction.h"
+#include "kernel_function.h"
 
 class KDE {
 public:
