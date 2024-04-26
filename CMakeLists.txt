@@ -31,7 +31,6 @@ set_source_files_properties(path/to/ANN/Mrpt.h PROPERTIES HEADER_FILE_ONLY TRUE)
 set(MAIN_SOURCES
         Sqnn/src/main.cpp
         Sqnn/src/KdeUsingMrpt.h
-        Sqnn/src/supportFunctions.h
         Sqnn/src/sample.h
         Sqnn/src/KDE.h
         Sqnn/src/IoOperation.h
