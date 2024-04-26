@@ -27,12 +27,12 @@ public:
     generator_.seed(seed);
 
     //if no k is needed (low accuracy)
-    //TODO: make sekund constructor since mrpt is still setup.
+    //TODO: make second constructor since mrpt is still setup.
     if (k == 0) return;
 
     //Needed for the ANN to be setup.
     mrpt_.grow_autotune(TARGET_RECALL_, KNN_, trees);
-    if (!mrpt_.is_autotuned()) printf("couldn't autotune!\n\n");
+    if (!mrpt_.is_autotuned()) printf("couldn't auto-tune!\n\n");
   }
 
 
@@ -50,7 +50,6 @@ public:
     for (float f: geometric::DistanceSecondNorm(nnMatrix, q))
       sum_a += (*KERNEL_)(f);
     sum_a /= (float) numberOfCandidates;
-
 
     //compute sample contribution
     float sum_b = 0;

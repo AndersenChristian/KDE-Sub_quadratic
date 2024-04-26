@@ -14,28 +14,28 @@
 
 class KdeNaive : public KDE {
 public:
-	KdeNaive(const Eigen::MatrixXf &data, kernel::kernelLambda<float> *kernel)
-			: data(data), kernel(kernel), n((int) data.rows()) {}
+  KdeNaive(const Eigen::MatrixXf &data, kernel::kernelLambda<float> *kernel)
+      : data(data), kernel(kernel), n((int) data.rows()) {}
 
-	float query(const Eigen::VectorXf &q) override {
-		float sum = 0;
+  float query(const Eigen::VectorXf &q) override {
+    float sum = 0;
 #pragma omp parallel for reduction(+:sum) shared(q) default(none)
-		for (int i = 0; i < n; ++i) {
-			sum += (*kernel)(data.col(i), q);
-		}
-		return sum / (float) n;
-	}
+    for (int i = 0; i < n; ++i) {
+      sum += (*kernel)(data.col(i), q);
+    }
+    return sum / (float) n;
+  }
 
-	const Eigen::MatrixXf& getData() override {
-		return data;
-	}
+  const Eigen::MatrixXf &getData() override {
+    return data;
+  }
 
-	~KdeNaive() override = default;
+  ~KdeNaive() override = default;
 
 private:
-	const Eigen::MatrixXf &data;
-	const kernel::kernelLambda<float> *kernel;
-	const int n;
+  const Eigen::MatrixXf &data;
+  const kernel::kernelLambda<float> *kernel;
+  const int n;
 };
 
 #endif //KDE_SUB_QUADRATIC_KDENAIVE_H
