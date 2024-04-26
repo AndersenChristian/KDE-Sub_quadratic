@@ -47,7 +47,7 @@ namespace kernel {
 	 * @param x, y both need to be same size, else it may lead to unwanted behavior.
 	 */
 	template<Arithmetic T>
-	using kernelLambda = std::function<T(const Eigen::VectorXf &x, const Eigen::VectorXf &y)>;
+	using kernelLambda = std::function<T(T distance)>;
 
 	/**
 	 * Given an ENUM of kernelType returns the corresponding lambda functions
@@ -58,26 +58,25 @@ namespace kernel {
 	 */
 	template<Arithmetic T>
 	inline kernelLambda<T> kernel_function(kernel::type kernel, const double sigma) {
-		const double sigma_squared = 2 * (sigma * sigma);
 		switch (kernel) {
 			//Gaussian kernel = e^(-||x-y||^2) where ||x-y||^2 is second norm
 			//Second norm = sqrt(|x0-y0|^2 + ... + |xd-yd|^2)
 			case kernel::type::Gaussian:
-				return kernelLambda<T>([sigma_squared](const Eigen::VectorXf &x, const Eigen::VectorXf &y) -> T {
-					T sum = 0;
-					for (int i = 0; i < x.size(); i++)
-						sum += mat::pow(mat::abs(x[i] - y[i]), 2);
-					sum = mat::sqrt(sum / sigma_squared);
+				return kernelLambda<T>([sigma](T distance) -> T {
+					T sum = distance / sigma;
 					return mat::exp(-sum);
 				});
 			case kernel::type::Exponential:
-				break;
+        return kernelLambda<T>([sigma](T distance) -> T {
+          T sum = std::sqrt(distance / sigma);
+          return mat::exp(-sum);
+        });
 			case kernel::type::Laplacian:
 				break;
 		}
 
 		//default (unreachable only there to avoid compiler warning)
-		return [](const Eigen::VectorXf &, const Eigen::VectorXf &) -> T { return T{}; };
+		return [](T distance) -> T { return T{}; };
 	}
 }
 

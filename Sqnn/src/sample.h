@@ -15,6 +15,7 @@
 
 namespace sample {
 
+  //TODO: complete redo
   inline void DegreeWeight(KDE *kde, float *out, const float ownContribution) {
     const Eigen::MatrixXf &data = kde->getData();
 #pragma omp parallel for shared(out, data, kde, ownContribution) default(none)
@@ -23,6 +24,7 @@ namespace sample {
     }
   }
 
+  //NOTE: a bit long. might need to be split into several functions
   inline void vertexSampling(int n, float *in, int samples, int *out) {
     //turning the degree list into a running sum list such
     //p_i = sum(p_1..p_i)
@@ -35,6 +37,7 @@ namespace sample {
     auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
     std::mt19937 generator(seed);
 
+    //TODO: more showing names. this make close to no sence.
     int start, end, m;
     float a, b, v;
     for (int i = 0; i < samples; ++i) {
@@ -55,6 +58,7 @@ namespace sample {
     }
   }
 
+  //NOTE: this might need to be rebuild to use O(n log n) in construction to be O(1) in running
   inline int
   proportionalDistanceSampling(const Eigen::VectorXf &q, const Eigen::MatrixXf &x,
                                kernel::kernelLambda<float> &kernel) {
@@ -88,6 +92,7 @@ namespace sample {
     return result;
   }
 
+  //TODO: break into several smaller sections. very long atm.
   inline void
   edgeSampling(std::vector<std::unique_ptr<KDE>> &tree, std::vector<int> &vertices, const Eigen::MatrixXf &data,
                std::pair<int, int> *out,
@@ -125,6 +130,7 @@ namespace sample {
       printf("pTop: %d\n", pTopPoint);
       printf("o: %d\n", oPoint);
       printf("sum: %d\n\n", pTopPoint + oPoint + aFinishPoint);
+      //debug end
 
       //index of the current node position
       int currentNode = active[0].second;

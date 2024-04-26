@@ -11,91 +11,101 @@
 
 #include "kernel_function.h"
 #include "KDE.h"
+#include "geometric.h"
 
 class KdeUsingMrpt : public KDE {
 public:
-	//TODO Should only handle allocation. Make method for isValid after.
-	KdeUsingMrpt(const Eigen::MatrixXf &data, int k, int samples, int trees, // NOLINT(*-msc51-cpp)
-							 kernel::kernelLambda<float> *kernel)
-			: KNN(k), /*data(data.rows(), data.cols())*/ data(data), kernel(kernel), mrpt(data), n((int) data.cols()), samples(samples) {
-		//this->data = data;
-		//random number-generator setup
-		auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-		generator.seed(seed);
+  //TODO Should only handle allocation. Make method for isValid after.
+  KdeUsingMrpt(const Eigen::MatrixXf &data, int k, int samples, int trees, // NOLINT(*-msc51-cpp)
+               kernel::kernelLambda<float> *kernel)
+      : KNN_(k), DATA_(data), KERNEL_(kernel), mrpt_(data), n((int) data.cols()),
+        samples(samples) {
+    //this->data = data;
+    //random number-generator setup
+    auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    generator_.seed(seed);
 
-		//if no k is needed (low accuracy)
-		//TODO: make sekund constructor since mrpt is still setup.
-		if (k == 0) return;
+    //if no k is needed (low accuracy)
+    //TODO: make sekund constructor since mrpt is still setup.
+    if (k == 0) return;
 
-		//Needed for the ANN to be setup.
-		mrpt.grow_autotune(TARGET_RECALL, KNN, trees);
-		if(!mrpt.is_autotuned()) printf("couldn't autotune!\n\n");
-	}
-
-	float query(const Eigen::VectorXf &q) override {
-		if (KNN == 0) return randomSampleAndSum(q);
-		std::vector<int> ann_list(n);
-
-		//Get candidates
-		int numberOfCandidates = 0;
-		mrpt.query(q, ann_list.data(), &numberOfCandidates);
-
-		//compute NN contribution
-		float sum_a = 0;
-#pragma omp parallel for reduction(+: sum_a) shared(ann_list, numberOfCandidates, q) default(none)
-		for (int i = 0; i < numberOfCandidates; ++i) {
-			int index = ann_list[i];
-			sum_a += (*kernel)(data.col(index), q);
-		}
-		sum_a /= (float) numberOfCandidates;
+    //Needed for the ANN to be setup.
+    mrpt_.grow_autotune(TARGET_RECALL_, KNN_, trees);
+    if (!mrpt_.is_autotuned()) printf("couldn't autotune!\n\n");
+  }
 
 
-		//compute sample contribution
-		float sum_b = 0;
-		int index;
+  float query(const Eigen::VectorXf &q) override {
+    //NOTE: not sure if this is suppose to be here
+    //if (KNN_ == 0) return randomSampleAndSum(q);
+
+    std::vector<int> ann_list(n);
+    int numberOfCandidates = 0;
+    mrpt_.query(q, ann_list.data(), &numberOfCandidates);
+
+    //compute NN contribution,
+    Eigen::MatrixXf nnMatrix(DATA_.rows(), ann_list.size());
+    for (int i = 0; i < (int) ann_list.size(); ++i) {
+      int colIndex = ann_list[i];
+      // Extract the column using Eigen's col method
+      nnMatrix.col(i) = DATA_.col(colIndex);
+    }
+    float sum_a = 0;
+    for (float f: geometric::DistanceSecondNorm(nnMatrix, q))
+      sum_a += f;
+    sum_a /= (float) numberOfCandidates;
+
+
+    //compute sample contribution
+    float sum_b = 0;
+    int index;
 #pragma omp parallel for private(index) reduction(+: sum_b) shared(numberOfCandidates, ann_list, q) default(none)
-		for (int i = 0; i < samples; ++i) {
-			do {
-				index = randomIndex(n);
-			} while (std::find(ann_list.begin(), ann_list.begin() + numberOfCandidates, index) !=
-							 ann_list.begin() + numberOfCandidates);
-			sum_b += (*kernel)(data.col(index), q);
-		}
-		sum_b /= (float) samples;
+    for (int i = 0; i < samples; ++i) {
+      do {
+        index = randomIndex(n);
+      } while (std::find(ann_list.begin(), ann_list.begin() + numberOfCandidates, index) !=
+               ann_list.begin() + numberOfCandidates);
+      sum_b += (*KERNEL_)(DATA_.col(index), q);
+    }
+    sum_b /= (float) samples;
 
-		//compute total approx
-		return (float) numberOfCandidates / (float) n * sum_a + (float) (n - numberOfCandidates) / (float) n * sum_b;
+    //compute total approx
+    return (float) numberOfCandidates / (float) n * sum_a + (float) (n - numberOfCandidates) / (float) n * sum_b;
 
-	}
+  }
 
-	const Eigen::MatrixXf &getData() override {
-		return data;
-	}
+  const Eigen::MatrixXf &getData() override {
+    return DATA_;
+  }
 
-	~KdeUsingMrpt() override = default;
+  ~KdeUsingMrpt() override = default;
 
 private:
-	const int KNN;
-	const double TARGET_RECALL = 0.9;
-	const Eigen::MatrixXf data;
-	const kernel::kernelLambda<float> *kernel;
-	Mrpt mrpt;
-	std::mt19937 generator;
+  const int KNN_;
+  const double TARGET_RECALL_ = 0.9;
+  const Eigen::MatrixXf DATA_;
+  const kernel::kernelLambda<float> *KERNEL_;
+  Mrpt mrpt_;
+  std::mt19937 generator_;
 
-	const int n, samples;
+  const int n, samples;
 
-	int randomIndex(const int max) {
-		std::uniform_int_distribution<int> distribution(0, max - 1);
-		return distribution(this->generator);
-	}
+  int randomIndex(const int max) {
+    std::uniform_int_distribution<int> distribution(0, max - 1);
+    return distribution(this->generator_);
+  }
 
-	float randomSampleAndSum(const Eigen::VectorXf &q) {
-		float sum = 0;
-		for (int i = 0; i < samples; ++i) {
-			sum += (*kernel)(data.col(randomIndex(n)), q);
-		}
-		return sum / (float) samples;
-	}
+  inline Eigen::MatrixXf SubMatrixFromIndexes(std::vector<int> indexes) {
+    Eigen::MatrixXf out(DATA_.rows(), indexes.size());
+    for (int i = 0; i < (int) indexes.size(); ++i) {
+      int colIndex = indexes[i];
+      // Extract the column using Eigen's col method
+      out.col(i) = DATA_.col(colIndex);
+    }
+    return out;
+  }
+
+
 };
 
 #endif //KDE_SUB_QUADRATIC_KDEUSINGMRPT_H
