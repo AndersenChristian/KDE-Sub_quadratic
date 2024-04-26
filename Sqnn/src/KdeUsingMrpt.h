@@ -5,7 +5,7 @@
 #ifndef KDE_SUB_QUADRATIC_KDEUSINGMRPT_H
 #define KDE_SUB_QUADRATIC_KDEUSINGMRPT_H
 
-#include <ANN/Mrpt.h>
+#include "Mrpt.h"
 #include <utility>
 #include <vector>
 
@@ -15,7 +15,7 @@
 class KdeUsingMrpt : public KDE {
 public:
 	//TODO Should only handle allocation. Make method for isValid after.
-	KdeUsingMrpt(const Eigen::MatrixXf &data, int k, int samples, int trees,
+	KdeUsingMrpt(const Eigen::MatrixXf &data, int k, int samples, int trees, // NOLINT(*-msc51-cpp)
 							 kernel::kernelLambda<float> *kernel)
 			: KNN(k), /*data(data.rows(), data.cols())*/ data(data), kernel(kernel), mrpt(data), n((int) data.cols()), samples(samples) {
 		//this->data = data;

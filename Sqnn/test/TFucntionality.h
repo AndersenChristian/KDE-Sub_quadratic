@@ -5,7 +5,7 @@
 #ifndef KDE_SUB_QUADRATIC_TFUCNTIONALITY_H
 #define KDE_SUB_QUADRATIC_TFUCNTIONALITY_H
 
-#include "../src/ANN/Mrpt.h"
+#include "src/Mrpt.h"
 
 #include <iostream>
 #include <Eigen/Dense>

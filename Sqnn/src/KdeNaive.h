@@ -5,7 +5,7 @@
 #ifndef KDE_SUB_QUADRATIC_KDENAIVE_H
 #define KDE_SUB_QUADRATIC_KDENAIVE_H
 
-#include "src/ANN/Mrpt.h"
+#include "Mrpt.h"
 #include <Eigen/Dense>
 #include <utility>
 #include <vector>
