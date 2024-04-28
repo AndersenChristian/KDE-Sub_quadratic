@@ -12,6 +12,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -Ofast -march=native -fopenmp
 include_directories(Sqnn)
 include_directories(Sqnn/src)
 
+add_subdirectory(Google_tests)
+
 # for errors when compiling
 add_compile_options(-Wall -Wextra -pedantic)
 

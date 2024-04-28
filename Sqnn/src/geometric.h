@@ -18,12 +18,11 @@ namespace geometric {
  * @return a list of distances
  */
   std::vector<float> DistanceSecondNorm(const Eigen::MatrixXf &DATA, const Eigen::VectorXf &POINT) {
-    std::vector<float> out(DATA.rows());
+    std::vector<float> out(DATA.cols());
     for (int i = 0; i < DATA.rows(); ++i) {
       const float *p_i = &POINT(i);
-      float *out_i = &out[i];
       for (int j = 0; j < DATA.cols(); ++j) {
-        *out_i += (float) std::pow((DATA(i, j) - *p_i), 2);
+        out[j] += (float) std::pow((DATA(i, j) - *p_i), 2);
       }
     }
     return out;
