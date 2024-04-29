@@ -44,7 +44,7 @@ std::string generateFilename() {
 
 	// Format the filename as YYMMDD-HHMM
 	char filename[20]; // Sufficient size for YYMMDD-HHMM
-	std::strftime(filename, sizeof(filename), "%y%m%d-%H%M", localTime);
+	std::strftime(filename, sizeof(filename), "%y%m%d-%H:%M", localTime);
 
 	return std::string(filename);
 }
