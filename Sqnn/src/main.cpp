@@ -83,8 +83,8 @@ int main(int argc, char *argv[]) {
 		k = std::stoi(argv[1]);
 		m = std::stoi(argv[2]);
 		sigma = std::stod(argv[3]);
-		std::string filename = ("../Sqnn/data/" + std::string(argv[4]));
-		if (!io::LoadData(filename, n, d, rho, h, X)) return -1;
+		std::string _filename = ("../Sqnn/data/" + std::string(argv[4]));
+		if (!io::LoadData(_filename, n, d, rho, h, X)) return -1;
 	}
 
 	runCppStyle(X, n, d, k, m, trees, rho, sigma, 0.01);
