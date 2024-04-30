@@ -15,12 +15,11 @@
 
 namespace sample {
 
-  //TODO: complete redo
-  inline void DegreeWeight(KDE *kde, float *out, const float ownContribution) {
-    const Eigen::MatrixXf &data = kde->getData();
-#pragma omp parallel for shared(out, data, kde, ownContribution) default(none)
-    for (int i = 0; i < data.cols(); ++i) {
-      out[i] = kde->query(data.col(i)) - (1. / (float) data.cols()) * ownContribution;
+
+  inline void DegreeWeight(const Eigen::MatrixXf &points, KDE &kde, const float ownContribution) {
+    std::vector<float> out(points.cols());
+    for (int i = 0; i < points.cols(); ++i) {
+      out[i] = kde.query(points.col(i)) - (ownContribution / (float) points.cols());
     }
   }
 
