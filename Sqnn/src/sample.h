@@ -95,7 +95,7 @@ namespace sample {
     }
 
     for (; i < buckets.size(); ++i) {
-      buckets[i] = Bucket{index[0] = HeapPop(max_heap).second)};
+      buckets[i] = Bucket(HeapPop(max_heap));
     }
 
     return buckets;
@@ -103,43 +103,29 @@ namespace sample {
 
 
   //NOTE: a bit long. might need to be split into several functions
-  inline void vertexSampling(int n, float *in, int samples, int *out) {
-    //turning the degree list into a running sum list such
-    //p_i = sum(p_1..p_i)
-    for (int i = 1; i < n; ++i) {
-      in[i] += in[i - 1];
-    }
+  inline std::vector<unsigned long>
+  vertexSampling(const std::vector<Bucket> &Buckets, const unsigned long samples, const float bucket_size) {
+    std::mt19937 rng(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+    std::uniform_int_distribution<unsigned long> Dist_bucket(0, Buckets.size() - 1);
+    std::uniform_real_distribution<float> Dist_internal_bucket(0, bucket_size);
+    std::vector<unsigned long> Vertices_index(samples);
 
-    //TODO consider getting sample from other place, not sure as i think the size is redundent
-    //random number-generator setup
-    auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-    std::mt19937 generator(seed);
-
-    //TODO: more showing names. this make close to no sence.
-    int start, end, m;
-    float a, b, v;
-    for (int i = 0; i < samples; ++i) {
-      start = 0, end = n - 1;
-      while (start != end) {
-        if (start < 0 || end < 0) std::exit(-2);
-        m = start + ((end - start) / 2);
-        a = start == 0 ? in[m] : in[m] - in[start - 1];  //ensures no out of index
-        b = in[end] - in[m];
-        std::uniform_real_distribution<float> distribution(0, a + b); //setup distribution limitation
-        v = distribution(generator);
-        if (v < a)
-          end = m;
-        else
-          start = m + 1;
-      }
-      out[i] = start;
+    for (auto &val: Vertices_index) {
+      auto bucket_nr = Dist_bucket(rng);
+      auto internal_bucket = Dist_internal_bucket(rng);
+      val = Buckets[bucket_nr].value[0] < internal_bucket ?
+            Buckets[bucket_nr].index[0] :
+            Buckets[bucket_nr].index[1];
     }
+    return Vertices_index;
   }
 
+
+  //DEBUG: still need to be looked at.
+
   //TODO: rework
-  inline int
-  proportionalDistanceSampling(const Eigen::VectorXf &q, const Eigen::MatrixXf &x,
-                               kernel::kernelLambda<float> &kernel) {
+  inline int proportionalDistanceSampling(const Eigen::VectorXf &q, const Eigen::MatrixXf &x,
+                                          kernel::kernelLambda<float> &kernel) {
     int size = (int) x.cols();
     std::vector<float> weights(size);
 
@@ -173,8 +159,7 @@ namespace sample {
   //TODO: break into several smaller sections. very long atm.
   inline void
   edgeSampling(std::vector<std::unique_ptr<KDE>> &tree, std::vector<int> &vertices, const Eigen::MatrixXf &data,
-               std::pair<int, int> *out,
-               kernel::kernelLambda<float> &kernel) {
+               std::pair<int, int> *out, kernel::kernelLambda<float> &kernel) {
     //RNG generator for sampling
     std::mt19937 generator(std::chrono::high_resolution_clock::now().time_since_epoch().count());
     std::uniform_real_distribution<float> distribution;
