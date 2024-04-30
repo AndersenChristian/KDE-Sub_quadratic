@@ -15,13 +15,57 @@
 
 namespace sample {
 
+  struct Bucket {
+    int index[2];
+    float value[2];
+  };
 
-  inline void DegreeWeight(const Eigen::MatrixXf &points, KDE &kde, const float ownContribution) {
+
+  std::vector<float> DegreeWeight(const Eigen::MatrixXf &points, KDE &kde, const float ownContribution) {
     std::vector<float> out(points.cols());
-    for (int i = 0; i < points.cols(); ++i) {
+    for (int i = 0; i < points.cols(); ++i)
       out[i] = kde.query(points.col(i)) - (ownContribution / (float) points.cols());
-    }
+    return out;
   }
+
+  //Note: might need overload method for single data
+  inline Bucket SetupBucket(const int index[2], float *value[2], float bucket_size){
+    Bucket bucket{};
+    bucket.index[0] = index[0];
+    bucket.index[1] = index[1];
+    bucket.value[0] = *value[0];
+    bucket.value[1] = *value[1];
+
+    float remaining_size;
+    if(*value[0] < *value[1]){
+      remaining_size = bucket_size - *value[0];
+      bucket.value[1] = remaining_size;
+      *value[1] -= remaining_size;
+    } else {
+      remaining_size = bucket_size - *value[1];
+      bucket.value[0] = remaining_size;
+      *value[0] -= remaining_size;
+    }
+
+    return bucket;
+  }
+
+  std::vector<Bucket> CreateSampleBuckets(const std::vector<float> &degree_weight, const float degree_weight_sum) {
+    float bucket_size = degree_weight_sum / (float) degree_weight.size();
+
+    //heaps holding value and index
+    std::set<std::pair<float, int>> min_heap;
+    std::set<std::pair<float, int>> max_heap;
+    for (unsigned long i = 0; i < degree_weight.size(); ++i) {
+      std::set<std::pair<float, int>> *_heap;
+      _heap = degree_weight[i] >= bucket_size ? &max_heap : &min_heap;
+      _heap->insert(std::pair<float, int>(degree_weight[i], i));
+    }
+
+    std::vector<Bucket> buckets;
+
+  }
+
 
   //NOTE: a bit long. might need to be split into several functions
   inline void vertexSampling(int n, float *in, int samples, int *out) {
