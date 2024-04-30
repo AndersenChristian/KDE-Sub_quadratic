@@ -37,9 +37,6 @@ public:
 
 
   float query(const Eigen::VectorXf &q) override {
-    //NOTE: not sure if this is suppose to be here
-    //if (KNN_ == 0) return randomSampleAndSum(q);
-
     std::vector<int> ann_list(N_);
     int numberOfCandidates = 0;
     mrpt_.query(q, ann_list.data(), &numberOfCandidates);
@@ -55,7 +52,7 @@ public:
     float sum_b = 0;
     std::vector<float> distances = geometric::DistanceSecondNorm(DATA_.leftCols(SAMPLES_ + KNN_ + 1), q);
     int count_samples = 0, index = 0;
-    while(count_samples < SAMPLES_){
+    while (count_samples < SAMPLES_) {
       if (std::find(ann_list.begin(), ann_list.end(), index++) != ann_list.end()) continue;
       ++count_samples;
       sum_b += (*KERNEL_)(distances[index - 1]);

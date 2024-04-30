@@ -58,7 +58,7 @@ namespace sample {
     }
   }
 
-  //NOTE: this might need to be rebuild to use O(n log n) in construction to be O(1) in running
+  //NOTE: this might need to be rebuild to use O(n log n) in construction to be O(1) in running instead of O(n) construct and O(log n) running
   inline int
   proportionalDistanceSampling(const Eigen::VectorXf &q, const Eigen::MatrixXf &x,
                                kernel::kernelLambda<float> &kernel) {

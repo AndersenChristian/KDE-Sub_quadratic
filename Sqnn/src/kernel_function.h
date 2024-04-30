@@ -75,8 +75,8 @@ namespace kernel {
 				break;
 		}
 
-		//default (unreachable only there to avoid compiler warning)
-		return [](T distance) -> T { return T{}; };
+		//default (unreachable, only there to avoid compiler warning)
+		return [](T) -> T { return T{}; };
 	}
 }
 

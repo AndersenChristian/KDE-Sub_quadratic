@@ -4,7 +4,6 @@
 
 #include <Eigen/Dense>
 #include <gtest/gtest.h>
-#include "IoOperation.h"
 #include "geometric.h"
 
 
@@ -77,19 +76,4 @@ TEST(GeoTest_distance_Test, input_modify) {
   for (int i = 0; i < data.size(); ++i) {
     EXPECT_EQ(data(i / 3, i % 3), data_base(i / 3, i % 3));
   }
-}
-
-TEST(distance_miss_test, tryial_1) {
-  Eigen::MatrixXf X;
-  Eigen::VectorXf q;
-  int k = 10, m = 6000, trees = 10;
-  int n, d;
-  float rho, h;
-  double sigma = 3.33;
-  std::string filename = "../../Sqnn/data/aloi-clean.data";
-  if (!io::LoadData(filename, n, d, rho, h, X)) throw ("couldn't read/open file");
-  q = X.col(24684);
-
-  geometric::DistanceSecondNorm(X, q);
-
 }

@@ -19,10 +19,9 @@ public:
 
   float query(const Eigen::VectorXf &q) override {
     float sum = 0;
-#pragma omp parallel for reduction(+:sum) shared(q) default(none)
-    for (int i = 0; i < n; ++i) {
-      sum += (*kernel)(data.col(i), q);
-    }
+    std::vector<float> distances = geometric::DistanceSecondNorm(data,q);
+    for (float &distance: distances)
+      sum += (*kernel)(distance);
     return sum / (float) n;
   }
 
