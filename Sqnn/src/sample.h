@@ -16,9 +16,25 @@
 namespace sample {
   using pair = std::pair<float, unsigned long>;
 
+
   struct Bucket {
-    unsigned long index[2];
-    float value[2];
+    unsigned long index[2]{};
+    float value[2]{};
+
+    Bucket() = default;
+
+    explicit Bucket(pair var) {
+      index[0] = var.second;
+      value[0] = var.first;
+    }
+
+    Bucket(pair var1, pair var2) {
+      index[0] = var1.second;
+      value[0] = var1.first;
+      index[1] = var2.second;
+      value[1] = var2.first;
+    }
+
   };
 
 
@@ -31,15 +47,10 @@ namespace sample {
 
   //Note: might need overload method for single data
   inline Bucket SetupBucket(pair &min_pair, pair &max_pair, const float bucket_size) {
-    Bucket bucket{};
-    bucket.index[0] = min_pair.second;
-    bucket.value[0] = min_pair.first;
-    bucket.index[1] = max_pair.second;
-
+    Bucket bucket(min_pair, max_pair);
     float remaining_size = bucket_size - min_pair.first;
     bucket.value[1] = remaining_size;
     max_pair.first -= remaining_size;
-
     return bucket;
   }
 
@@ -58,7 +69,7 @@ namespace sample {
   std::vector<Bucket> CreateSampleBuckets(const std::vector<float> &degree_weight, const float degree_weight_sum) {
     float bucket_size = degree_weight_sum / (float) degree_weight.size();
 
-    //building heaps holding value and index
+    //setup and populate a min and a max heap
     std::multiset<pair> min_heap;
     std::multiset<pair, std::greater<>> max_heap;
     for (unsigned long i = 0; i < degree_weight.size(); ++i) {
@@ -70,17 +81,21 @@ namespace sample {
 
     std::vector<Bucket> buckets(degree_weight.size());
 
-    //TODO: get min pair and max pair, create bucket and insert the remaining from max pair where needed.
-    //NOTE: going to have to do some control of whether min is empty for extreme cases.
-    for (auto &bucket: buckets) {
+    unsigned long i = 0;
+    for (; i < buckets.size(); ++i) {
+      if (min_heap.empty()) break;
       pair min = HeapPop(min_heap);
       pair max = HeapPop(max_heap);
-      bucket = SetupBucket(min, max, bucket_size);
+      buckets[i] = SetupBucket(min, max, bucket_size);
       if (max.first == 0) continue;
       if (max.first >= bucket_size)
         max_heap.insert(max);
       else
         min_heap.insert(max);
+    }
+
+    for (; i < buckets.size(); ++i) {
+      buckets[i] = Bucket{index[0] = HeapPop(max_heap).second)};
     }
 
     return buckets;
