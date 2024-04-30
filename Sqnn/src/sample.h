@@ -14,9 +14,10 @@
 #include "KDE.h"
 
 namespace sample {
+  using pair = std::pair<float, unsigned long>;
 
   struct Bucket {
-    int index[2];
+    unsigned long index[2];
     float value[2];
   };
 
@@ -29,41 +30,60 @@ namespace sample {
   }
 
   //Note: might need overload method for single data
-  inline Bucket SetupBucket(const int index[2], float *value[2], float bucket_size){
+  inline Bucket SetupBucket(pair &min_pair, pair &max_pair, const float bucket_size) {
     Bucket bucket{};
-    bucket.index[0] = index[0];
-    bucket.index[1] = index[1];
-    bucket.value[0] = *value[0];
-    bucket.value[1] = *value[1];
+    bucket.index[0] = min_pair.second;
+    bucket.value[0] = min_pair.first;
+    bucket.index[1] = max_pair.second;
 
-    float remaining_size;
-    if(*value[0] < *value[1]){
-      remaining_size = bucket_size - *value[0];
-      bucket.value[1] = remaining_size;
-      *value[1] -= remaining_size;
-    } else {
-      remaining_size = bucket_size - *value[1];
-      bucket.value[0] = remaining_size;
-      *value[0] -= remaining_size;
-    }
+    float remaining_size = bucket_size - min_pair.first;
+    bucket.value[1] = remaining_size;
+    max_pair.first -= remaining_size;
 
     return bucket;
+  }
+
+  std::pair<float, unsigned long> HeapPop(std::multiset<std::pair<float, unsigned long>> &heap) {
+    auto pair = *heap.begin();
+    heap.erase(pair);
+    return pair;
+  }
+
+  std::pair<float, unsigned long> HeapPop(std::multiset<std::pair<float, unsigned long>, std::greater<>> &heap) {
+    auto pair = *heap.begin();
+    heap.erase(pair);
+    return pair;
   }
 
   std::vector<Bucket> CreateSampleBuckets(const std::vector<float> &degree_weight, const float degree_weight_sum) {
     float bucket_size = degree_weight_sum / (float) degree_weight.size();
 
-    //heaps holding value and index
-    std::set<std::pair<float, int>> min_heap;
-    std::set<std::pair<float, int>> max_heap;
+    //building heaps holding value and index
+    std::multiset<pair> min_heap;
+    std::multiset<pair, std::greater<>> max_heap;
     for (unsigned long i = 0; i < degree_weight.size(); ++i) {
-      std::set<std::pair<float, int>> *_heap;
-      _heap = degree_weight[i] >= bucket_size ? &max_heap : &min_heap;
-      _heap->insert(std::pair<float, int>(degree_weight[i], i));
+      if (degree_weight[i] >= bucket_size)
+        max_heap.insert(pair(degree_weight[i], i));
+      else
+        min_heap.insert(pair(degree_weight[i], i));
     }
 
-    std::vector<Bucket> buckets;
+    std::vector<Bucket> buckets(degree_weight.size());
 
+    //TODO: get min pair and max pair, create bucket and insert the remaining from max pair where needed.
+    //NOTE: going to have to do some control of whether min is empty for extreme cases.
+    for (auto &bucket: buckets) {
+      pair min = HeapPop(min_heap);
+      pair max = HeapPop(max_heap);
+      bucket = SetupBucket(min, max, bucket_size);
+      if (max.first == 0) continue;
+      if (max.first >= bucket_size)
+        max_heap.insert(max);
+      else
+        min_heap.insert(max);
+    }
+
+    return buckets;
   }
 
 
@@ -101,7 +121,7 @@ namespace sample {
     }
   }
 
-  //NOTE: this might need to be rebuild to use O(n log n) in construction to be O(1) in running instead of O(n) construct and O(log n) running
+  //TODO: rework
   inline int
   proportionalDistanceSampling(const Eigen::VectorXf &q, const Eigen::MatrixXf &x,
                                kernel::kernelLambda<float> &kernel) {
