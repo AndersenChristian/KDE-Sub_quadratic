@@ -37,8 +37,6 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
             [[maybe_unused]] const double epsilon) {
   kernel::kernelLambda<float> kernel = kernel::kernel_function<float>(kernel::type::Gaussian, sigma);
 
-  //TODO: multi-level KDE instead
-  //how tall is the tree?
   const int normalHeight = std::ceil(log2(vertices));
   const int cutoffHeight = std::ceil(log2(samples));
   const int treeHeight = normalHeight - cutoffHeight;
@@ -48,40 +46,20 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
   printf("cutoff height: %d\n", cutoffHeight);
   printf("tree height: %d\n", treeHeight);
   printf("nodes: %d\n\n", nodes);
-  kdeTree[1] = std::make_unique<KdeUsingMrpt>(data, nearestNeighbor, samples, trees, &kernel);
+  //kdeTree[1] = std::make_unique<KdeUsingMrpt>(data, nearestNeighbor, samples, trees, &kernel);
 
-  //printf("begin KDE-tree construction\n");
-  //buildMultiKDE(data, kdeTree, 1, nearestNeighbor, samples, trees, &kernel);
-  //printf("build KDE tree\n");
-
-  //testing how it went, expecting these to be fairly similar.
-  //printf("KDE full: %f\n", kdeTree[1]->query(data.col(1)));
-  //printf("KDE 1'st: %f\n", kdeTree[2]->query(data.col(1)));
-  //printf("KDE 2'nd: %f\n", kdeTree[3]->query(data.col(1)));
-  //printf("KDE sum : %f\n", (1. / 2.) * (kdeTree[2]->query(data.col(1)) + kdeTree[3]->query(data.col(1))));
-  //printf("KDE 4'th: %f\n", kdeTree[4]->query(data.col(1)));
-  //printf("KDE 5'th: %f\n", kdeTree[5]->query(data.col(1)));
-  //printf("KDE 6'th: %f\n", kdeTree[6]->query(data.col(1)));
-  //printf("KDE 7'th: %f\n", kdeTree[7]->query(data.col(1)));
-  //float sum = 0;
-  //for (int i = 4; i < 8; ++i) {
-  //	sum += kdeTree[i]->query(data.col(1));
-  //}
-  //printf("KDE l'2: %f\n", sum / 4);
-
-
-  //test distanceSampling for leaf notes
-  //int out = proportionalDistanceSampling(data.col(1),data.block(0,0,128,500),kernel);
-  //printf("%d\n", out);
-
-  //test tree setup
-  //kdeTree[1] = std::unique_ptr<KDE>(std::make_unique<KdeUsingMrpt>(data, nearestNeighbor, samples, trees, &kernel));
-  //kdeTree[2] = std::make_unique<KdeNaive>(data, &kernel);
+  printf("begin KDE-tree construction\n");
+  buildMultiKDE(data, kdeTree, 1, nearestNeighbor, samples, trees, &kernel);
+  printf("build KDE tree\n");
 
   //TODO: weight
-  std::vector<float> vertexWeight(vertices);
-  //const float ownContribution = (float) (1.0 - epsilon) * kernel(data.col(0), data.col(0));
-  Sample::DegreeWeight(kdeTree[1].get(), vertexWeight.data(), ownContribution);
+  const float ownContribution = (float) (1.0 - epsilon) * kernel(1);
+  auto start = std::chrono::system_clock::now();
+  kdeTree[1].get()->query(data.col(1));
+  auto end = std::chrono::system_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+  printf("time gated: %ld", duration.count());
+  //Sample::DegreeWeight(data, *kdeTree[1], ownContribution);
   printf("weights gathered\n");
 
   /*

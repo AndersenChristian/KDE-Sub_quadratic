@@ -16,8 +16,10 @@ class testKDE : public KDE {
   }
 
   const Eigen::MatrixXf &getData() override {
-    return Eigen::MatrixXf(0, 0);
+    return data;
   }
+private:
+  Eigen::MatrixXf data;
 };
 
 TEST(SampleTest, DegreeWeight) {

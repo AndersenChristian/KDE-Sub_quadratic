@@ -54,6 +54,8 @@ int main(int argc, char *argv[]) {
 	// Register signal handler for SIGSEGV (segmentation fault)
 	signal(SIGSEGV, signalHandler);
 	signal(SIGABRT, signalHandler);
+  signal(SIGTERM, signalHandler);
+  signal(SIGKILL, signalHandler);
 
 	// Generate filename
 	std::string filename = "output_file/" + generateFilename();
