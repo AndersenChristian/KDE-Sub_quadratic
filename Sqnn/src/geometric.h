@@ -8,7 +8,7 @@
 #include <Eigen/Dense>
 #include <cmath>
 
-namespace geometric {
+namespace Geometric {
 
   /**
  *

@@ -19,7 +19,7 @@ public:
 
   float query(const Eigen::VectorXf &q) override {
     float sum = 0;
-    std::vector<float> distances = geometric::DistanceSecondNorm(data,q);
+    std::vector<float> distances = Geometric::DistanceSecondNorm(data, q);
     for (float &distance: distances)
       sum += (*kernel)(distance);
     return sum / (float) n;

@@ -15,7 +15,7 @@ TEST(GeoTest_distance_Test, distance_squared_matrix) {
   Eigen::VectorXf point(3);
   point << 5, 5, 5;
 
-  std::vector<float> dist = geometric::DistanceSecondNorm(data, point);
+  std::vector<float> dist = Geometric::DistanceSecondNorm(data, point);
   std::vector<float> exp_dist{21, 18, 21};
 
   EXPECT_EQ(dist.size(), exp_dist.size());
@@ -33,7 +33,7 @@ TEST(GeoTest_distance_Test, distance_wide_matrix) {
   Eigen::VectorXf point(3);
   point << 5, 5, 5;
 
-  std::vector<float> dist = geometric::DistanceSecondNorm(data, point);
+  std::vector<float> dist = Geometric::DistanceSecondNorm(data, point);
   std::vector<float> exp_dist{21, 18, 21, 21, 18, 21};
 
   EXPECT_EQ(dist.size(), exp_dist.size());
@@ -51,7 +51,7 @@ TEST(GeoTest_distance_Test, distance_tall_matrix) {
   Eigen::VectorXf point(3);
   point << 5, 5, 5;
 
-  std::vector<float> dist = geometric::DistanceSecondNorm(data, point);
+  std::vector<float> dist = Geometric::DistanceSecondNorm(data, point);
   std::vector<float> exp_dist{21, 18, 21};
 
   EXPECT_EQ(dist.size(), exp_dist.size());
@@ -71,7 +71,7 @@ TEST(GeoTest_distance_Test, input_modify) {
 
   Eigen::MatrixXf data_base = data.block(0, 0, 3, 3);
 
-  std::vector<float> dist = geometric::DistanceSecondNorm(data, point);
+  std::vector<float> dist = Geometric::DistanceSecondNorm(data, point);
 
   for (int i = 0; i < data.size(); ++i) {
     EXPECT_EQ(data(i / 3, i % 3), data_base(i / 3, i % 3));

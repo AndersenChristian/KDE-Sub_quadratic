@@ -10,10 +10,11 @@
 #include <chrono>
 #include <random>
 #include "kernel_function.h"
+#include "geometric.h"
 
 #include "KDE.h"
 
-namespace sample {
+namespace Sample {
   using pair = std::pair<float, unsigned long>;
 
 
@@ -34,7 +35,6 @@ namespace sample {
       index[1] = var2.second;
       value[1] = var2.first;
     }
-
   };
 
 
@@ -102,9 +102,8 @@ namespace sample {
   }
 
 
-  //NOTE: a bit long. might need to be split into several functions
   inline std::vector<unsigned long>
-  vertexSampling(const std::vector<Bucket> &Buckets, const unsigned long samples, const float bucket_size) {
+  VertexSampling(const std::vector<Bucket> &Buckets, const unsigned long samples, const float bucket_size) {
     std::mt19937 rng(std::chrono::high_resolution_clock::now().time_since_epoch().count());
     std::uniform_int_distribution<unsigned long> Dist_bucket(0, Buckets.size() - 1);
     std::uniform_real_distribution<float> Dist_internal_bucket(0, bucket_size);
@@ -113,7 +112,7 @@ namespace sample {
     for (auto &val: Vertices_index) {
       auto bucket_nr = Dist_bucket(rng);
       auto internal_bucket = Dist_internal_bucket(rng);
-      val = Buckets[bucket_nr].value[0] < internal_bucket ?
+      val = Buckets[bucket_nr].value[0] > internal_bucket ?
             Buckets[bucket_nr].index[0] :
             Buckets[bucket_nr].index[1];
     }
@@ -130,6 +129,7 @@ namespace sample {
     std::vector<float> weights(size);
 
     //creates a runnins sum
+    weights[0] = Geometric::
     weights[0] = kernel(q, x.col(0));
     for (int i = 1; i < size; ++i) {
       weights[i] = kernel(q, x.col(i)) + weights[i - 1];
@@ -186,15 +186,6 @@ namespace sample {
 
     //exits if both lists are empty.
     while (aFinishPoint != 0) {
-      //debug prints
-      printf("aCurrent: %d\n", aCurrentPoint);
-      printf("aEmpty: %d\n", aEmptyPoint);
-      printf("aFinish: %d\n", aFinishPoint);
-      printf("pTop: %d\n", pTopPoint);
-      printf("o: %d\n", oPoint);
-      printf("sum: %d\n\n", pTopPoint + oPoint + aFinishPoint);
-      //debug end
-
       //index of the current node position
       int currentNode = active[0].second;
 
@@ -261,6 +252,8 @@ namespace sample {
       aEmptyPoint = 0;
     }
   }
+
+
 
 }
 

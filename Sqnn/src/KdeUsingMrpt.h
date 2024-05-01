@@ -44,13 +44,13 @@ public:
     //compute NN contribution,
     Eigen::MatrixXf nnMatrix = SubMatrixFromIndexes(ann_list);
     float sum_a = 0;
-    for (float f: geometric::DistanceSecondNorm(nnMatrix, q))
+    for (float f: Geometric::DistanceSecondNorm(nnMatrix, q))
       sum_a += (*KERNEL_)(f);
     sum_a /= (float) numberOfCandidates;
 
     //compute sample contribution
     float sum_b = 0;
-    std::vector<float> distances = geometric::DistanceSecondNorm(DATA_.leftCols(SAMPLES_ + KNN_ + 1), q);
+    std::vector<float> distances = Geometric::DistanceSecondNorm(DATA_.leftCols(SAMPLES_ + KNN_ + 1), q);
     int count_samples = 0, index = 0;
     while (count_samples < SAMPLES_) {
       if (std::find(ann_list.begin(), ann_list.end(), index++) != ann_list.end()) continue;
