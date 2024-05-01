@@ -121,18 +121,16 @@ namespace Sample {
 
 
   //DEBUG: still need to be looked at.
-
   //TODO: rework
   inline int proportionalDistanceSampling(const Eigen::VectorXf &q, const Eigen::MatrixXf &x,
                                           kernel::kernelLambda<float> &kernel) {
     int size = (int) x.cols();
-    std::vector<float> weights(size);
 
     //creates a runnins sum
-    weights[0] = Geometric::
-    weights[0] = kernel(q, x.col(0));
+    auto weights = Geometric::DistanceSecondNorm(x, q);
+    weights[0] = kernel(weights[0]);
     for (int i = 1; i < size; ++i) {
-      weights[i] = kernel(q, x.col(i)) + weights[i - 1];
+      weights[i] = kernel(weights[i]) + weights[i - 1];
     }
 
     //deal with random selection
@@ -252,6 +250,7 @@ namespace Sample {
       aEmptyPoint = 0;
     }
   }
+
 
 
 
