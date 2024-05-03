@@ -4,6 +4,7 @@
 
 #include <gtest/gtest.h>
 #include <Eigen/Dense>
+#include <unsupported/Eigen/MatrixFunctions>
 #include "IoOperation.h"
 #include "geometric.h"
 #include "kernel_function.h"
@@ -15,14 +16,14 @@ protected:
   SpeedTest() {
     int n, d;
     int k = 10, m = 500, trees = 10;
-    double sigma = 3.3366;
+    sigma = 3.3366;
     float rho, h;
     std::string _filename = ("../../Sqnn/data/aloi-clean.data");
     std::cout << _filename << "\n";
     io::LoadData(_filename, n, d, rho, h, data);
     this->kernel = kernel::kernel_function<float>(kernel::type::Gaussian, sigma);
-    this->dist = data.colwise()-((Eigen::VectorXf) data.col(0));
-    this->dist.colwise().norm();
+    this->dist = (data.colwise() - ((Eigen::VectorXf) data.col(0))).colwise().norm();
+    kDist = this->dist / sigma;
   }
 
   ~SpeedTest() override = default;
@@ -43,22 +44,28 @@ protected:
 public:
   Eigen::MatrixXf data;
   kernel::kernelLambda<float> kernel;
-  Eigen::MatrixXf dist;
+  Eigen::VectorXf dist;
+  Eigen::VectorXf kDist;
+  double sigma;
 
 };
 
-TEST_F(SpeedTest, SetupOverheadTimeAprox){}
+TEST_F(SpeedTest, SetupOverheadTimeAprox) {}
 
 TEST_F(SpeedTest, ForLoop) {
   Geometric::DistanceSecondNorm(data, data.col(0));
 }
 
-TEST_F(SpeedTest, EigenDist){
+TEST_F(SpeedTest, EigenDist) {
   Eigen::VectorXf point = data.col(0);
-  (data.colwise()-point).colwise().norm();
+  (data.colwise() - point).colwise().squaredNorm();
 }
 
-TEST_F(SpeedTest, KernelCost){
-  for(unsigned long i = 0; i < this->dist.size(); ++i)
-    this->kernel(this->dist(i));
+TEST_F(SpeedTest, KernelDivision) {
+  this->dist / sigma;
+}
+
+TEST_F(SpeedTest, KernelCost) {
+  for (unsigned long i = 0; i < this->dist.size(); ++i)
+    this->kernel(this->dist((long) i));
 }
