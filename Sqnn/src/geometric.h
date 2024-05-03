@@ -18,7 +18,6 @@ namespace Geometric {
  * @return a list of distances
  */
   inline std::vector<float> DistanceSecondNorm(const Eigen::MatrixXf &DATA, const Eigen::VectorXf &POINT) {
-    (DATA-POINT).lpNorm<>();
     std::vector<float> out(DATA.cols());
     for (int i = 0; i < DATA.rows(); ++i) {
       const float *p_i = &POINT(i);
