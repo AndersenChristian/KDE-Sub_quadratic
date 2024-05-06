@@ -19,11 +19,12 @@ protected:
     sigma = 3.3366;
     float rho, h;
     std::string _filename = ("../../Sqnn/data/aloi-clean.data");
-    std::cout << _filename << "\n";
     io::LoadData(_filename, n, d, rho, h, data);
     this->kernel = kernel::kernel_function<float>(kernel::type::Gaussian, sigma);
     this->dist = (data.colwise() - ((Eigen::VectorXf) data.col(0))).colwise().norm();
     kDist = this->dist / sigma;
+    omp_set_num_threads(1);
+    Eigen::setNbThreads(1);
   }
 
   ~SpeedTest() override = default;
@@ -37,8 +38,7 @@ protected:
   }
 
   void TearDown() override {
-    // Code here will be called immediately after each test (right
-    // before the destructor).
+    std::cout << std::endl;
   }
 
 public:
@@ -68,4 +68,22 @@ TEST_F(SpeedTest, KernelDivision) {
 TEST_F(SpeedTest, KernelCost) {
   for (unsigned long i = 0; i < this->dist.size(); ++i)
     this->kernel(this->dist((long) i));
+}
+
+TEST_F(SpeedTest, Distance) {
+  auto start_time = std::chrono::high_resolution_clock::now();
+  auto g = Geometric::DistanceSecondNorm(data, data.col(0));
+  auto end_time = std::chrono::high_resolution_clock::now();
+  printf("time normal distance: %ld ns\n",
+         std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+
+  Eigen::VectorXf point = data.col(0);
+  start_time = std::chrono::high_resolution_clock::now();
+  auto e = (data.colwise() - point).colwise().squaredNorm();
+  end_time = std::chrono::high_resolution_clock::now();
+  printf("time Eigen distance: %ld ns\n",
+         std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+
+  g[0] += 1;
+  e(0);
 }
