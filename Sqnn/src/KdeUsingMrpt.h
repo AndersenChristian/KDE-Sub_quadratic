@@ -12,7 +12,7 @@
 #include "Mrpt.h"
 #include "kernel_function.h"
 #include "KDE.h"
-#include "geometric.h"
+
 
 class KdeUsingMrpt : public KDE {
 public:
@@ -37,30 +37,15 @@ public:
 
 
   float query(const Eigen::VectorXf &q) override {
-    std::vector<int> ann_list(N_);
-    int numberOfCandidates = 0;
-    mrpt_.query(q, ann_list.data(), &numberOfCandidates);
-
-    //compute NN contribution,
-    Eigen::MatrixXf nnMatrix = SubMatrixFromIndexes(ann_list);
     float sum_a = 0;
-    for (float f: Geometric::DistanceSecondNorm(nnMatrix, q))
-      sum_a += (*KERNEL_)(f);
-    sum_a /= (float) numberOfCandidates;
+    if (KNN_ != 0)
+      sum_a = NNContribution(q) / (float) KNN_;
 
-    //compute sample contribution
-    float sum_b = 0;
-    std::vector<float> distances = Geometric::DistanceSecondNorm(DATA_.leftCols(SAMPLES_ + KNN_ + 1), q);
-    int count_samples = 0, index = 0;
-    while (count_samples < SAMPLES_) {
-      if (std::find(ann_list.begin(), ann_list.end(), index++) != ann_list.end()) continue;
-      ++count_samples;
-      sum_b += (*KERNEL_)(distances[index - 1]);
-    }
-    sum_b /= (float) SAMPLES_;
+    float sum_b = SampleContribution(q) / (float) SAMPLES_;
 
     //compute total approx
-    return (float) numberOfCandidates / (float) N_ * sum_a + (float) (N_ - numberOfCandidates) / (float) N_ * sum_b;
+    return ((float) KNN_ / (float) N_) * sum_a + ((float) (N_ - KNN_) / (float) N_) * sum_b;
+
 
   }
 
@@ -79,13 +64,48 @@ private:
   std::mt19937 generator_;
 
   inline Eigen::MatrixXf SubMatrixFromIndexes(std::vector<int> &indexes) {
-    Eigen::MatrixXf out(DATA_.rows(), indexes.size());
-    for (int i = 0; i < (int) indexes.size(); ++i) {
+    Eigen::MatrixXf out(DATA_.rows(), KNN_);
+    for (int i = 0; i < (int) KNN_; ++i) {
       int colIndex = indexes[i];
       // Extract the column using Eigen's col method
       out.col(i) = DATA_.col(colIndex);
     }
     return out;
+  }
+
+  inline float NNContribution(const Eigen::VectorXf &q) {
+    std::vector<int> ann_list(N_);
+    int numberOfCandidates = 0;
+    auto pre_mrpt = std::chrono::high_resolution_clock::now();
+    mrpt_.query(q, ann_list.data(), &numberOfCandidates);
+    auto post_mrpt = std::chrono::high_resolution_clock::now();
+
+    Eigen::MatrixXf nnMatrix = SubMatrixFromIndexes(ann_list);
+    float sum = 0;
+    auto distance_a = (nnMatrix.colwise() - q).colwise().lpNorm<2>();
+    for (int i = 0; i < KNN_; ++i) sum += (*KERNEL_)(distance_a(i));
+    auto post_nn_contribution = std::chrono::high_resolution_clock::now();
+
+    //TEST prints
+    printf("mrpt: %ld ns\n", std::chrono::duration_cast<std::chrono::nanoseconds>(post_mrpt - pre_mrpt).count());
+    printf("nn contribution: %ld ns\n",
+           std::chrono::duration_cast<std::chrono::nanoseconds>(post_nn_contribution - post_mrpt).count());
+
+    return sum;
+  }
+
+  inline float SampleContribution(const Eigen::VectorXf &q) {
+    auto pre_sample = std::chrono::high_resolution_clock::now();
+    //compute sample contribution
+    float sum = 0;
+    auto distance_b = (DATA_.leftCols(SAMPLES_).colwise() - q).colwise().lpNorm<2>();
+    for (int i = 0; i < SAMPLES_; ++i) sum += (*KERNEL_)(distance_b(i));
+    auto post_sample = std::chrono::high_resolution_clock::now();
+
+    printf("sample: %ld ns\n",
+           std::chrono::duration_cast<std::chrono::nanoseconds>(post_sample - pre_sample).count());
+
+    return sum;
   }
 
 };

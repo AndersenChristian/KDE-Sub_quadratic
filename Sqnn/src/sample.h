@@ -10,7 +10,6 @@
 #include <chrono>
 #include <random>
 #include "kernel_function.h"
-#include "geometric.h"
 
 #include "KDE.h"
 

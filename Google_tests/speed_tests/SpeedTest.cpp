@@ -4,10 +4,10 @@
 
 #include <gtest/gtest.h>
 #include <Eigen/Dense>
-#include <unsupported/Eigen/MatrixFunctions>
 #include "IoOperation.h"
-#include "geometric.h"
 #include "kernel_function.h"
+#include "KdeNaive.h"
+#include "KdeUsingMrpt.h"
 
 class SpeedTest : public ::testing::Test {
 protected:
@@ -50,12 +50,6 @@ public:
 
 };
 
-TEST_F(SpeedTest, SetupOverheadTimeAprox) {}
-
-TEST_F(SpeedTest, ForLoop) {
-  Geometric::DistanceSecondNorm(data, data.col(0));
-}
-
 TEST_F(SpeedTest, EigenDist) {
   Eigen::VectorXf point = data.col(0);
   (data.colwise() - point).colwise().squaredNorm();
@@ -71,19 +65,31 @@ TEST_F(SpeedTest, KernelCost) {
 }
 
 TEST_F(SpeedTest, Distance) {
-  auto start_time = std::chrono::high_resolution_clock::now();
-  auto g = Geometric::DistanceSecondNorm(data, data.col(0));
-  auto end_time = std::chrono::high_resolution_clock::now();
-  printf("time normal distance: %ld ns\n",
-         std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
-
   Eigen::VectorXf point = data.col(0);
-  start_time = std::chrono::high_resolution_clock::now();
+  auto start_time = std::chrono::high_resolution_clock::now();
   auto e = (data.colwise() - point).colwise().squaredNorm();
-  end_time = std::chrono::high_resolution_clock::now();
+  auto end_time = std::chrono::high_resolution_clock::now();
   printf("time Eigen distance: %ld ns\n",
          std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
-
-  g[0] += 1;
   e(0);
+}
+
+TEST_F(SpeedTest, NaiveKDE) {
+  KdeNaive KDE(data, &kernel);
+  auto start_time = std::chrono::high_resolution_clock::now();
+  auto f = KDE.query(data.col(0));
+  auto end_time = std::chrono::high_resolution_clock::now();
+  f += f;
+  printf("time KDE Naive: %ld ns\n",
+         std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+}
+
+TEST_F(SpeedTest, AnnKDE) {
+  KdeUsingMrpt KDE(data, 120, 430, 10, &kernel);
+  auto start_time = std::chrono::high_resolution_clock::now();
+  auto f = KDE.query(data.col(0));
+  auto end_time = std::chrono::high_resolution_clock::now();
+  f += f;
+  printf("time KDE Naive: %ld ns\n",
+         std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
 }

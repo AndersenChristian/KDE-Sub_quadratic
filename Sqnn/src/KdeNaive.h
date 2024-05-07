@@ -18,11 +18,17 @@ public:
       : data(data), kernel(kernel), n((int) data.rows()) {}
 
   float query(const Eigen::VectorXf &q) override {
+//    float sum = 0;
+//    std::vector<float> distances = Geometric::DistanceSecondNorm(data, q);
+//    for (float &distance: distances)
+//      sum += (*kernel)(distance);
+//    return sum / (float) n;
+
+    auto distances = (data.colwise() - q).colwise().lpNorm<2>();
     float sum = 0;
-    std::vector<float> distances = Geometric::DistanceSecondNorm(data, q);
-    for (float &distance: distances)
-      sum += (*kernel)(distance);
-    return sum / (float) n;
+    for (int i = 0; i < distances.size(); ++i)
+      sum += (*kernel)(distances(i));
+    return sum / (float) data.size();
   }
 
   const Eigen::MatrixXf &getData() override {
