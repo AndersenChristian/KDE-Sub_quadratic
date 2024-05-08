@@ -27,8 +27,6 @@ namespace io {
 
     // Check if the file opened successfully
     if (file.is_open()) {
-      //TODO: loop and safe.
-      //TODO: maybe parallel? not sure yet, or if that could cause mem issue
       std::string line;
       std::stringstream ss(line);
 
@@ -50,7 +48,11 @@ namespace io {
       file.close();
       return true;
     } else {
-      printf("couldn't find file.\nshutdown...");
+      printf("couldn't find file.\nshutdown...\n");
+      printf("path:\n");
+      printf("%s\n", std::filesystem::current_path().c_str());
+      printf("%s\n", FILENAME.c_str());
+      fflush(stdout);
       return false;
     }
   }

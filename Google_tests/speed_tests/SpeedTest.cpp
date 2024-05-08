@@ -11,6 +11,8 @@
 #include "KdeUsingMrpt.h"
 #include "KdeUsingMrpt2.h"
 
+std::string filename;
+
 class SpeedTest : public ::testing::Test {
 protected:
   // You can define the constructor and destructor:
@@ -20,8 +22,7 @@ protected:
     int k = 10, m = 500, trees = 10;
     sigma = 3.3366;
     float rho, h;
-    std::string _filename = ("../../Sqnn/data/aloi-clean.data");
-    io::LoadData(_filename, n, d, rho, h, data);
+    if (!io::LoadData(filename, n, d, rho, h, data)) exit(-1);
     this->kernel = kernel::kernel_function<float>(kernel::type::Gaussian, sigma);
     this->dist = (data.colwise() - ((Eigen::VectorXf) data.col(0))).colwise().norm();
     kDist = this->dist / sigma;
@@ -49,7 +50,6 @@ public:
   Eigen::VectorXf dist;
   Eigen::VectorXf kDist;
   double sigma;
-
 };
 
 TEST_F(SpeedTest, EigenDist) {
@@ -79,9 +79,8 @@ TEST_F(SpeedTest, Distance) {
 TEST_F(SpeedTest, NaiveKDE) {
   KdeNaive KDE(data, &kernel);
   auto start_time = std::chrono::high_resolution_clock::now();
-  auto f = KDE.query(data.col(0));
+  KDE.query(data.col(0));
   auto end_time = std::chrono::high_resolution_clock::now();
-  f += f;
   printf("time KDE Naive: %ld ns\n",
          std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
 }
@@ -89,9 +88,8 @@ TEST_F(SpeedTest, NaiveKDE) {
 TEST_F(SpeedTest, AnnKDE) {
   KdeUsingMrpt KDE(data, 120, 430, 10, &kernel);
   auto start_time = std::chrono::high_resolution_clock::now();
-  auto f = KDE.query(data.col(0));
+  KDE.query(data.col(0));
   auto end_time = std::chrono::high_resolution_clock::now();
-  f += f;
   printf("time KDE Naive: %ld ns\n",
          std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
 }
@@ -112,7 +110,7 @@ TEST_F(SpeedTest, MathEigen) {
   auto pre_dist = std::chrono::high_resolution_clock::now();
   distances = distances / 2;
   auto post_dist = std::chrono::high_resolution_clock::now();
-  distances = distances.unaryExpr([](float v){return std::exp(-v);});
+  distances.unaryExpr([](float v){return std::exp(-v);});
   auto post_expr = std::chrono::high_resolution_clock::now();
   printf("division: %ld ns\n",
          std::chrono::duration_cast<std::chrono::nanoseconds>(post_dist - pre_dist).count());
@@ -124,16 +122,17 @@ TEST_F(SpeedTest, MathEigen2) {
   Eigen::VectorXf distances = (data.colwise() - data.col(0)).colwise().lpNorm<2>();
   float sigma = 2;
   auto pre_expr = std::chrono::high_resolution_clock::now();
-  distances = distances.unaryExpr([sigma](float v){return std::exp(-v/sigma);});
+  distances.unaryExpr([sigma](float v){return std::exp(-v/sigma);});
   auto post_expr = std::chrono::high_resolution_clock::now();
   printf("expr: %ld ns\n",
          std::chrono::duration_cast<std::chrono::nanoseconds>(post_expr - pre_expr).count());
 }
 
 TEST_F(SpeedTest, MathEigen_Using_Kernel) {
+  const kernel::kernelLambda<float> _kf = kernel::kernel_function<float>(kernel::type::Gaussian, sigma);
   Eigen::VectorXf distances = (data.colwise() - data.col(0)).colwise().lpNorm<2>();
   auto pre_expr = std::chrono::high_resolution_clock::now();
-  distances = distances.unaryExpr(kernel);
+  distances.unaryExpr(_kf);
   auto post_expr = std::chrono::high_resolution_clock::now();
   printf("expr: %ld ns\n",
          std::chrono::duration_cast<std::chrono::nanoseconds>(post_expr - pre_expr).count());
@@ -142,7 +141,7 @@ TEST_F(SpeedTest, MathEigen_Using_Kernel) {
 TEST_F(SpeedTest, MathEigen_Using_Switch) {
   Eigen::VectorXf distances = (data.colwise() - data.col(0)).colwise().lpNorm<2>();
   auto pre_expr = std::chrono::high_resolution_clock::now();
-  distances = kernel::KernelFunction(kernel::type::Gaussian, (float) sigma, distances);
+  kernel::KernelFunction(kernel::type::Gaussian, (float) sigma, distances);
   auto post_expr = std::chrono::high_resolution_clock::now();
   printf("expr: %ld ns\n",
          std::chrono::duration_cast<std::chrono::nanoseconds>(post_expr - pre_expr).count());
@@ -151,9 +150,16 @@ TEST_F(SpeedTest, MathEigen_Using_Switch) {
 TEST_F(SpeedTest, FastestOfAll){
   KdeUsingMrpt2 KDE(data, 120, 430, 10, kernel::type::Gaussian);
   auto start_time = std::chrono::high_resolution_clock::now();
-  auto f = KDE.query(data.col(0));
+  KDE.query(data.col(0));
   auto end_time = std::chrono::high_resolution_clock::now();
-  f += f;
   printf("time KDE Naive: %ld ns\n",
          std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+}
+
+int main(int argc, char **argv){
+  printf("%d\n", argc);
+  testing::InitGoogleTest();
+  printf("%s\n", argv[1]);
+  filename = "Sqnn/data/" + std::string(argv[1]);
+  return RUN_ALL_TESTS();
 }
