@@ -123,9 +123,7 @@ namespace Sample {
     for(int i = 0; i < data.cols(); ++i){
       std::uniform_int_distribution<long> getIndex(i, data.cols() - 1);
       long index = getIndex(rng);
-      auto tmp = data.col(i);
-      data.col(i) = data.col(index);
-      data.col(index) = tmp;
+      data.col(i).swap(data.col(index));
     }
   }
 

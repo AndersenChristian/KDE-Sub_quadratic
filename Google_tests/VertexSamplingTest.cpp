@@ -138,4 +138,5 @@ TEST(MatrixShuffle, Small){
   Eigen::MatrixXf data(3,3);
   data << 1, 2, 3, 4, 5, 6, 7, 8, 9;
   Sample::ShuffleMatrixRows(data);
+  std::cout << data;
 }
