@@ -5,7 +5,7 @@
 #ifndef KDE_SUB_QUADRATIC_KDENAIVE_H
 #define KDE_SUB_QUADRATIC_KDENAIVE_H
 
-#include "src/ANN/Mrpt.h"
+#include "Mrpt.h"
 #include <Eigen/Dense>
 #include <utility>
 #include <vector>
@@ -14,28 +14,33 @@
 
 class KdeNaive : public KDE {
 public:
-	KdeNaive(const Eigen::MatrixXf &data, kernel::kernelLambda<float> *kernel)
-			: data(data), kernel(kernel), n((int) data.rows()) {}
+  KdeNaive(const Eigen::MatrixXf &data, kernel::kernelLambda<float> *kernel)
+      : data(data), kernel(kernel), n((int) data.rows()) {}
 
-	float query(const Eigen::VectorXf &q) override {
-		float sum = 0;
-#pragma omp parallel for reduction(+:sum) shared(q) default(none)
-		for (int i = 0; i < n; ++i) {
-			sum += (*kernel)(data.col(i), q);
-		}
-		return sum / (float) n;
-	}
+  float query(const Eigen::VectorXf &q) override {
+//    float sum = 0;
+//    std::vector<float> distances = Geometric::DistanceSecondNorm(data, q);
+//    for (float &distance: distances)
+//      sum += (*kernel)(distance);
+//    return sum / (float) n;
 
-	const Eigen::MatrixXf& getData() override {
-		return data;
-	}
+    auto distances = (data.colwise() - q).colwise().lpNorm<2>();
+    float sum = 0;
+    for (int i = 0; i < distances.size(); ++i)
+      sum += (*kernel)(distances(i));
+    return sum / (float) data.size();
+  }
 
-	~KdeNaive() override = default;
+  const Eigen::MatrixXf &getData() override {
+    return data;
+  }
+
+  ~KdeNaive() override = default;
 
 private:
-	const Eigen::MatrixXf &data;
-	const kernel::kernelLambda<float> *kernel;
-	const int n;
+  const Eigen::MatrixXf &data;
+  const kernel::kernelLambda<float> *kernel;
+  const int n;
 };
 
 #endif //KDE_SUB_QUADRATIC_KDENAIVE_H

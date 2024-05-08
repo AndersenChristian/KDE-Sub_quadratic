@@ -12,48 +12,50 @@
 
 namespace io {
 
-	inline std::vector<std::string> splitString(const std::string &str) {
-		std::istringstream iss(str);
-		std::vector<std::string> result;
-		for (std::string s; iss >> s;) {
-			result.push_back(s);
-		}
-		return result;
-	}
+  inline std::vector<std::string> SplitString(const std::string &str) {
+    std::istringstream iss(str);
+    std::vector<std::string> result;
+    for (std::string s; iss >> s;) {
+      result.push_back(s);
+    }
+    return result;
+  }
 
-	inline bool loadData(const std::string &filename, int &n, int &d, float &rho, float &h, Eigen::MatrixXf &X) {
-		// Open the file
-		std::ifstream file(filename);
+  inline bool LoadData(const std::string &FILENAME, int &n, int &d, float &rho, float &h, Eigen::MatrixXf &X) {
+    // Open the file
+    std::ifstream file(FILENAME);
 
-		// Check if the file opened successfully
-		if (file.is_open()) {
-			//TODO: loop and safe.
-			//TODO: maybe parallel? not sure yet, or if that could cause mem issue
-			std::string line;
-			std::stringstream ss(line);
+    // Check if the file opened successfully
+    if (file.is_open()) {
+      std::string line;
+      std::stringstream ss(line);
 
-			std::getline(file, line);
-			std::vector<std::string> data = splitString(line);
-			n = std::stoi(data[0]);
-			d = std::stoi(data[1]);
-			rho = std::stof(data[2]);
-			h = std:: stof(data[3]);
+      std::getline(file, line);
+      std::vector<std::string> data = SplitString(line);
+      n = std::stoi(data[0]);
+      d = std::stoi(data[1]);
+      rho = std::stof(data[2]);
+      h = std::stof(data[3]);
 
-			X = Eigen::MatrixXf(d, n);
+      X = Eigen::MatrixXf(d, n);
 
-			for (int i = 0; i < n; ++i) {
-				std::getline(file, line);
-				data = splitString(line);
-				for (int j = 0; j < d; ++j)
-					X(j, i) = std::stof(data[j]);
-			}
-			file.close();
-			return true;
-		} else {
-			printf("couldn't find file.\nshutdown...");
-			return false;
-		}
-	}
+      for (int i = 0; i < n; ++i) {
+        std::getline(file, line);
+        data = SplitString(line);
+        for (int j = 0; j < d; ++j)
+          X(j, i) = std::stof(data[j]);
+      }
+      file.close();
+      return true;
+    } else {
+      printf("couldn't find file.\nshutdown...\n");
+      printf("path:\n");
+      printf("%s\n", std::filesystem::current_path().c_str());
+      printf("%s\n", FILENAME.c_str());
+      fflush(stdout);
+      return false;
+    }
+  }
 }
 
 #endif //KDE_SUB_QUADRATIC_IOOPERATION_H

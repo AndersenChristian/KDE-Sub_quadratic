@@ -5,12 +5,14 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Set compiler flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -Ofast -march=native -fopenmp -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98 -Ofast -march=native -fopenmp")
 #for profiling
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -Ofast -march=native -fopenmp -O0")
 
 include_directories(Sqnn)
 include_directories(Sqnn/src)
+
+add_subdirectory(Google_tests)
 
 # for errors when compiling
 add_compile_options(-Wall -Wextra -pedantic)
@@ -31,7 +33,6 @@ set_source_files_properties(path/to/ANN/Mrpt.h PROPERTIES HEADER_FILE_ONLY TRUE)
 set(MAIN_SOURCES
         Sqnn/src/main.cpp
         Sqnn/src/KdeUsingMrpt.h
-        Sqnn/src/supportFunctions.h
         Sqnn/src/sample.h
         Sqnn/src/KDE.h
         Sqnn/src/IoOperation.h

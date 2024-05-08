@@ -5,7 +5,7 @@
 #ifndef KDE_SUB_QUADRATIC_TFUCNTIONALITY_H
 #define KDE_SUB_QUADRATIC_TFUCNTIONALITY_H
 
-#include "../src/ANN/Mrpt.h"
+#include "src/Mrpt.h"
 
 #include <iostream>
 #include <Eigen/Dense>
@@ -96,7 +96,7 @@ void test2(){
 	int out[k];
 	float out_distances[k];
 
-	Mrpt::exact_knn(point.data(), data[0].data(),d, n, k, out, out_distances);
+	Mrpt::exact_knn(point.DATA_(), data[0].DATA_(), d, n, k, out, out_distances);
 
 	std::cout << out[0] << "\t" << out_distances[0] << "\t" << data[0][out[0]];
 

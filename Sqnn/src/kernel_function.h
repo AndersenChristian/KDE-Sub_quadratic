@@ -2,8 +2,8 @@
 // Created by cj on 6-2-24.
 //
 
-#ifndef KDE_SUB_QUADRATIC_KERNELFUNCTION_H
-#define KDE_SUB_QUADRATIC_KERNELFUNCTION_H
+#ifndef KDE_SUB_QUADRATIC_KERNEL_FUNCTION_H
+#define KDE_SUB_QUADRATIC_KERNEL_FUNCTION_H
 
 #include <functional>
 #include <cmath>
@@ -47,7 +47,7 @@ namespace kernel {
 	 * @param x, y both need to be same size, else it may lead to unwanted behavior.
 	 */
 	template<Arithmetic T>
-	using kernelLambda = std::function<T(const Eigen::VectorXf &x, const Eigen::VectorXf &y)>;
+	using kernelLambda = std::function<T(T distance)>;
 
 	/**
 	 * Given an ENUM of kernelType returns the corresponding lambda functions
@@ -58,27 +58,36 @@ namespace kernel {
 	 */
 	template<Arithmetic T>
 	inline kernelLambda<T> kernel_function(kernel::type kernel, const double sigma) {
-		const double sigma_squared = 2 * (sigma * sigma);
 		switch (kernel) {
 			//Gaussian kernel = e^(-||x-y||^2) where ||x-y||^2 is second norm
 			//Second norm = sqrt(|x0-y0|^2 + ... + |xd-yd|^2)
 			case kernel::type::Gaussian:
-				return kernelLambda<T>([sigma_squared](const Eigen::VectorXf &x, const Eigen::VectorXf &y) -> T {
-					T sum = 0;
-					for (int i = 0; i < x.size(); i++)
-						sum += mat::pow(mat::abs(x[i] - y[i]), 2);
-					sum = mat::sqrt(sum / sigma_squared);
-					return mat::exp(-sum);
+				return kernelLambda<T>([sigma](T distance) -> T {
+					return mat::exp(-distance / sigma);
 				});
 			case kernel::type::Exponential:
-				break;
+        return kernelLambda<T>([sigma](T distance) -> T {
+          T sum = std::sqrt(distance / sigma);
+          return mat::exp(-sum);
+        });
 			case kernel::type::Laplacian:
 				break;
 		}
 
-		//default (unreachable only there to avoid compiler warning)
-		return [](const Eigen::VectorXf &, const Eigen::VectorXf &) -> T { return T{}; };
+		//default (unreachable, only there to avoid compiler warning)
+		return [](T) -> T { return T{}; };
 	}
+
+  inline Eigen::VectorXf KernelFunction(const kernel::type kernel, const float sigma, const Eigen::VectorXf &distances){
+    switch (kernel) {
+      case type::Gaussian:
+        return distances.unaryExpr([sigma](float v){return std::exp(-v/sigma);});
+      case type::Exponential:
+        break;
+      case type::Laplacian:
+        break;
+    }
+  }
 }
 
-#endif //KDE_SUB_QUADRATIC_KERNELFUNCTION_H
+#endif //KDE_SUB_QUADRATIC_KERNEL_FUNCTION_H

@@ -1,7 +1,7 @@
 Test info:
 k: 10-50
 d: 10-30
-n: 500-1000
+N_: 500-1000
 tests per k: 500
 
 value is computed as: hits / k / tests per k -> returning procent of correctly selected near neighbor.

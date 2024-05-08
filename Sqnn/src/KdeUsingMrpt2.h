@@ -2,8 +2,8 @@
 // Created by cj on 26-3-24.
 //
 
-#ifndef KDE_SUB_QUADRATIC_KDEUSINGMRPT_H
-#define KDE_SUB_QUADRATIC_KDEUSINGMRPT_H
+#ifndef KDE_SUB_QUADRATIC_KDEUSINGMRPT2_H
+#define KDE_SUB_QUADRATIC_KDEUSINGMRPT2_H
 
 #include <utility>
 #include <vector>
@@ -14,18 +14,13 @@
 #include "KDE.h"
 
 
-class KdeUsingMrpt : public KDE {
+class KdeUsingMrpt2 : public KDE {
 public:
   //TODO Should only handle allocation. Make method for isValid after.
-  KdeUsingMrpt(const Eigen::MatrixXf &data, int k, int samples, int trees, // NOLINT(*-msc51-cpp)
-               kernel::kernelLambda<float> *kernel)
+  KdeUsingMrpt2(const Eigen::MatrixXf &data, int k, int samples, int trees, // NOLINT(*-msc51-cpp)
+               kernel::type kernel)
       : KNN_(k), N_((int) data.cols()), SAMPLES_(samples), DATA_(data), KERNEL_(kernel),
         mrpt_(data) {
-    //this->data = data;
-    //random number-generator setup
-    auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-    generator_.seed(seed);
-
     //if no k is needed (low accuracy)
     //TODO: make second constructor since mrpt is still setup.
     if (k == 0) return;
@@ -53,22 +48,19 @@ public:
     return DATA_;
   }
 
-  ~KdeUsingMrpt() override = default;
+  ~KdeUsingMrpt2() override = default;
 
 private:
   const int KNN_, N_, SAMPLES_;
-  const double TARGET_RECALL_ = 0.9;
+  const double TARGET_RECALL_ = 0.5, SIGMA_ = 3.3366;
   const Eigen::MatrixXf DATA_;
-  const kernel::kernelLambda<float> *KERNEL_;
+  const kernel::type KERNEL_;
   Mrpt mrpt_;
-  std::mt19937 generator_;
 
   inline Eigen::MatrixXf SubMatrixFromIndexes(std::vector<int> &indexes) {
     Eigen::MatrixXf out(DATA_.rows(), KNN_);
     for (int i = 0; i < (int) KNN_; ++i) {
-      int colIndex = indexes[i];
-      // Extract the column using Eigen's col method
-      out.col(i) = DATA_.col(colIndex);
+      out.col(i) = DATA_.col(indexes[i]);
     }
     return out;
   }
@@ -81,10 +73,10 @@ private:
     auto post_mrpt = std::chrono::high_resolution_clock::now();
 
     Eigen::MatrixXf nnMatrix = SubMatrixFromIndexes(ann_list);
-    float sum = 0;
-    auto distance_a = (nnMatrix.colwise() - q).colwise().lpNorm<2>();
-    for (int i = 0; i < KNN_; ++i) sum += (*KERNEL_)(distance_a(i));
+    auto distance = (nnMatrix.colwise() - q).colwise().lpNorm<2>();
+    kernel::KernelFunction(KERNEL_, (float) SIGMA_, distance);
     auto post_nn_contribution = std::chrono::high_resolution_clock::now();
+    float sum = distance.sum();
 
     //TEST prints
     printf("mrpt: %ld ns\n", std::chrono::duration_cast<std::chrono::nanoseconds>(post_mrpt - pre_mrpt).count());
@@ -97,10 +89,10 @@ private:
   inline float SampleContribution(const Eigen::VectorXf &q) {
     auto pre_sample = std::chrono::high_resolution_clock::now();
     //compute sample contribution
-    float sum = 0;
-    auto distance_b = (DATA_.leftCols(SAMPLES_).colwise() - q).colwise().lpNorm<2>();
-    for (int i = 0; i < SAMPLES_; ++i) sum += (*KERNEL_)(distance_b(i));
+    auto distance = (DATA_.leftCols(SAMPLES_).colwise() - q).colwise().lpNorm<2>();
+    kernel::KernelFunction(KERNEL_, (float) SIGMA_, distance);
     auto post_sample = std::chrono::high_resolution_clock::now();
+    float sum = distance.sum();
 
     printf("sample: %ld ns\n",
            std::chrono::duration_cast<std::chrono::nanoseconds>(post_sample - pre_sample).count());
@@ -110,4 +102,4 @@ private:
 
 };
 
-#endif //KDE_SUB_QUADRATIC_KDEUSINGMRPT_H
+#endif //KDE_SUB_QUADRATIC_KDEUSINGMRPT2_H

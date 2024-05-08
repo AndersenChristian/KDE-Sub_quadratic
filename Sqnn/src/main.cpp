@@ -2,7 +2,7 @@
 // Created by cj on 6-2-24.
 //
 
-#include "kernelFunction.h"
+#include "kernel_function.h"
 
 #include <vector>
 #include <random>
@@ -44,7 +44,7 @@ std::string generateFilename() {
 
 	// Format the filename as YYMMDD-HHMM
 	char filename[20]; // Sufficient size for YYMMDD-HHMM
-	std::strftime(filename, sizeof(filename), "%y%m%d-%H%M", localTime);
+	std::strftime(filename, sizeof(filename), "%y%m%d-%H:%M", localTime);
 
 	return std::string(filename);
 }
@@ -54,6 +54,8 @@ int main(int argc, char *argv[]) {
 	// Register signal handler for SIGSEGV (segmentation fault)
 	signal(SIGSEGV, signalHandler);
 	signal(SIGABRT, signalHandler);
+  signal(SIGTERM, signalHandler);
+  signal(SIGKILL, signalHandler);
 
 	// Generate filename
 	std::string filename = "output_file/" + generateFilename();
@@ -83,8 +85,8 @@ int main(int argc, char *argv[]) {
 		k = std::stoi(argv[1]);
 		m = std::stoi(argv[2]);
 		sigma = std::stod(argv[3]);
-		std::string filename = ("../Sqnn/data/" + std::string(argv[4]));
-		if (!io::loadData(filename, n, d, rho, h, X)) return -1;
+		std::string _filename = ("../Sqnn/data/" + std::string(argv[4]));
+		if (!io::LoadData(_filename, n, d, rho, h, X)) return -1;
 	}
 
 	runCppStyle(X, n, d, k, m, trees, rho, sigma, 0.01);
