@@ -63,8 +63,7 @@ namespace kernel {
 			//Second norm = sqrt(|x0-y0|^2 + ... + |xd-yd|^2)
 			case kernel::type::Gaussian:
 				return kernelLambda<T>([sigma](T distance) -> T {
-					T sum = distance / sigma;
-					return mat::exp(-sum);
+					return mat::exp(-distance / sigma);
 				});
 			case kernel::type::Exponential:
         return kernelLambda<T>([sigma](T distance) -> T {
@@ -78,6 +77,17 @@ namespace kernel {
 		//default (unreachable, only there to avoid compiler warning)
 		return [](T) -> T { return T{}; };
 	}
+
+  inline Eigen::VectorXf KernelFunction(const kernel::type kernel, const float sigma, const Eigen::VectorXf &distances){
+    switch (kernel) {
+      case type::Gaussian:
+        return distances.unaryExpr([sigma](float v){return std::exp(-v/sigma);});
+      case type::Exponential:
+        break;
+      case type::Laplacian:
+        break;
+    }
+  }
 }
 
 #endif //KDE_SUB_QUADRATIC_KERNEL_FUNCTION_H
