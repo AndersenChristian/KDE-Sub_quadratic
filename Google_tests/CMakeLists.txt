@@ -13,6 +13,8 @@ add_executable(Google_Tests_run
 add_executable(Speed_Tests
         speed_tests/SpeedTest.cpp)
 
+add_executable(Var_Finder Var_Finder.cpp)
+
 # linking Google_Tests_run with DateConverter_lib which will be tested
 #target_link_libraries(Google_Tests_run DateConverter_lib)
 
@@ -23,3 +25,4 @@ target_link_libraries(Speed_Tests gtest gtest_main)
 find_package(Eigen3 REQUIRED)
 target_link_libraries(Google_Tests_run Eigen3::Eigen)
 target_link_libraries(Speed_Tests Eigen3::Eigen)
+target_link_libraries(Var_Finder Eigen3::Eigen)

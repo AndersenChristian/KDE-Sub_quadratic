@@ -118,40 +118,19 @@ namespace Sample {
     return Vertices_index;
   }
 
-
-  //DEBUG: still need to be looked at.
-  //TODO: rework
-  inline int proportionalDistanceSampling(const Eigen::VectorXf &q, const Eigen::MatrixXf &x,
-                                          kernel::kernelLambda<float> &kernel) {
-    int size = (int) x.cols();
-
-    //creates a runnins sum
-    auto weights = Geometric::DistanceSecondNorm(x, q);
-    weights[0] = kernel(weights[0]);
-    for (int i = 1; i < size; ++i) {
-      weights[i] = kernel(weights[i]) + weights[i - 1];
+  inline void ShuffleMatrixRows(Eigen::MatrixXf &data){
+    std::mt19937 rng(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+    for(int i = 0; i < data.cols(); ++i){
+      std::uniform_int_distribution<long> getIndex(i, data.cols() - 1);
+      long index = getIndex(rng);
+      auto tmp = data.col(i);
+      data.col(i) = data.col(index);
+      data.col(index) = tmp;
     }
-
-    //deal with random selection
-    std::mt19937 generator(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-    std::uniform_real_distribution<float> distribution(0, weights[size - 1]);
-    float ranValue = distribution(generator);
-
-    int low = 0, high = size - 1, result = -1;
-
-    while (low <= high) {
-      int mid = low + (high - low) / 2;
-
-      if (weights[mid] >= ranValue) {
-        result = mid;
-        high = mid - 1; // move to the left to find the smallest element
-      } else {
-        low = mid + 1;
-      }
-    }
-
-    return result;
   }
+
+/*
+  //DEBUG: still need to be looked at.
 
   //TODO: break into several smaller sections. very long atm.
   inline void
@@ -249,6 +228,7 @@ namespace Sample {
       aEmptyPoint = 0;
     }
   }
+  */
 
 
 

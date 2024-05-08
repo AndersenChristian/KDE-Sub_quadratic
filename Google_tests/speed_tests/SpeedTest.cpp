@@ -148,7 +148,7 @@ TEST_F(SpeedTest, MathEigen_Using_Switch) {
 }
 
 TEST_F(SpeedTest, FastestOfAll){
-  KdeUsingMrpt2 KDE(data, 120, 430, 10, kernel::type::Gaussian);
+  KdeUsingMrpt2 KDE(data, 120, 430, 10, kernel::type::Gaussian, sigma);
   auto start_time = std::chrono::high_resolution_clock::now();
   KDE.query(data.col(0));
   auto end_time = std::chrono::high_resolution_clock::now();

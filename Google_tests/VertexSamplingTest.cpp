@@ -133,3 +133,9 @@ TEST(SampleTest, vertexSampling) {
   EXPECT_NEAR(count[4], 26190, 304);
   EXPECT_NEAR(count[5], 28571, 316);
 }
+
+TEST(MatrixShuffle, Small){
+  Eigen::MatrixXf data(3,3);
+  data << 1, 2, 3, 4, 5, 6, 7, 8, 9;
+  Sample::ShuffleMatrixRows(data);
+}

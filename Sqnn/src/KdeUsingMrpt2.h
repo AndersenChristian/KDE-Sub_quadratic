@@ -17,9 +17,18 @@
 class KdeUsingMrpt2 : public KDE {
 public:
   //TODO Should only handle allocation. Make method for isValid after.
-  KdeUsingMrpt2(const Eigen::MatrixXf &data, int k, int samples, int trees, // NOLINT(*-msc51-cpp)
-               kernel::type kernel)
-      : KNN_(k), N_((int) data.cols()), SAMPLES_(samples), DATA_(data), KERNEL_(kernel),
+  KdeUsingMrpt2(const Eigen::MatrixXf &data,
+                int k,
+                int samples,
+                int trees, // NOLINT(*-msc51-cpp)
+                double sigma,
+                kernel::type kernel = kernel::type::Gaussian)
+      : KNN_(k),
+        N_((int) data.cols()),
+        samples_(samples),
+        SIGMA_(sigma),
+        DATA_(data),
+        KERNEL_(kernel),
         mrpt_(data) {
     //if no k is needed (low accuracy)
     //TODO: make second constructor since mrpt is still setup.
@@ -36,23 +45,26 @@ public:
     if (KNN_ != 0)
       sum_a = NNContribution(q) / (float) KNN_;
 
-    float sum_b = SampleContribution(q) / (float) SAMPLES_;
+    float sum_b = SampleContribution(q) / (float) samples_;
 
     //compute total approx
     return ((float) KNN_ / (float) N_) * sum_a + ((float) (N_ - KNN_) / (float) N_) * sum_b;
-
-
   }
 
   const Eigen::MatrixXf &getData() override {
     return DATA_;
   }
 
+  void setSamples(int newSample) {
+    this->samples_ = newSample;
+  }
+
   ~KdeUsingMrpt2() override = default;
 
 private:
-  const int KNN_, N_, SAMPLES_;
-  const double TARGET_RECALL_ = 0.5, SIGMA_ = 3.3366;
+  int samples_;
+  const int KNN_, N_;
+  const double TARGET_RECALL_ = 0.5, SIGMA_;
   const Eigen::MatrixXf DATA_;
   const kernel::type KERNEL_;
   Mrpt mrpt_;
@@ -67,10 +79,7 @@ private:
 
   inline float NNContribution(const Eigen::VectorXf &q) {
     std::vector<int> ann_list(N_);
-    int numberOfCandidates = 0;
-    auto pre_mrpt = std::chrono::high_resolution_clock::now();
-    mrpt_.query(q, ann_list.data(), &numberOfCandidates);
-    auto post_mrpt = std::chrono::high_resolution_clock::now();
+    mrpt_.query(q, ann_list.data());
 
     Eigen::MatrixXf nnMatrix = SubMatrixFromIndexes(ann_list);
     auto distance = (nnMatrix.colwise() - q).colwise().lpNorm<2>();
@@ -78,24 +87,15 @@ private:
     auto post_nn_contribution = std::chrono::high_resolution_clock::now();
     float sum = distance.sum();
 
-    //TEST prints
-    printf("mrpt: %ld ns\n", std::chrono::duration_cast<std::chrono::nanoseconds>(post_mrpt - pre_mrpt).count());
-    printf("nn contribution: %ld ns\n",
-           std::chrono::duration_cast<std::chrono::nanoseconds>(post_nn_contribution - post_mrpt).count());
-
     return sum;
   }
 
   inline float SampleContribution(const Eigen::VectorXf &q) {
-    auto pre_sample = std::chrono::high_resolution_clock::now();
     //compute sample contribution
-    auto distance = (DATA_.leftCols(SAMPLES_).colwise() - q).colwise().lpNorm<2>();
-    kernel::KernelFunction(KERNEL_, (float) SIGMA_, distance);
+    Eigen::VectorXf distance = (DATA_.leftCols(samples_).colwise() - q).colwise().lpNorm<2>();
+    distance = kernel::KernelFunction(KERNEL_, (float) SIGMA_, distance);
     auto post_sample = std::chrono::high_resolution_clock::now();
     float sum = distance.sum();
-
-    printf("sample: %ld ns\n",
-           std::chrono::duration_cast<std::chrono::nanoseconds>(post_sample - pre_sample).count());
 
     return sum;
   }
