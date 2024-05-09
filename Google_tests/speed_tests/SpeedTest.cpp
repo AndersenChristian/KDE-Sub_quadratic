@@ -19,7 +19,7 @@ protected:
 
   SpeedTest() {
     int n, d;
-    int k = 10, m = 500, trees = 10;
+    int k = 0, m = 170, trees = 10;
     sigma = 3.3366;
     float rho, h;
     if (!io::LoadData(filename, n, d, rho, h, data)) exit(-1);
@@ -148,7 +148,7 @@ TEST_F(SpeedTest, MathEigen_Using_Switch) {
 }
 
 TEST_F(SpeedTest, FastestOfAll){
-  KdeUsingMrpt2 KDE(data, 120, 430, 10, kernel::type::Gaussian, sigma);
+  KdeUsingMrpt2 KDE(data, 120, 430, 10, sigma);
   auto start_time = std::chrono::high_resolution_clock::now();
   KDE.query(data.col(0));
   auto end_time = std::chrono::high_resolution_clock::now();

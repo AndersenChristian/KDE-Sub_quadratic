@@ -37,11 +37,12 @@ public:
 
 
   float query(const Eigen::VectorXf &q) override {
+    std::vector<int> ann_list(N_);
     float sum_a = 0;
     if (KNN_ != 0)
-      sum_a = NNContribution(q) / (float) KNN_;
+      sum_a = NNContribution(q, ann_list) / (float) KNN_;
 
-    float sum_b = SampleContribution(q) / (float) SAMPLES_;
+    float sum_b = SampleContribution(q, ann_list) / (float) SAMPLES_;
 
     //compute total approx
     return ((float) KNN_ / (float) N_) * sum_a + ((float) (N_ - KNN_) / (float) N_) * sum_b;
@@ -57,7 +58,7 @@ public:
 
 private:
   const int KNN_, N_, SAMPLES_;
-  const double TARGET_RECALL_ = 0.9;
+  const double TARGET_RECALL_ = 0.5;
   const Eigen::MatrixXf DATA_;
   const kernel::kernelLambda<float> *KERNEL_;
   Mrpt mrpt_;
@@ -73,39 +74,32 @@ private:
     return out;
   }
 
-  inline float NNContribution(const Eigen::VectorXf &q) {
-    std::vector<int> ann_list(N_);
-    int numberOfCandidates = 0;
-    auto pre_mrpt = std::chrono::high_resolution_clock::now();
-    mrpt_.query(q, ann_list.data(), &numberOfCandidates);
-    auto post_mrpt = std::chrono::high_resolution_clock::now();
-
+  inline float NNContribution(const Eigen::VectorXf &q, std::vector<int> &ann_list) {
+    mrpt_.query(q, ann_list.data());
     Eigen::MatrixXf nnMatrix = SubMatrixFromIndexes(ann_list);
     float sum = 0;
-    auto distance_a = (nnMatrix.colwise() - q).colwise().lpNorm<2>();
-    for (int i = 0; i < KNN_; ++i) sum += (*KERNEL_)(distance_a(i));
-    auto post_nn_contribution = std::chrono::high_resolution_clock::now();
-
-    //TEST prints
-    printf("mrpt: %ld ns\n", std::chrono::duration_cast<std::chrono::nanoseconds>(post_mrpt - pre_mrpt).count());
-    printf("nn contribution: %ld ns\n",
-           std::chrono::duration_cast<std::chrono::nanoseconds>(post_nn_contribution - post_mrpt).count());
+    Eigen::VectorXf distance_a = (nnMatrix.colwise() - q).colwise().lpNorm<2>();
+    distance_a = distance_a.block(0, 0, 1, KNN_);
+    distance_a = kernel::KernelFunction(kernel::type::Gaussian, 3.3366, distance_a);
+    sum = distance_a.sum();
 
     return sum;
   }
 
-  inline float SampleContribution(const Eigen::VectorXf &q) {
-    auto pre_sample = std::chrono::high_resolution_clock::now();
+  inline float SampleContribution(const Eigen::VectorXf &q, std::vector<int> ann_list) {
     //compute sample contribution
-    float sum = 0;
-    auto distance_b = (DATA_.leftCols(SAMPLES_).colwise() - q).colwise().lpNorm<2>();
-    for (int i = 0; i < SAMPLES_; ++i) sum += (*KERNEL_)(distance_b(i));
-    auto post_sample = std::chrono::high_resolution_clock::now();
+    Eigen::VectorXf distance_b = (DATA_.leftCols(SAMPLES_ + KNN_).colwise() - q).colwise().lpNorm<2>();
 
-    printf("sample: %ld ns\n",
-           std::chrono::duration_cast<std::chrono::nanoseconds>(post_sample - pre_sample).count());
+    //removes any points that are apart of the nearest neighbor calculation.
+    if (KNN_ > 0)
+      for (int i = 0; i < KNN_; ++i) {
+        printf("index: %d\n", ann_list[i]);
+        if (ann_list[i] > KNN_ + SAMPLES_) continue;
+        distance_b(i) = MAXFLOAT;
+      }
 
-    return sum;
+    distance_b = kernel::KernelFunction(kernel::type::Gaussian, 3.3366, distance_b);
+    return distance_b.sum();
   }
 
 };

@@ -20,10 +20,10 @@
 
 void buildMultiKDE(Eigen::MatrixXf data, std::vector<std::unique_ptr<KDE>> &kde, int index, int k,
                    int samples, int trees, kernel::kernelLambda<float> *kernel) {
-  if (data.cols() <= samples) return;
+  if (data.cols() <= samples + k) return;
+  //printf("iteration: %d\n", index);
   kde[index] = std::make_unique<KdeUsingMrpt>(data, k, samples, trees, kernel);
   //recursively creates the tree
-  printf("iteration: %d\n", index);
   //TODO change this into a loop instead of recursion
   buildMultiKDE(data.block(0, 0, data.rows(), std::ceil(data.cols() / 2)), kde, index * 2, k, samples, trees, kernel);
   buildMultiKDE(data.block(0, data.cols() / 2, data.rows(), data.cols() / 2), kde, index * 2 + 1, k, samples, trees,
@@ -38,7 +38,7 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
   kernel::kernelLambda<float> kernel = kernel::kernel_function<float>(kernel::type::Gaussian, sigma);
 
   const int normalHeight = std::ceil(log2(vertices));
-  const int cutoffHeight = std::ceil(log2(samples));
+  const int cutoffHeight = std::floor(log2(samples));
   const int treeHeight = normalHeight - cutoffHeight;
   const int nodes = (int) std::pow(2, treeHeight);
   std::vector<std::unique_ptr<KDE>> kdeTree(nodes);
@@ -57,8 +57,8 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
   auto start = std::chrono::system_clock::now();
   kdeTree[1].get()->query(data.col(1));
   auto end = std::chrono::system_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-  printf("time gated: %ld", duration.count());
+  auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+  printf("time gated: %ld ns\n", duration.count());
   //Sample::DegreeWeight(data, *kdeTree[1], ownContribution);
   printf("weights gathered\n");
 
@@ -69,6 +69,7 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
   vertexSampling(vertices, vertexWeight.data(), vertexSamplingNr, vertexSampled.data());
   printf("sampled vertex\n");
 
+  /*
   //TODO: sample edges
   std::vector<std::pair<int,int>> edgeSampled(vertexSamplingNr);
   edgeSampling(kdeTree, vertexSampled, data, edgeSampled.data(), kernel);
