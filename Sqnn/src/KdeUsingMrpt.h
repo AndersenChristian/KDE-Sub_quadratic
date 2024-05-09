@@ -37,10 +37,12 @@ public:
 
 
   float query(const Eigen::VectorXf &q) override {
-    std::vector<int> ann_list(N_);
+    std::vector<int> ann_list;
     float sum_a = 0;
-    if (KNN_ != 0)
+    if (KNN_ != 0) {
+      ann_list.resize(KNN_);
       sum_a = NNContribution(q, ann_list) / (float) KNN_;
+    }
 
     float sum_b = SampleContribution(q, ann_list) / (float) SAMPLES_;
 
@@ -91,12 +93,13 @@ private:
     Eigen::VectorXf distance_b = (DATA_.leftCols(SAMPLES_ + KNN_).colwise() - q).colwise().lpNorm<2>();
 
     //removes any points that are apart of the nearest neighbor calculation.
-    if (KNN_ > 0)
+    if (KNN_ > 0) {
       for (int i = 0; i < KNN_; ++i) {
         printf("index: %d\n", ann_list[i]);
         if (ann_list[i] > KNN_ + SAMPLES_) continue;
         distance_b(i) = MAXFLOAT;
       }
+    }
 
     distance_b = kernel::KernelFunction(kernel::type::Gaussian, 3.3366, distance_b);
     return distance_b.sum();

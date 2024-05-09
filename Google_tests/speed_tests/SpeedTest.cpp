@@ -12,6 +12,7 @@
 #include "KdeUsingMrpt2.h"
 
 std::string filename;
+int k = 0, m = 170, trees = 10;
 
 class SpeedTest : public ::testing::Test {
 protected:
@@ -19,7 +20,6 @@ protected:
 
   SpeedTest() {
     int n, d;
-    int k = 0, m = 170, trees = 10;
     sigma = 3.3366;
     float rho, h;
     if (!io::LoadData(filename, n, d, rho, h, data)) exit(-1);
@@ -86,11 +86,11 @@ TEST_F(SpeedTest, NaiveKDE) {
 }
 
 TEST_F(SpeedTest, AnnKDE) {
-  KdeUsingMrpt KDE(data, 120, 430, 10, &kernel);
+  KdeUsingMrpt KDE(data, 0, 2100, 10, &kernel);
   auto start_time = std::chrono::high_resolution_clock::now();
   KDE.query(data.col(0));
   auto end_time = std::chrono::high_resolution_clock::now();
-  printf("time KDE Naive: %ld ns\n",
+  printf("time Ann: %ld ns\n",
          std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
 }
 
@@ -101,14 +101,14 @@ TEST_F(SpeedTest, MathSelf) {
     d = (kernel)(d);
   }
   auto post_expr = std::chrono::high_resolution_clock::now();
-  printf("expr time: %ld\n",
+  printf("mat self - expr time: %ld ns\n",
          std::chrono::duration_cast<std::chrono::nanoseconds>(post_expr - pre_expr).count());
 }
 
 TEST_F(SpeedTest, MathEigen) {
   Eigen::VectorXf distances = (data.colwise() - data.col(0)).colwise().lpNorm<2>();
   auto pre_dist = std::chrono::high_resolution_clock::now();
-  distances = distances / 2;
+  distances.operator/=(2);
   auto post_dist = std::chrono::high_resolution_clock::now();
   distances.unaryExpr([](float v){return std::exp(-v);});
   auto post_expr = std::chrono::high_resolution_clock::now();
@@ -157,9 +157,19 @@ TEST_F(SpeedTest, FastestOfAll){
 }
 
 int main(int argc, char **argv){
-  printf("%d\n", argc);
+  if(argc != 5){
+    printf("missing arguments");
+    fflush(stdout);
+    exit(-1);
+  }
   testing::InitGoogleTest();
-  printf("%s\n", argv[1]);
+
+  k = std::stoi(argv[2]);
+  m = std::stoi(argv[3]);
+  trees = std::stoi(argv[4]);
+
+  //could be better
   filename = "Sqnn/data/" + std::string(argv[1]);
+
   return RUN_ALL_TESTS();
 }
