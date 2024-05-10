@@ -80,8 +80,10 @@ namespace kernel {
 
   inline Eigen::VectorXf KernelFunction(const kernel::type kernel, const float sigma, const Eigen::VectorXf &distances){
     switch (kernel) {
-      case type::Gaussian:
-        return distances.unaryExpr([sigma](float v){return std::exp(-v/sigma);});
+      case type::Gaussian: {
+        auto div = 2 * (sigma * sigma);
+        return distances.unaryExpr([div](float v) { return std::exp(-v / div); });
+      }
       case type::Exponential:
         break;
       case type::Laplacian:

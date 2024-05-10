@@ -6,15 +6,15 @@ speed_aloi_all: $(ALOI_TESTS)
 
 speed_aloi_0.01: $(BIN_DIR)/Speed_Tests
 	@echo "TEST: Aloi 0.01"
-	@./$(BIN_DIR)/Speed_Tests aloi-clean.data 0 170 0
+	@./$(BIN_DIR)/Speed_Tests aloi-clean.data 0 170 0 3.3366
 
 speed_aloi_0.001: $(BIN_DIR)/Speed_Tests
 	@echo "TEST: Aloi 0.001"
-	@./$(BIN_DIR)/Speed_Tests aloi-clean.data 0 2100 0
+	@./$(BIN_DIR)/Speed_Tests aloi-clean.data 0 2100 0 2.0346
 
 speed_aloi_0.0001: $(BIN_DIR)/Speed_Tests
 	@echo "TEST: Aloi 0.0001"
-	@./$(BIN_DIR)/Speed_Tests aloi-clean.data 0 170 0
+	@./$(BIN_DIR)/Speed_Tests aloi-clean.data 0 20000 0 3.3366
 
 speed_aloi_0.00001: $(BIN_DIR)/Speed_Tests
 	@echo "TEST: Aloi 0.00001"

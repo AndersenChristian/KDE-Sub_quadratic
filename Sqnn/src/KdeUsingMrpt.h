@@ -18,7 +18,7 @@ class KdeUsingMrpt : public KDE {
 public:
   //TODO Should only handle allocation. Make method for isValid after.
   KdeUsingMrpt(const Eigen::MatrixXf &data, int k, int samples, int trees, // NOLINT(*-msc51-cpp)
-               kernel::kernelLambda<float> *kernel)
+               kernel::type kernel)
       : KNN_(k), N_((int) data.cols()), SAMPLES_(samples), DATA_(data), KERNEL_(kernel),
         mrpt_(data) {
     //this->data = data;
@@ -62,7 +62,7 @@ private:
   const int KNN_, N_, SAMPLES_;
   const double TARGET_RECALL_ = 0.5;
   const Eigen::MatrixXf DATA_;
-  const kernel::kernelLambda<float> *KERNEL_;
+  const kernel::type KERNEL_;
   Mrpt mrpt_;
   std::mt19937 generator_;
 

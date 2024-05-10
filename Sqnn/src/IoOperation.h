@@ -21,7 +21,7 @@ namespace io {
     return result;
   }
 
-  inline bool LoadData(const std::string &FILENAME, int &n, int &d, float &rho, float &h, Eigen::MatrixXf &X) {
+  inline bool LoadData(const std::string &FILENAME, int &n, int &d, Eigen::MatrixXf &X) {
     // Open the file
     std::ifstream file(FILENAME);
 
@@ -34,8 +34,6 @@ namespace io {
       std::vector<std::string> data = SplitString(line);
       n = std::stoi(data[0]);
       d = std::stoi(data[1]);
-      rho = std::stof(data[2]);
-      h = std::stof(data[3]);
 
       X = Eigen::MatrixXf(d, n);
 
