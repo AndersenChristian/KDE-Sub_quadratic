@@ -14,33 +14,25 @@
 
 class KdeNaive : public KDE {
 public:
-  KdeNaive(const Eigen::MatrixXf &data, kernel::kernelLambda<float> *kernel)
-      : data(data), kernel(kernel), n((int) data.rows()) {}
+  KdeNaive(const Eigen::MatrixXf &data, kernel::type kernel, float sigma)
+      : DATA_(data), KERNEL_(kernel), SIGMA_(sigma) {}
 
   float query(const Eigen::VectorXf &q) override {
-//    float sum = 0;
-//    std::vector<float> distances = Geometric::DistanceSecondNorm(data, q);
-//    for (float &distance: distances)
-//      sum += (*kernel)(distance);
-//    return sum / (float) n;
-
-    auto distances = (data.colwise() - q).colwise().lpNorm<2>();
-    float sum = 0;
-    for (int i = 0; i < distances.size(); ++i)
-      sum += (*kernel)(distances(i));
-    return sum / (float) data.size();
+    Eigen::VectorXf distances = (DATA_.colwise() - q).colwise().lpNorm<2>();
+    distances = kernel::KernelFunction(KERNEL_, SIGMA_, distances);
+    return distances.sum() / (float) DATA_.cols();
   }
 
   const Eigen::MatrixXf &getData() override {
-    return data;
+    return DATA_;
   }
 
   ~KdeNaive() override = default;
 
 private:
-  const Eigen::MatrixXf &data;
-  const kernel::kernelLambda<float> *kernel;
-  const int n;
+  const Eigen::MatrixXf &DATA_;
+  const kernel::type KERNEL_;
+  const float SIGMA_;
 };
 
 #endif //KDE_SUB_QUADRATIC_KDENAIVE_H

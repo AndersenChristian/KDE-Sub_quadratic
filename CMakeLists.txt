@@ -38,6 +38,7 @@ set(MAIN_SOURCES
         Sqnn/src/IoOperation.h
         Sqnn/src/controller.h
         Sqnn/src/KdeNaive.h
+        Sqnn/src/KdeSampling.h
 )
 
 file(GLOB API_SOURCES Sqnn/src/API/*.h)

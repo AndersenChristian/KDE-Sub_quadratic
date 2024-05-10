@@ -92,7 +92,7 @@ private:
     //compute sample contribution
     Eigen::VectorXf distance_b = (DATA_.leftCols(SAMPLES_ + KNN_).colwise() - q).colwise().lpNorm<2>();
 
-    //removes any points that are apart of the nearest neighbor calculation.
+    //removes any points that are apart from the nearest neighbor calculation.
     if (KNN_ > 0) {
       for (int i = 0; i < KNN_; ++i) {
         printf("index: %d\n", ann_list[i]);

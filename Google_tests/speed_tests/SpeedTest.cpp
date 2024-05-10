@@ -10,6 +10,8 @@
 #include "KdeNaive.h"
 #include "KdeUsingMrpt.h"
 #include "KdeUsingMrpt2.h"
+#include "KdeSampling.h"
+#include "sample.h"
 
 std::string filename;
 int k = 0, m = 170, trees = 10;
@@ -24,6 +26,7 @@ protected:
     float rho, h;
     if (!io::LoadData(filename, n, d, rho, h, data)) exit(-1);
     this->kernel = kernel::kernel_function<float>(kernel::type::Gaussian, sigma);
+    Sample::ShuffleMatrixRows(data);
     this->dist = (data.colwise() - ((Eigen::VectorXf) data.col(0))).colwise().norm();
     kDist = this->dist / sigma;
     omp_set_num_threads(1);
@@ -49,7 +52,7 @@ public:
   kernel::kernelLambda<float> kernel;
   Eigen::VectorXf dist;
   Eigen::VectorXf kDist;
-  double sigma;
+  float sigma;
 };
 
 TEST_F(SpeedTest, EigenDist) {
@@ -77,7 +80,7 @@ TEST_F(SpeedTest, Distance) {
 }
 
 TEST_F(SpeedTest, NaiveKDE) {
-  KdeNaive KDE(data, &kernel);
+  KdeNaive KDE(data, kernel::type::Gaussian, sigma);
   auto start_time = std::chrono::high_resolution_clock::now();
   KDE.query(data.col(0));
   auto end_time = std::chrono::high_resolution_clock::now();
@@ -154,6 +157,19 @@ TEST_F(SpeedTest, FastestOfAll){
   auto end_time = std::chrono::high_resolution_clock::now();
   printf("time KDE Naive: %ld ns\n",
          std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+}
+
+TEST_F(SpeedTest, KdeSampling){
+  KdeSampling kdeSampling(data, 3000, sigma, kernel::type::Gaussian);
+  auto start_time = std::chrono::high_resolution_clock::now();
+  auto result = kdeSampling.query(data.col(100000));
+  auto end_time = std::chrono::high_resolution_clock::now();
+  auto actual_result = KdeNaive(data, kernel::type::Gaussian, sigma).query(data.col(100000));
+  printf("time KDE Sampling only: %ld ns\n",
+         std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
+  printf("approx value: %f\n", result);
+  printf("actual value: %f\n", actual_result);
+  printf("off factor: %f\n", std::abs(actual_result-result) / actual_result);
 }
 
 int main(int argc, char **argv){
