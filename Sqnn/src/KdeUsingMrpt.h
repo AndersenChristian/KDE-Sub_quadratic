@@ -21,11 +21,6 @@ public:
                kernel::type kernel)
       : KNN_(k), N_((int) data.cols()), SAMPLES_(samples), DATA_(data), KERNEL_(kernel),
         mrpt_(data) {
-    //this->data = data;
-    //random number-generator setup
-    auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-    generator_.seed(seed);
-
     //if no k is needed (low accuracy)
     //TODO: make second constructor since mrpt is still setup.
     if (k == 0) return;
@@ -47,7 +42,9 @@ public:
     float sum_b = SampleContribution(q, ann_list) / (float) SAMPLES_;
 
     //compute total approx
-    return ((float) KNN_ / (float) N_) * sum_a + ((float) (N_ - KNN_) / (float) N_) * sum_b;
+    sum_a = ((float) KNN_ / (float) N_) * sum_a;
+    sum_b = ((float) (N_ - KNN_) / (float) N_) * sum_b;
+    return sum_a + sum_b;
 
 
   }
@@ -64,7 +61,6 @@ private:
   const Eigen::MatrixXf DATA_;
   const kernel::type KERNEL_;
   Mrpt mrpt_;
-  std::mt19937 generator_;
 
   inline Eigen::MatrixXf SubMatrixFromIndexes(std::vector<int> &indexes) {
     Eigen::MatrixXf out(DATA_.rows(), KNN_);
@@ -82,26 +78,27 @@ private:
     float sum = 0;
     Eigen::VectorXf distance_a = (nnMatrix.colwise() - q).colwise().lpNorm<2>();
     distance_a = distance_a.block(0, 0, 1, KNN_);
-    distance_a = kernel::KernelFunction(kernel::type::Gaussian, 3.3366, distance_a);
+    distance_a = kernel::KernelFunction(KERNEL_, 3.3366, distance_a);
     sum = distance_a.sum();
 
     return sum;
   }
 
-  inline float SampleContribution(const Eigen::VectorXf &q, std::vector<int> ann_list) {
+  inline float SampleContribution(const Eigen::VectorXf &q, std::vector<int> &ann_list) {
+    const int SAMPLE = KNN_ + N_;
+    //rearrange the ann_list with the lowest index
+    auto unary_predicate = [SAMPLE](int x){return x > SAMPLE;};
+    auto iterator = std::remove_if(ann_list.begin(), ann_list.end(),
+                                            unary_predicate);
+
     //compute sample contribution
     Eigen::VectorXf distance_b = (DATA_.leftCols(SAMPLES_ + KNN_).colwise() - q).colwise().lpNorm<2>();
-
-    //removes any points that are apart from the nearest neighbor calculation.
-    if (KNN_ > 0) {
-      for (int i = 0; i < KNN_; ++i) {
-        printf("index: %d\n", ann_list[i]);
-        if (ann_list[i] > KNN_ + SAMPLES_) continue;
-        distance_b(i) = MAXFLOAT;
-      }
-    }
-
     distance_b = kernel::KernelFunction(kernel::type::Gaussian, 3.3366, distance_b);
+
+    //remove the nearest neighbor contribution
+    for(auto d = ann_list.begin(); d != iterator; ++d)
+      distance_b[*d] = 0;
+
     return distance_b.sum();
   }
 

@@ -15,14 +15,18 @@ add_executable(Speed_Tests
 
 add_executable(Var_Finder Var_Finder.cpp)
 
+add_executable(Matrix_Shifting SubMatrixManipulation.cpp)
+
 # linking Google_Tests_run with DateConverter_lib which will be tested
 #target_link_libraries(Google_Tests_run DateConverter_lib)
 
 target_link_libraries(Google_Tests_run gtest gtest_main)
 target_link_libraries(Speed_Tests gtest gtest_main)
+target_link_libraries(Matrix_Shifting gtest gtest_main)
 
 # Find Eigen
 find_package(Eigen3 REQUIRED)
 target_link_libraries(Google_Tests_run Eigen3::Eigen)
 target_link_libraries(Speed_Tests Eigen3::Eigen)
 target_link_libraries(Var_Finder Eigen3::Eigen)
+target_link_libraries(Matrix_Shifting Eigen3::Eigen)

@@ -3,8 +3,19 @@
 
 package "Kernel Density Estimation (KDE)" {
 
-    class KDE {
-        + estimateDensity(data: vector, kernelType: kernels, bandwidth: double): vector
+    class KdeUsingMrpt {
+        - KNN_: int {readOnly}
+        - N_: int {readOnly}
+        - SAMPLES_: int {readOnly}
+        - DATA_: Matrix {readOnly}
+        - KERNEL_: kernelType {readOnly}
+        - mrpt_: Mrpt
+
+        + KdeUsingMrpt(data: Eigen::MatrixXf*, knn: int, samples: int, trees: int, kernel: kernelType)
+        + query(q: Eigen::VectorXf*): float
+        + ~KdeUsingMrpt()
+        -NNContribution(q: Eigen::VectorXf*, ann_list: vector<int>*): inline float
+        -SampleContribution(q: Eigen::VectorXf*, ann_list: vector<int>*): inline float
     }
 
     class KernelFunction {
