@@ -24,8 +24,8 @@ protected:
     int n, d;
     sigma = 3.3366;
     float rho, h;
-    if (!io::LoadData(filename, n, d, rho, h, data)) exit(-1);
-    this->kernel = kernel::kernel_function<float>(kernel::type::Gaussian, sigma);
+    if (!io::LoadData(filename, n, d, data)) exit(-1);
+    this->kernel = kernel::type::Gaussian;
     Sample::ShuffleMatrixRows(data);
     this->dist = (data.colwise() - ((Eigen::VectorXf) data.col(0))).colwise().norm();
     kDist = this->dist / sigma;
@@ -49,25 +49,11 @@ protected:
 
 public:
   Eigen::MatrixXf data;
-  kernel::kernelLambda<float> kernel;
+  kernel::type kernel;
   Eigen::VectorXf dist;
   Eigen::VectorXf kDist;
   float sigma;
 };
-
-TEST_F(SpeedTest, EigenDist) {
-  Eigen::VectorXf point = data.col(0);
-  (data.colwise() - point).colwise().squaredNorm();
-}
-
-TEST_F(SpeedTest, KernelDivision) {
-  this->dist / sigma;
-}
-
-TEST_F(SpeedTest, KernelCost) {
-  for (unsigned long i = 0; i < this->dist.size(); ++i)
-    this->kernel(this->dist((long) i));
-}
 
 TEST_F(SpeedTest, Distance) {
   Eigen::VectorXf point = data.col(0);
@@ -89,23 +75,12 @@ TEST_F(SpeedTest, NaiveKDE) {
 }
 
 TEST_F(SpeedTest, AnnKDE) {
-  KdeUsingMrpt KDE(data, 0, 2100, 10, &kernel);
+  KdeUsingMrpt KDE(data, 0, 2100, 10, kernel);
   auto start_time = std::chrono::high_resolution_clock::now();
   KDE.query(data.col(0));
   auto end_time = std::chrono::high_resolution_clock::now();
   printf("time Ann: %ld ns\n",
          std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
-}
-
-TEST_F(SpeedTest, MathSelf) {
-  Eigen::VectorXf distances = (data.colwise() - data.col(0)).colwise().lpNorm<2>();
-  auto pre_expr = std::chrono::high_resolution_clock::now();
-  for(auto &d : distances){
-    d = (kernel)(d);
-  }
-  auto post_expr = std::chrono::high_resolution_clock::now();
-  printf("mat self - expr time: %ld ns\n",
-         std::chrono::duration_cast<std::chrono::nanoseconds>(post_expr - pre_expr).count());
 }
 
 TEST_F(SpeedTest, MathEigen) {

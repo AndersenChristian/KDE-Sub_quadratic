@@ -118,9 +118,12 @@ namespace Sample {
     return Vertices_index;
   }
 
-  inline void ShuffleMatrixRows(Eigen::MatrixXf &data){
+  inline void ShuffleMatrixRows(
+      Eigen::MatrixXf &data,
+      long seed = std::chrono::high_resolution_clock::now().time_since_epoch().count()
+  ){
     for(int i = 0; i < data.cols(); ++i){
-      std::mt19937 rng(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+      std::mt19937 rng(seed);
       std::uniform_int_distribution<long> getIndex(i, data.cols() - 1);
       long index = getIndex(rng);
       data.col(i).swap(data.col(index));

@@ -14,7 +14,7 @@ speed_aloi_0.001: $(BIN_DIR)/Speed_Tests
 
 speed_aloi_0.0001: $(BIN_DIR)/Speed_Tests
 	@echo "TEST: Aloi 0.0001"
-	@./$(BIN_DIR)/Speed_Tests aloi-clean.data 0 20000 0 3.3366
+	@./$(BIN_DIR)/Speed_Tests aloi-clean.data 170 500 50 1.3300
 
 speed_aloi_0.00001: $(BIN_DIR)/Speed_Tests
 	@echo "TEST: Aloi 0.00001"
