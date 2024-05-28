@@ -2,7 +2,7 @@
 // Created by cj on 6-2-24.
 //
 
-#include "kernel_function.h"
+#include "kernel_function.hpp"
 
 #include <vector>
 #include <random>
@@ -13,8 +13,8 @@
 #include <csignal>
 #include <cstdlib>
 
-#include "IoOperation.h"
-#include "controller.h"
+#include "IoOperation.hpp"
+#include "controller.hpp"
 
 using std::function;
 using std::vector;

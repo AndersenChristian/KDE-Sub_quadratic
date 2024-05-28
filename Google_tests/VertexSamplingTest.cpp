@@ -3,8 +3,8 @@
 //
 
 #include <gtest/gtest.h>
-#include "KDE.h"
-#include "sample.h"
+#include "KDE.hpp"
+#include "sample.hpp"
 
 class testKDE : public KDE {
   float query(const Eigen::VectorXf &q) override {

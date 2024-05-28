@@ -2,16 +2,16 @@
 // Created by cj on 8-4-24.
 //
 
-#ifndef KDE_SUB_QUADRATIC_SAMPLE_H
-#define KDE_SUB_QUADRATIC_SAMPLE_H
+#ifndef KDE_SUB_QUADRATIC_SAMPLE_HPP
+#define KDE_SUB_QUADRATIC_SAMPLE_HPP
 
 #include <vector>
 #include <Eigen/Dense>
 #include <chrono>
 #include <random>
-#include "kernel_function.h"
+#include "kernel_function.hpp"
 
-#include "KDE.h"
+#include "KDE.hpp"
 
 namespace Sample {
   using pair = std::pair<float, unsigned long>;
@@ -122,8 +122,8 @@ namespace Sample {
       Eigen::MatrixXf &data,
       long seed = std::chrono::high_resolution_clock::now().time_since_epoch().count()
   ){
+    std::mt19937 rng(seed);
     for(int i = 0; i < data.cols(); ++i){
-      std::mt19937 rng(seed);
       std::uniform_int_distribution<long> getIndex(i, data.cols() - 1);
       long index = getIndex(rng);
       data.col(i).swap(data.col(index));
@@ -236,4 +236,4 @@ namespace Sample {
 
 }
 
-#endif //KDE_SUB_QUADRATIC_SAMPLE_H
+#endif //KDE_SUB_QUADRATIC_SAMPLE_HPP

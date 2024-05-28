@@ -2,8 +2,8 @@
 // Created by cj on 6-2-24.
 //
 
-#ifndef KDE_SUB_QUADRATIC_KERNEL_FUNCTION_H
-#define KDE_SUB_QUADRATIC_KERNEL_FUNCTION_H
+#ifndef KDE_SUB_QUADRATIC_KERNEL_FUNCTION_HPP
+#define KDE_SUB_QUADRATIC_KERNEL_FUNCTION_HPP
 
 #include <functional>
 #include <cmath>
@@ -92,4 +92,4 @@ namespace kernel {
   }
 }
 
-#endif //KDE_SUB_QUADRATIC_KERNEL_FUNCTION_H
+#endif //KDE_SUB_QUADRATIC_KERNEL_FUNCTION_HPP

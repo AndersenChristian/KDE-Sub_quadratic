@@ -2,15 +2,15 @@
 // Created by cj on 10-4-24.
 //
 
-#ifndef KDE_SUB_QUADRATIC_KDENAIVE_H
-#define KDE_SUB_QUADRATIC_KDENAIVE_H
+#ifndef KDE_SUB_QUADRATIC_KDENAIVE_HPP
+#define KDE_SUB_QUADRATIC_KDENAIVE_HPP
 
-#include "Mrpt.h"
+#include "Mrpt.hpp"
 #include <Eigen/Dense>
 #include <utility>
 #include <vector>
 
-#include "KDE.h"
+#include "KDE.hpp"
 
 class KdeNaive : public KDE {
 public:
@@ -35,4 +35,4 @@ private:
   const float SIGMA_;
 };
 
-#endif //KDE_SUB_QUADRATIC_KDENAIVE_H
+#endif //KDE_SUB_QUADRATIC_KDENAIVE_HPP

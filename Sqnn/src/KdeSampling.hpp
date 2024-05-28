@@ -2,16 +2,16 @@
 // Created by cj on 10-5-24.
 //
 
-#ifndef KDE_SUB_QUADRATIC_KDESAMPLING_H
-#define KDE_SUB_QUADRATIC_KDESAMPLING_H
+#ifndef KDE_SUB_QUADRATIC_KDESAMPLING_HPP
+#define KDE_SUB_QUADRATIC_KDESAMPLING_HPP
 
 #include <utility>
 #include <vector>
 #include <chrono>
 
-#include "Mrpt.h"
-#include "kernel_function.h"
-#include "KDE.h"
+#include "Mrpt.hpp"
+#include "kernel_function.hpp"
+#include "KDE.hpp"
 
 
 class KdeSampling : public KDE {
@@ -42,4 +42,4 @@ private:
   const kernel::type KERNEL_;
 };
 
-#endif //KDE_SUB_QUADRATIC_KDESAMPLING_H
+#endif //KDE_SUB_QUADRATIC_KDESAMPLING_HPP

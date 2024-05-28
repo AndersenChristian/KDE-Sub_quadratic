@@ -32,13 +32,14 @@ set_source_files_properties(path/to/ANN/Mrpt.h PROPERTIES HEADER_FILE_ONLY TRUE)
 # Define variables for source files
 set(MAIN_SOURCES
         Sqnn/src/main.cpp
-        Sqnn/src/KdeUsingMrpt.h
-        Sqnn/src/sample.h
-        Sqnn/src/KDE.h
-        Sqnn/src/IoOperation.h
-        Sqnn/src/controller.h
-        Sqnn/src/KdeNaive.h
-        Sqnn/src/KdeSampling.h
+        Sqnn/src/KdeUsingMrpt.hpp
+        Sqnn/src/sample.hpp
+        Sqnn/src/KDE.hpp
+        Sqnn/src/IoOperation.hpp
+        Sqnn/src/controller.hpp
+        Sqnn/src/KdeNaive.hpp
+        Sqnn/src/KdeSampling.hpp
+        Sqnn/src/Alias.hpp
 )
 
 file(GLOB API_SOURCES Sqnn/src/API/*.h)

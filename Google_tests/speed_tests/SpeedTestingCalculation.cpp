@@ -5,13 +5,13 @@
 #include <gtest/gtest.h>
 #include <Eigen/Dense>
 #include <cmath>
-#include "IoOperation.h"
-#include "kernel_function.h"
-#include "KdeNaive.h"
-#include "KdeUsingMrpt.h"
-#include "KdeUsingMrpt2.h"
-#include "KdeSampling.h"
-#include "sample.h"
+#include "IoOperation.hpp"
+#include "kernel_function.hpp"
+#include "KdeNaive.hpp"
+#include "KdeUsingMrpt.hpp"
+#include "KdeUsingMrpt2.hpp"
+#include "KdeSampling.hpp"
+#include "sample.hpp"
 
 std::string filename;
 int k = 0, m = 170, trees = 10;

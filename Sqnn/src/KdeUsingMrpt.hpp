@@ -2,16 +2,16 @@
 // Created by cj on 26-3-24.
 //
 
-#ifndef KDE_SUB_QUADRATIC_KDEUSINGMRPT_H
-#define KDE_SUB_QUADRATIC_KDEUSINGMRPT_H
+#ifndef KDE_SUB_QUADRATIC_KDEUSINGMRPT_HPP
+#define KDE_SUB_QUADRATIC_KDEUSINGMRPT_HPP
 
 #include <utility>
 #include <vector>
 #include <unordered_set>
 
-#include "Mrpt.h"
-#include "kernel_function.h"
-#include "KDE.h"
+#include "Mrpt.hpp"
+#include "kernel_function.hpp"
+#include "KDE.hpp"
 
 
 class KdeUsingMrpt : public KDE {
@@ -39,12 +39,7 @@ public:
       sum_a = NNContribution(q, ann_list) / (float) KNN_;
     }
 
-    //TEST
-    for(int i = 0; i < KNN_; ++i)
-      printf("%d\n",ann_list[i]);
-    //TEST-end
-
-    float sum_b = SampleContribution(q, ann_list) / (float) SAMPLES_;
+    float sum_b = SampleContribution(q, ann_list);
 
     //compute total approx
     sum_a = ((float) KNN_ / (float) N_) * sum_a;
@@ -96,12 +91,15 @@ private:
     distance_b = kernel::KernelFunction(KERNEL_, SIGMA_, distance_b);
 
     //remove the nearest neighbor contribution
-    for (auto d = ann_list.begin(); d != iterator; ++d)
+    int count = 0;
+    for (auto d = ann_list.begin(); d != iterator; ++d) {
+      count++;
       distance_b[*d] = 0;
+    }
 
-    return distance_b.sum();
+    return distance_b.sum() / (float) (COLS - count);
   }
 
 };
 
-#endif //KDE_SUB_QUADRATIC_KDEUSINGMRPT_H
+#endif //KDE_SUB_QUADRATIC_KDEUSINGMRPT_HPP

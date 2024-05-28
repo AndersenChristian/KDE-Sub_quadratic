@@ -6,17 +6,17 @@
  * remember to remove any [maybe_unused] only there right now to suppress compiler warnings.
  */
 
-#ifndef KDE_SUB_QUADRATIC_CONTROLLER_H
-#define KDE_SUB_QUADRATIC_CONTROLLER_H
+#ifndef KDE_SUB_QUADRATIC_CONTROLLER_HPP
+#define KDE_SUB_QUADRATIC_CONTROLLER_HPP
 
 #include <Eigen/Dense>
 #include <iostream>
 
-#include "kernel_function.h"
-#include "KdeUsingMrpt.h"
-#include "KdeNaive.h"
-#include "sample.h"
-#include "KDE.h"
+#include "kernel_function.hpp"
+#include "KdeUsingMrpt.hpp"
+#include "KdeNaive.hpp"
+#include "sample.hpp"
+#include "KDE.hpp"
 
 void buildMultiKDE(Eigen::MatrixXf data, std::vector<std::unique_ptr<KDE>> &kde, int index, int k,
                    int samples, int trees, kernel::kernelLambda<float> *kernel) {
@@ -80,4 +80,4 @@ runCppStyle(const Eigen::MatrixXf &data, const int vertices, [[maybe_unused]] co
 
 }
 
-#endif //KDE_SUB_QUADRATIC_CONTROLLER_H
+#endif //KDE_SUB_QUADRATIC_CONTROLLER_HPP

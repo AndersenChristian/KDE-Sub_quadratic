@@ -2,12 +2,12 @@
 // Created by cj on 8-4-24.
 //
 
-#ifndef KDE_SUB_QUADRATIC_KDE_H
-#define KDE_SUB_QUADRATIC_KDE_H
+#ifndef KDE_SUB_QUADRATIC_KDE_HPP
+#define KDE_SUB_QUADRATIC_KDE_HPP
 
 #include <Eigen/Dense>
 
-#include "kernel_function.h"
+#include "kernel_function.hpp"
 
 class KDE {
 public:
@@ -18,4 +18,4 @@ public:
   virtual ~KDE() = default;
 };
 
-#endif //KDE_SUB_QUADRATIC_KDE_H
+#endif //KDE_SUB_QUADRATIC_KDE_HPP

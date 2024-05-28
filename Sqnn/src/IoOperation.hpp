@@ -2,8 +2,8 @@
 // Created by cj on 9-4-24.
 //
 
-#ifndef KDE_SUB_QUADRATIC_IOOPERATION_H
-#define KDE_SUB_QUADRATIC_IOOPERATION_H
+#ifndef KDE_SUB_QUADRATIC_IOOPERATION_HPP
+#define KDE_SUB_QUADRATIC_IOOPERATION_HPP
 
 #include <filesystem>
 #include <fstream>
@@ -56,4 +56,4 @@ namespace io {
   }
 }
 
-#endif //KDE_SUB_QUADRATIC_IOOPERATION_H
+#endif //KDE_SUB_QUADRATIC_IOOPERATION_HPP

@@ -6,11 +6,11 @@
 #include <string>
 #include <Eigen/Dense>
 
-#include "IoOperation.h"
-#include "KdeUsingMrpt2.h"
-#include "kernel_function.h"
-#include "KdeNaive.h"
-#include "sample.h"
+#include "IoOperation.hpp"
+#include "KdeUsingMrpt2.hpp"
+#include "kernel_function.hpp"
+#include "KdeNaive.hpp"
+#include "sample.hpp"
 
 Eigen::MatrixXf data;
 std::string filename;

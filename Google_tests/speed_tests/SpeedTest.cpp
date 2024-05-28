@@ -6,12 +6,12 @@
 #include <Eigen/Dense>
 #include <cmath>
 
-#include "IoOperation.h"
-#include "kernel_function.h"
-#include "KdeNaive.h"
-#include "KdeUsingMrpt.h"
-#include "KdeSampling.h"
-#include "sample.h"
+#include "IoOperation.hpp"
+#include "kernel_function.hpp"
+#include "KdeNaive.hpp"
+#include "KdeUsingMrpt.hpp"
+#include "KdeSampling.hpp"
+#include "sample.hpp"
 
 std::string filename;
 int k, m, trees;
@@ -60,7 +60,7 @@ public:
 };
 
 TEST_F(SpeedTest, NaiveKDE) {
-  KdeNaive KDE(data, kernel::type::Gaussian, sigma);
+  KdeNaive KDE(data, kernel, sigma);
   auto start_time = std::chrono::high_resolution_clock::now();
   KDE.query(data.col(0));
   auto end_time = std::chrono::high_resolution_clock::now();
@@ -72,7 +72,7 @@ TEST_F(SpeedTest, Kde) {
   auto start_time = std::chrono::high_resolution_clock::now();
   auto result = this->kde->query(data.col(0));
   auto end_time = std::chrono::high_resolution_clock::now();
-  auto actual_result = KdeNaive(data, kernel::type::Gaussian, sigma).query(data.col(100000));
+  auto actual_result = KdeNaive(data, kernel, sigma).query(data.col(100000));
   printf("time KDE Sampling only: %ld ns\n",
          std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count());
   printf("approx value: %f\n", result);

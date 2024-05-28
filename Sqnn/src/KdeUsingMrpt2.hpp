@@ -2,16 +2,16 @@
 // Created by cj on 26-3-24.
 //
 
-#ifndef KDE_SUB_QUADRATIC_KDEUSINGMRPT2_H
-#define KDE_SUB_QUADRATIC_KDEUSINGMRPT2_H
+#ifndef KDE_SUB_QUADRATIC_KDEUSINGMRPT2_HPP
+#define KDE_SUB_QUADRATIC_KDEUSINGMRPT2_HPP
 
 #include <utility>
 #include <vector>
 #include <unordered_set>
 
-#include "Mrpt.h"
-#include "kernel_function.h"
-#include "KDE.h"
+#include "Mrpt.hpp"
+#include "kernel_function.hpp"
+#include "KDE.hpp"
 
 
 class KdeUsingMrpt2 : public KDE {
@@ -102,4 +102,4 @@ private:
 
 };
 
-#endif //KDE_SUB_QUADRATIC_KDEUSINGMRPT2_H
+#endif //KDE_SUB_QUADRATIC_KDEUSINGMRPT2_HPP
